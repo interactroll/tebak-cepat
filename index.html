@@ -212,19 +212,6 @@
       </div>
     </div>
 
-    <!-- IMPOR GOOGLE SHEETS -->
-    <div class="card-custom p-4 mb-4 border-info">
-      <h5 class="fw-bold text-info mb-2"><i class="bi bi-file-earmark-spreadsheet-fill me-2"></i>IMPOR BANK SOAL (GOOGLE SHEETS)</h5>
-      <p class="small text-slate-400 mb-3">Paste link CSV publik dari Google Sheets kamu di sini:</p>
-      
-      <div class="input-group">
-        <input type="text" id="input-csv-url" class="form-control bg-dark text-white border-secondary" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
-        <button onclick="importSoalDariCSV()" class="btn btn-info fw-bold text-dark">
-          <i class="bi bi-download me-1"></i> IMPOR SOAL NOW
-        </button>
-      </div>
-    </div>
-
     <div class="card-custom p-4 mb-4 border-success">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
@@ -297,7 +284,7 @@
 
     <div class="card-custom p-4 mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold text-info mb-0"><i class="bi bi-grid-fill me-2"></i>KATALOG BANK SOAL</h5>
+        <h5 class="fw-bold text-info mb-0"><i class="bi bi-grid-fill me-2"></i>KATALOG BANK SOAL (DARI SHEETS)</h5>
         <input type="text" id="admin-search-soal" class="form-control form-control-sm bg-dark text-white border-secondary" style="max-width: 250px;" placeholder="Cari soal...">
       </div>
       <div id="admin-soal-container" class="row g-3"></div>
@@ -677,66 +664,6 @@
       });
     }
 
-    // FUNGSI IMPOR SOAL DENGAN PARSER TANGGUNG LENGKAP
-    window.importSoalDariCSV = function() {
-      const url = document.getElementById('input-csv-url').value.trim();
-      if(!url) return alert("Masukkan link CSV Google Sheets terlebih dahulu!");
-
-      fetch(url)
-        .then(res => res.text())
-        .then(csvText => {
-          // Parse baris demi baris
-          const lines = csvText.split(/\r?\n/);
-          let newBankSoal = [];
-
-          for(let i = 1; i < lines.length; i++) {
-            if(!lines[i].trim()) continue;
-            
-            // Extract kolom
-            const regex = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*)/g;
-            let cols = [];
-            let match;
-            while ((match = regex.exec(lines[i])) !== null) {
-              let val = match[1];
-              if (val !== undefined) {
-                if (val.startsWith('"') && val.endsWith('"')) {
-                  val = val.substring(1, val.length - 1).replace(/""/g, '"');
-                }
-                cols.push(val.trim());
-              }
-            }
-
-            // Jika kolom terpisah нормально
-            if(cols.length >= 6) {
-              newBankSoal.push({
-                teks: cols[0],
-                opsi: {
-                  A: cols[1] || '',
-                  B: cols[2] || '',
-                  C: cols[3] || '',
-                  D: cols[4] || '',
-                  E: cols[5] || ''
-                },
-                kunci: (cols[6] || '').toUpperCase()
-              });
-            }
-          }
-
-          if(newBankSoal.length === 0) return alert("Format CSV tidak valid atau data kosong!");
-
-          set(ref(db, 'bankSoal'), newBankSoal);
-          set(ref(db, 'currentActiveIndex'), 0);
-          remove(ref(db, 'claims'));
-
-          alert(`Berhasil mengimpor ${newBankSoal.length} soal baru!`);
-          document.getElementById('input-csv-url').value = '';
-        })
-        .catch(err => {
-          alert("Gagal mengambil data dari link CSV! Pastikan link di-publish ke web sebagai CSV.");
-          console.error(err);
-        });
-    };
-
     window.setGameState = function(status) {
       set(ref(db, 'isGameStarted'), status);
     };
@@ -781,7 +708,7 @@
     function renderAdminCards(filterText = "") {
       const container = document.getElementById('admin-soal-container');
       if(bankSoalData.length === 0) {
-        container.innerHTML = `<div class="col-12 text-center text-slate-400 py-4"><i class="bi bi-inbox display-4 d-block mb-2"></i>Belum ada soal. Gunakan menu 'IMPOR BANK SOAL' di atas!</div>`;
+        container.innerHTML = `<div class="col-12 text-center text-slate-400 py-4"><i class="bi bi-inbox display-4 d-block mb-2"></i>Belum ada soal. Kirim soal dari Google Sheets lewat Apps Script!</div>`;
         return;
       }
 
