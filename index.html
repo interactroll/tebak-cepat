@@ -42,7 +42,7 @@
 
     /* HERO SECTION */
     .hero-section {
-      padding: 40px 0 60px;
+      padding: 40px 0 50px;
     }
     .hero-title {
       font-size: 2.5rem;
@@ -108,16 +108,37 @@
       font-size: 1.8rem;
       margin-bottom: 16px;
     }
-    .icon-blue { background: #dbeafe; color: #2563eb; }
-    .icon-green { background: #dcfce7; color: #16a34a; }
     .icon-purple { background: #f3e8ff; color: #9333ea; }
-    .icon-orange { background: #ffedd5; color: #ea580c; }
+    .icon-green { background: #dcfce7; color: #16a34a; }
+    .icon-blue { background: #dbeafe; color: #2563eb; }
+    
     .card-media-title {
       font-weight: 700;
       font-size: 0.95rem;
       color: #1e293b;
       margin: 0;
       line-height: 1.3;
+    }
+
+    /* REALTIME QUIZ BOX */
+    .realtime-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 24px;
+    }
+    .btn-quiz-link {
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-quiz-link:hover {
+      transform: translateY(-2px);
     }
 
     /* BANNER WA */
@@ -211,65 +232,70 @@
           <p class="hero-desc mb-4">
             Media pembelajaran UTBK yang lengkap, terstruktur, dan dibuat untuk membantumu paham konsep, latihan soal, dan berkembang.
           </p>
-          <button class="btn btn-primary-custom text-white" data-bs-toggle="modal" data-bs-target="#modalKuis">
-            <i class="bi bi-book-half me-2"></i> Mulai Belajar
-          </button>
+          <a href="#arena-kuis" class="btn btn-primary-custom text-white">
+            <i class="bi bi-controller me-2"></i> Mulai Belajar
+          </a>
         </div>
-        <div class="col-lg-6 text-center">
-          <!-- Mockup Visual -->
-          <div class="p-4 bg-white rounded-5 shadow-sm border text-center">
-             <i class="bi bi-phone text-primary display-1"></i>
-             <h4 class="fw-bold mt-3">Portal Kuis Realtime</h4>
-             <p class="text-muted small">Pilih materi kuis dan bertanding dengan siswa lain secara live!</p>
+        
+        <!-- CARD SAMPING HERO: REALTIME KUIS DIRECT LINK -->
+        <div class="col-lg-6">
+          <div class="realtime-box shadow-sm border" id="arena-kuis">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <span class="badge bg-danger rounded-pill px-3 py-2">⚡ LIVE REALTIME</span>
+              <h4 class="fw-bold mb-0 text-slate-900 fs-5">Arena Kuis Interaktif</h4>
+            </div>
+            <p class="text-muted small mb-3">Klik langsung untuk bertanding dan menjawab kuis secara real-time bersama teman-teman!</p>
+            
+            <div class="d-grid gap-2">
+              <a href="https://www.prastancy.fun/gamemorfologi" class="btn btn-primary btn-quiz-link">
+                <span>🎮 Play Kuis Morfologi</span>
+                <i class="bi bi-arrow-right-circle-fill fs-5"></i>
+              </a>
+              <a href="https://www.prastancy.fun/gametandabaca" class="btn btn-success btn-quiz-link">
+                <span>📝 Play Kuis Tanda Baca</span>
+                <i class="bi bi-arrow-right-circle-fill fs-5"></i>
+              </a>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 
-  <!-- MEDIA AJAR UTBK -->
+  <!-- MEDIA AJAR UTBK (3 SUBTES DIREVISI) -->
   <section class="py-4">
     <div class="container">
       <h2 class="section-title">Media Ajar UTBK</h2>
       <div class="row g-3">
         
-        <!-- CARD 1: LITERASI BAHASA INDONESIA (KLIK UNTUK MAIN KUIS) -->
-        <div class="col-6 col-md-3">
-          <div class="card-media" data-bs-toggle="modal" data-bs-target="#modalKuis">
-            <div class="icon-box icon-blue">
-              <i class="bi bi-book-fill"></i>
-            </div>
-            <h3 class="card-media-title">Literasi<br>Bahasa Indonesia</h3>
-          </div>
-        </div>
-
-        <!-- CARD 2 -->
-        <div class="col-6 col-md-3">
-          <div class="card-media">
-            <div class="icon-box icon-green">
-              <i class="bi bi-calculator-fill"></i>
-            </div>
-            <h3 class="card-media-title">Penalaran<br>Matematika</h3>
-          </div>
-        </div>
-
-        <!-- CARD 3 -->
-        <div class="col-6 col-md-3">
+        <!-- SUBTES 1 -->
+        <div class="col-md-4">
           <div class="card-media">
             <div class="icon-box icon-purple">
               <i class="bi bi-lightbulb-fill"></i>
             </div>
-            <h3 class="card-media-title">Pengetahuan &<br>Pemahaman Umum</h3>
+            <h3 class="card-media-title">Pengetahuan &<br>Pemahaman Umum (PPU)</h3>
           </div>
         </div>
 
-        <!-- CARD 4 -->
-        <div class="col-6 col-md-3">
+        <!-- SUBTES 2 -->
+        <div class="col-md-4">
           <div class="card-media">
-            <div class="icon-box icon-orange">
-              <i class="bi bi-clipboard-check-fill"></i>
+            <div class="icon-box icon-green">
+              <i class="bi bi-pencil-square"></i>
             </div>
-            <h3 class="card-media-title">Simulasi<br>UTBK</h3>
+            <h3 class="card-media-title">Kemampuan Membaca<br>& Menulis (KMM)</h3>
+          </div>
+        </div>
+
+        <!-- SUBTES 3 -->
+        <div class="col-md-4">
+          <div class="card-media">
+            <div class="icon-box icon-blue">
+              <i class="bi bi-book-fill"></i>
+            </div>
+            <h3 class="card-media-title">Literasi<br>Bahasa Indonesia</h3>
           </div>
         </div>
 
@@ -292,32 +318,34 @@
     </div>
   </section>
 
-  <!-- KONTEN EDUKASI -->
+  <!-- KONTEN EDUKASI (TIKTOK & YOUTUBE PRASTANCY) -->
   <section class="py-4">
     <div class="container">
       <h2 class="section-title">Konten Edukasi</h2>
       <div class="row g-3">
         
+        <!-- TIKTOK -->
         <div class="col-md-6">
-          <a href="https://tiktok.com" target="_blank" class="card-social">
+          <a href="https://www.tiktok.com/@prastancy" target="_blank" class="card-social">
             <div class="social-icon bg-tiktok">
               <i class="bi bi-tiktok"></i>
             </div>
             <div class="flex-grow-1">
-              <h4 class="fw-bold fs-6 mb-1">TikTok</h4>
+              <h4 class="fw-bold fs-6 mb-1">TikTok @prastancy</h4>
               <p class="text-muted small mb-0">Tips, trik, dan info UTBK dalam konten singkat.</p>
             </div>
             <i class="bi bi-chevron-right text-muted fs-5"></i>
           </a>
         </div>
 
+        <!-- YOUTUBE -->
         <div class="col-md-6">
-          <a href="https://youtube.com" target="_blank" class="card-social">
+          <a href="https://www.youtube.com/@prastancy" target="_blank" class="card-social">
             <div class="social-icon bg-youtube">
               <i class="bi bi-youtube"></i>
             </div>
             <div class="flex-grow-1">
-              <h4 class="fw-bold fs-6 mb-1">YouTube</h4>
+              <h4 class="fw-bold fs-6 mb-1">YouTube @prastancy</h4>
               <p class="text-muted small mb-0">Pembahasan materi dan latihan soal lebih lengkap.</p>
             </div>
             <i class="bi bi-chevron-right text-muted fs-5"></i>
@@ -339,30 +367,6 @@
       <p class="mb-0 text-muted">© 2026 Prastancy. All rights reserved.</p>
     </div>
   </footer>
-
-  <!-- MODAL PILIH GAME KUIS -->
-  <div class="modal fade" id="modalKuis" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content rounded-4 border-0 shadow">
-        <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold">Pilih Kuis Pembelajaran</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div class="d-grid gap-3">
-            <a href="/gamemorfologi" class="btn btn-primary btn-lg fw-bold py-3 rounded-3 text-start d-flex align-items-center justify-content-between">
-              <span>🎮 Kuis Morfologi</span>
-              <i class="bi bi-arrow-right"></i>
-            </a>
-            <a href="/gametandabaca" class="btn btn-success btn-lg fw-bold py-3 rounded-3 text-start d-flex align-items-center justify-content-between">
-              <span>📝 Kuis Tanda Baca</span>
-              <i class="bi bi-arrow-right"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
