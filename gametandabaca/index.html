@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tebak Cepat - Arena Kuis Realtime</title>
+  <title>Tebak Cepat - Kuis Tanda Baca</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -71,7 +71,7 @@
       <div class="mb-3">
         <i class="bi bi-rocket-takeoff text-warning display-3"></i>
       </div>
-      <h2 class="fw-bold text-warning mb-1">⚡ TEBAK CEPAT</h2>
+      <h2 class="fw-bold text-warning mb-1">⚡ KUIS TANDA BACA</h2>
       <p class="text-slate-400 small mb-4">Siapa Cepat, Dia Juara! 🚀</p>
       
       <div class="mb-3 text-start">
@@ -99,7 +99,7 @@
         </div>
       </div>
       <h3 class="fw-bold text-warning mb-2">HALO, <span id="lobby-user-name" class="text-info">-</span>! 👋</h3>
-      <p class="text-slate-300 fs-5 mb-4">Kamu sudah terhubung di <b>Ruang Tunggu Arena</b>.</p>
+      <p class="text-slate-300 fs-5 mb-4">Kamu sudah terhubung di <b>Ruang Tunggu Arena (Tanda Baca)</b>.</p>
       
       <div class="alert alert-dark border border-warning p-3 mb-4">
         <div class="spinner-grow spinner-grow-sm text-warning me-2"></div>
@@ -196,7 +196,7 @@
     
     <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
       <div>
-        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM</h3>
+        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM (TANDA BACA)</h3>
         <p class="text-slate-400 small mb-0">Pusat Kendali Live Quiz & Monitoring Real-Time</p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
@@ -297,12 +297,13 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+    // Konfigurasi Firebase khusus Kuis Tanda Baca
     const firebaseConfig = {
       apiKey: "AIzaSyDeGAiaUfFbeDaAb4GZEu0cufVZDJADvms",
-      authDomain: "tebak-cepet.firebaseapp.com",
-      databaseURL: "https://tebak-cepet-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "tebak-cepet",
-      storageBucket: "tebak-cepet.firebasestorage.app",
+      authDomain: "tebakcepat-tandabaca.firebaseapp.com",
+      databaseURL: "https://tebakcepat-tandabaca-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tebakcepat-tandabaca",
+      storageBucket: "tebakcepat-tandabaca.firebasestorage.app",
       messagingSenderId: "856777161943",
       appId: "1:856777161943:web:86c80a522a25d5ff994492"
     };
@@ -323,8 +324,9 @@
     let audioCtx = null;
 
     window.addEventListener('DOMContentLoaded', () => {
-      const savedUser = localStorage.getItem('tebakcepet_user');
-      const savedRole = localStorage.getItem('tebakcepet_role');
+      // Menggunakan LocalStorage khusus Tanda Baca agar tidak bentrok dengan Kuis Morfologi
+      const savedUser = localStorage.getItem('tandabaca_user');
+      const savedRole = localStorage.getItem('tandabaca_role');
 
       if (savedRole === 'admin') {
         showView('admin');
@@ -409,7 +411,7 @@
 
       if(nameInput.toLowerCase() === ADMIN_USERNAME) {
         if(passInput === ADMIN_PASSWORD) {
-          localStorage.setItem('tebakcepet_role', 'admin');
+          localStorage.setItem('tandabaca_role', 'admin');
           showView('admin');
           initAdminListeners();
         } else {
@@ -419,8 +421,8 @@
       }
 
       currentUser = nameInput;
-      localStorage.setItem('tebakcepet_user', currentUser);
-      localStorage.removeItem('tebakcepet_role');
+      localStorage.setItem('tandabaca_user', currentUser);
+      localStorage.removeItem('tandabaca_role');
 
       document.getElementById('display-user').innerText = currentUser;
       document.getElementById('lobby-user-name').innerText = currentUser;
@@ -440,13 +442,13 @@
 
     window.userLogout = function() {
       if(confirm("Apakah kamu yakin ingin keluar / ganti nama?")) {
-        localStorage.removeItem('tebakcepet_user');
+        localStorage.removeItem('tandabaca_user');
         location.reload();
       }
     };
 
     window.adminLogout = function() {
-      localStorage.removeItem('tebakcepet_role');
+      localStorage.removeItem('tandabaca_role');
       location.reload();
     };
 
