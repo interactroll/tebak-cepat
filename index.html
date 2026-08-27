@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tebak Cepat - Arena Kuis Realtime</title>
+  <title>Tebak Cepat - Live Race Arena</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -41,15 +41,20 @@
     .input-custom { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #475569 !important; font-weight: 600; }
     .input-custom::placeholder { color: #94a3b8 !important; font-weight: normal; }
 
-    /* Style Interaktif Admin Control Room */
+    /* Control Room Admin */
     .admin-card-soal { background: #0f172a; border: 2px solid #334155; border-radius: 12px; transition: all 0.25s ease; }
     .admin-card-soal:hover { border-color: #38bdf8; transform: translateY(-2px); }
     .admin-card-soal.is-live { border-color: #22c55e; background: #064e3b; box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
     .pulse-live { animation: pulse-green 1.5s infinite; }
     @keyframes pulse-green { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-    .badge-rank { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
-    .rank-1 { background: #f59e0b; color: #000; } .rank-2 { background: #94a3b8; color: #000; } .rank-3 { background: #b45309; color: #fff; }
+    /* LIVE RACE PROGRESS BAR STYLES */
+    .race-track-container { background: #0f172a; border-radius: 12px; padding: 15px; border: 1px solid #334155; }
+    .race-item { margin-bottom: 12px; }
+    .race-bar-bg { background: #1e293b; height: 24px; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #334155; }
+    .race-bar-fill { height: 100%; background: linear-gradient(90deg, #2563eb, #38bdf8); border-radius: 12px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .race-bar-fill.rank-1-bar { background: linear-gradient(90deg, #d97706, #f59e0b); }
+    .race-avatar { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; font-weight: bold; color: #ffffff; text-shadow: 0 0 4px #000; }
   </style>
 </head>
 <body>
@@ -82,6 +87,7 @@
   <!-- ================= LAYAR 2: ARENA GAME SISWA ================= -->
   <div id="view-game" class="container my-4" style="display:none; max-width: 850px;">
     
+    <!-- Profil Header -->
     <div class="card-custom p-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div class="d-flex align-items-center">
         <div class="bg-primary text-white rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -105,6 +111,7 @@
       </div>
     </div>
 
+    <!-- Kotak Soal Utama -->
     <div class="card-custom p-4 mb-3" id="box-soal">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-2">
         <span class="badge bg-primary fs-6" id="badge-soal-id">Soal #1</span>
@@ -117,6 +124,7 @@
       <div id="opsi-container" class="opsi-grid mb-3"></div>
     </div>
 
+    <!-- Peta Soal Navigasi -->
     <div class="card-custom p-3 mb-4" id="box-peta-soal">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="small fw-bold text-slate-400"><i class="bi bi-grid-3x3-gap-fill me-1"></i> NAVIGASI SOAL</span>
@@ -125,20 +133,23 @@
       <div id="peta-soal-container" class="peta-soal-grid"></div>
     </div>
 
+    <!-- LIVE RACE PROGRESS BAR BOARD -->
     <div class="card-custom p-4">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-3">
-        <h5 class="fw-bold text-success mb-0"><i class="bi bi-broadcast me-2"></i>KLASEMEN SEMENTARA</h5>
-        <span class="badge bg-success-subtle text-success border border-success">Live Sync</span>
+        <h5 class="fw-bold text-warning mb-0"><i class="bi bi-flag-fill me-2"></i>LIVE RACE LEADERBOARD</h5>
+        <span class="badge bg-success-subtle text-success border border-success">0.01s Sync</span>
       </div>
-      <div id="leaderboard-list"></div>
+      
+      <div class="race-track-container" id="race-container">
+        <div class="text-center text-slate-500 py-3"><div class="spinner-border spinner-border-sm me-2"></div>Memuat balapan skor...</div>
+      </div>
     </div>
 
   </div>
 
-  <!-- ================= LAYAR 3: CONTROL ROOM ADMIN SUPER INTERAKTIF ================= -->
+  <!-- ================= LAYAR 3: CONTROL ROOM ADMIN ================= -->
   <div id="view-admin" class="container my-4" style="display:none; max-width: 950px;">
     
-    <!-- Top Header -->
     <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
       <div>
         <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM</h3>
@@ -203,13 +214,18 @@
     </div>
 
     <!-- List Soal Cards Interaktif -->
-    <div class="card-custom p-4">
+    <div class="card-custom p-4 mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="fw-bold text-info mb-0"><i class="bi bi-grid-fill me-2"></i>KATALOG BANK SOAL</h5>
         <input type="text" id="admin-search-soal" class="form-control form-control-sm bg-dark text-white border-secondary" style="max-width: 250px;" placeholder="Cari soal...">
       </div>
-      
       <div id="admin-soal-container" class="row g-3"></div>
+    </div>
+
+    <!-- Live Race Monitor untuk Admin -->
+    <div class="card-custom p-4">
+      <h5 class="fw-bold text-warning mb-3"><i class="bi bi-flag-fill me-2"></i>MONITOR BALAPAN SKOR SISWA</h5>
+      <div class="race-track-container" id="admin-race-container"></div>
     </div>
 
   </div>
@@ -312,29 +328,48 @@
         }
       });
 
+      // Synchronize Live Race Bar
       onValue(ref(db, 'users'), (snapshot) => {
-        const users = snapshot.val();
-        if(users) {
-          let sorted = [];
-          for(let u in users) sorted.push({ name: u, score: users[u].score || 0 });
-          sorted.sort((a,b) => b.score - a.score);
-
-          let html = '';
-          sorted.forEach((item, idx) => {
-            let rankClass = idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : 'bg-slate-700 text-white'));
-            let isMe = item.name === currentUser ? 'bg-slate-800 border border-primary' : '';
-            html += `
-              <div class="d-flex justify-content-between align-items-center p-2 rounded-3 mb-2 ${isMe}">
-                <div class="d-flex align-items-center">
-                  <span class="badge-rank ${rankClass}">${idx+1}</span>
-                  <span class="fw-bold ${item.name === currentUser ? 'text-info' : 'text-slate-200'}">${item.name}</span>
-                </div>
-                <div class="badge bg-warning text-dark fs-6 font-monospace">${item.score} Pts</div>
-              </div>`;
-          });
-          document.getElementById('leaderboard-list').innerHTML = html;
-        }
+        const users = snapshot.val() || {};
+        renderLiveRaceTrack(users, 'race-container');
       });
+    }
+
+    // FUNGSI RENDER LIVE RACE PROGRESS BAR (Poin & Bar Animator)
+    function renderLiveRaceTrack(usersData, targetElementId) {
+      let sorted = [];
+      for(let u in usersData) sorted.push({ name: u, score: usersData[u].score || 0 });
+      sorted.sort((a,b) => b.score - a.score);
+
+      if(sorted.length === 0) {
+        document.getElementById(targetElementId).innerHTML = `<div class="text-center text-slate-500 py-2">Belum ada siswa yang masuk arena.</div>`;
+        return;
+      }
+
+      // Hitung Skor Tertinggi untuk Batas Bar (100%)
+      let maxScore = Math.max(...sorted.map(s => s.score), 100);
+
+      let html = '';
+      sorted.forEach((item, idx) => {
+        let percent = Math.min(100, Math.max(5, (item.score / maxScore) * 100));
+        let isTop = idx === 0;
+        let isMe = item.name === currentUser;
+
+        html += `
+          <div class="race-item">
+            <div class="d-flex justify-content-between align-items-center small mb-1">
+              <span class="fw-bold ${isMe ? 'text-info' : 'text-slate-300'}">
+                ${isTop ? '👑 ' : ''}${idx + 1}. ${item.name} ${isMe ? '(Kamu)' : ''}
+              </span>
+              <span class="fw-bold text-warning font-monospace">${item.score} Pts</span>
+            </div>
+            <div class="race-bar-bg">
+              <div class="race-bar-fill ${isTop ? 'rank-1-bar' : ''}" style="width: ${percent}%;"></div>
+              <span class="race-avatar">🏎️</span>
+            </div>
+          </div>`;
+      });
+      document.getElementById(targetElementId).innerHTML = html;
     }
 
     function renderPetaSoal() {
@@ -416,7 +451,6 @@
     let adminLiveIndex = 0;
 
     function initAdminListeners() {
-      // Monitor Bank Soal & Current Active Index
       onValue(ref(db, 'bankSoal'), (snapshot) => {
         bankSoalData = snapshot.val() || [];
         document.getElementById('stat-total-soal').innerText = bankSoalData.length;
@@ -428,7 +462,6 @@
         });
       });
 
-      // Monitor Stats Pemain & Leaderboard
       onValue(ref(db, 'users'), (snapshot) => {
         const users = snapshot.val() || {};
         const userList = Object.keys(users);
@@ -442,9 +475,10 @@
         } else {
           document.getElementById('stat-leader').innerText = "-";
         }
+
+        renderLiveRaceTrack(users, 'admin-race-container');
       });
 
-      // Filter Pencarian Soal
       document.getElementById('admin-search-soal').addEventListener('input', function(e) {
         renderAdminCards(e.target.value.toLowerCase());
       });
@@ -471,7 +505,6 @@
               </div>
               <p class="fw-semibold text-white mb-3" style="min-height: 48px;">${item.teks}</p>
               
-              <!-- Opsi Preview Badge -->
               <div class="d-flex flex-wrap gap-1 mb-3">
                 ${Object.keys(item.opsi).map(k => `<span class="badge ${k === item.kunci ? 'bg-success border border-light' : 'bg-dark text-slate-400'}">${k}: ${item.opsi[k]}</span>`).join('')}
               </div>
