@@ -33,23 +33,25 @@
 
     .ikon-opsi { display: inline-flex; justify-content: center; align-items: center; font-weight: 800; background: rgba(255,255,255,0.25); min-width: 36px; height: 36px; border-radius: 8px; margin-right: 12px; flex-shrink: 0; }
 
-    /* Peta Soal di Bawah */
+    /* Peta Soal Navigasi */
     .peta-soal-grid { display: flex; flex-wrap: wrap; gap: 8px; }
     .btn-peta { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #94a3b8; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .btn-peta.active { border-color: #38bdf8; background: #0284c7; color: white; }
 
-    /* Perbaikan Input Nama (Font Terang Jelas) */
-    .input-nama-user { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #475569 !important; font-weight: 600; }
-    .input-nama-user::placeholder { color: #94a3b8 !important; font-weight: normal; }
+    .input-custom { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #475569 !important; font-weight: 600; }
+    .input-custom::placeholder { color: #94a3b8 !important; font-weight: normal; }
 
-    .text-neon { color: #4ade80; }
+    .btn-soal-admin { text-align: left; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 10px; width: 100%; transition: all 0.2s; }
+    .btn-soal-admin:hover { background: #1e293b; border-color: #38bdf8; }
+    .btn-soal-admin.active { border-color: #22c55e; background: #14532d; }
+
     .badge-rank { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
     .rank-1 { background: #f59e0b; color: #000; } .rank-2 { background: #94a3b8; color: #000; } .rank-3 { background: #b45309; color: #fff; }
   </style>
 </head>
 <body>
 
-  <!-- ================= LAYAR 1: LOGIN (Teks Santai & Kontras Jelas) ================= -->
+  <!-- ================= LAYAR 1: LOGIN UTAMA ================= -->
   <div id="view-login" class="container mt-5" style="max-width: 450px;">
     <div class="card-custom p-4 p-md-5 text-center">
       <div class="mb-3">
@@ -58,17 +60,25 @@
       <h2 class="fw-bold text-warning mb-1">⚡ TEBAK CEPAT</h2>
       <p class="text-slate-400 small mb-4">Siapa Cepat, Dia Juara! 🚀</p>
       
+      <!-- Form Input Username -->
       <div class="mb-3 text-start">
-        <label class="form-label text-slate-300 small fw-bold">Siapa nama kamu?</label>
-        <input type="text" id="inputName" class="form-control form-control-lg input-nama-user" placeholder="Ketik nama di sini..." autocomplete="off">
+        <label class="form-label text-slate-300 small fw-bold">Username / Nama:</label>
+        <input type="text" id="inputName" class="form-control form-control-lg input-custom" placeholder="Ketik nama kamu..." autocomplete="off">
       </div>
-      <button onclick="loginUser()" class="btn btn-warning btn-lg w-100 fw-bold shadow-sm py-3 mt-2">
-        GASKAN MAIN! 🔥
+
+      <!-- Form Input Password (Muncul Otomatis Jika Ngetik Admin) -->
+      <div class="mb-3 text-start" id="box-password" style="display:none;">
+        <label class="form-label text-warning small fw-bold"><i class="bi bi-key-fill me-1"></i> Password Admin:</label>
+        <input type="password" id="inputPassword" class="form-control form-control-lg input-custom border-warning" placeholder="Ketik password admin...">
+      </div>
+
+      <button onclick="handleLogin()" class="btn btn-warning btn-lg w-100 fw-bold shadow-sm py-3 mt-2">
+        MASUK ARENA 🔥
       </button>
     </div>
   </div>
 
-  <!-- ================= LAYAR 2: GAME ARENA ================= -->
+  <!-- ================= LAYAR 2: ARENA GAME SISWA ================= -->
   <div id="view-game" class="container my-4" style="display:none; max-width: 850px;">
     
     <!-- Header Status -->
@@ -100,9 +110,8 @@
     <div class="card-custom p-4 mb-3" id="box-soal">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-2">
         <span class="badge bg-primary fs-6" id="badge-soal-id">Soal #1</span>
-        <!-- Info Klaim Soal -->
-        <span id="status-klaim" class="badge bg-dark border border-secondary text-warning px-2 py-1">
-          <i class="bi bi-person-check me-1"></i> Belum diklaim siapapun
+        <span id="status-klaim" class="badge bg-dark border border-secondary text-slate-400 px-2 py-1">
+          <i class="bi bi-clock me-1"></i> Belum diklaim siapapun
         </span>
       </div>
 
@@ -112,7 +121,7 @@
       <div id="opsi-container" class="opsi-grid mb-3"></div>
     </div>
 
-    <!-- Peta Navigasi Soal (Posisinya Sekarang Di Bawah Kotak Soal) -->
+    <!-- Peta Navigasi Soal (Di Bawah Kotak Soal) -->
     <div class="card-custom p-3 mb-4" id="box-peta-soal">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="small fw-bold text-slate-400"><i class="bi bi-grid-3x3-gap-fill me-1"></i> NAVIGASI SOAL</span>
@@ -121,10 +130,10 @@
       <div id="peta-soal-container" class="peta-soal-grid"></div>
     </div>
 
-    <!-- Leaderboard Real-Time -->
+    <!-- Leaderboard -->
     <div class="card-custom p-4">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-3">
-        <h5 class="fw-bold text-neon mb-0"><i class="bi bi-broadcast me-2"></i>KLASEMEN SEMENTARA</h5>
+        <h5 class="fw-bold text-success mb-0"><i class="bi bi-broadcast me-2"></i>KLASEMEN SEMENTARA</h5>
         <span class="badge bg-success-subtle text-success border border-success">Live Sync</span>
       </div>
       <div id="leaderboard-list"></div>
@@ -132,10 +141,35 @@
 
   </div>
 
+  <!-- ================= LAYAR 3: DASHBOARD ADMIN ================= -->
+  <div id="view-admin" class="container my-4" style="display:none; max-width: 850px;">
+    <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-shield-lock-fill me-2"></i>DASHBOARD ADMIN</h3>
+        <p class="text-slate-400 small mb-0">Kendali Soal & Klasemen Real-Time</p>
+      </div>
+      <div>
+        <button onclick="resetLeaderboard()" class="btn btn-danger btn-sm fw-bold me-2">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Klasemen
+        </button>
+        <button onclick="resetClaims()" class="btn btn-warning btn-sm fw-bold">
+          <i class="bi bi-trash me-1"></i> Reset Klaim
+        </button>
+      </div>
+    </div>
+
+    <div class="card-custom p-4">
+      <h5 class="fw-bold text-info mb-3"><i class="bi bi-broadcast me-2"></i>KONTROL SOAL LIVE</h5>
+      <p class="text-slate-400 small">Klik salah satu soal untuk langsung mentayangkannya di layar siswa:</p>
+      
+      <div id="admin-soal-list" class="d-grid gap-2"></div>
+    </div>
+  </div>
+
   <!-- ================= FIREBASE MODULE ================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDeGAiaUfFbeDaAb4GZEu0cufVZDJADvms",
@@ -150,6 +184,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // KREDENSIAL ADMIN
+    const ADMIN_USERNAME = "admin";
+    const ADMIN_PASSWORD = "123"; // Ganti password admin di sini jika mau
+
     let currentUser = "";
     let userScore = 0;
     let bankSoalData = [];
@@ -157,15 +195,37 @@
     let answeredQuestions = {};
     let currentFontSize = 1.1;
 
+    // Monitor Input Username (Tampilkan Input Password jika ketik Admin)
+    document.getElementById('inputName').addEventListener('input', function(e) {
+      const val = e.target.value.trim().toLowerCase();
+      document.getElementById('box-password').style.display = (val === ADMIN_USERNAME) ? 'block' : 'none';
+    });
+
     window.changeFontSize = function(delta) {
       currentFontSize = Math.max(0.85, Math.min(1.5, currentFontSize + delta));
       document.documentElement.style.setProperty('--font-base', `${currentFontSize}rem`);
     };
 
-    window.loginUser = function() {
+    // FUNGSI LOGIN / AKSES
+    window.handleLogin = function() {
       const nameInput = document.getElementById('inputName').value.trim();
-      if(!nameInput) return alert("Isi nama kamu dulu ya!");
-      
+      const passInput = document.getElementById('inputPassword').value.trim();
+
+      if(!nameInput) return alert("Isi nama kamu dulu!");
+
+      // DEDEKSI ADMIN
+      if(nameInput.toLowerCase() === ADMIN_USERNAME) {
+        if(passInput === ADMIN_PASSWORD) {
+          document.getElementById('view-login').style.display = 'none';
+          document.getElementById('view-admin').style.display = 'block';
+          initAdminListeners();
+        } else {
+          alert("Password Admin Salah!");
+        }
+        return;
+      }
+
+      // LOGIN SISWA BIASA
       currentUser = nameInput;
       document.getElementById('display-user').innerText = currentUser;
       document.getElementById('view-login').style.display = 'none';
@@ -181,21 +241,23 @@
         }
       });
 
-      initRealtimeListeners();
+      initSiswaListeners();
     };
 
-    function initRealtimeListeners() {
-      // Sync Soal
+    // --- LOGIKA ARENA SISWA ---
+    function initSiswaListeners() {
+      // Sync Bank Soal & Soal Aktif dari Admin
       onValue(ref(db, 'bankSoal'), (snapshot) => {
-        const data = snapshot.val();
-        if(data && Array.isArray(data) && data.length > 0) {
-          bankSoalData = data;
-          renderPetaSoal();
+        bankSoalData = snapshot.val() || [];
+        renderPetaSoal();
+
+        onValue(ref(db, 'currentActiveIndex'), (snapIndex) => {
+          currentSoalIndex = snapIndex.val() || 0;
           renderCurrentSoal();
-        }
+        });
       });
 
-      // Sync Klaim Soal per Soal
+      // Sync Klaim Soal
       onValue(ref(db, 'claims'), (snapshot) => {
         const claims = snapshot.val() || {};
         const currentClaim = claims[currentSoalIndex];
@@ -299,7 +361,6 @@
         userScore += 100;
         document.getElementById('display-score').innerText = userScore;
         
-        // Update Skor & Klaim Soal Pertama
         update(ref(db, 'users/' + currentUser), { score: userScore });
         update(ref(db, 'claims'), { [currentSoalIndex]: currentUser });
       } else {
@@ -309,6 +370,56 @@
 
       const buttons = document.querySelectorAll('#opsi-container .btn-jawaban');
       buttons.forEach(btn => btn.disabled = true);
+    };
+
+    // --- LOGIKA DASHBOARD ADMIN ---
+    function initAdminListeners() {
+      onValue(ref(db, 'bankSoal'), (snapshot) => {
+        const bankSoal = snapshot.val() || [];
+        onValue(ref(db, 'currentActiveIndex'), (snapIndex) => {
+          const activeIdx = snapIndex.val() || 0;
+          renderAdminSoal(bankSoal, activeIdx);
+        });
+      });
+    }
+
+    function renderAdminSoal(bankSoal, activeIdx) {
+      if(!bankSoal || bankSoal.length === 0) {
+        document.getElementById('admin-soal-list').innerHTML = `<div class="alert alert-secondary">Bank soal kosong. Silakan klik 'IMPOR SOAL' dari Google Sheets!</div>`;
+        return;
+      }
+
+      let html = '';
+      bankSoal.forEach((item, idx) => {
+        let isActive = idx === activeIdx ? 'active' : '';
+        html += `
+          <button class="btn btn-soal-admin p-3 ${isActive}" onclick="publishSoal(${idx})">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="badge ${idx === activeIdx ? 'bg-success' : 'bg-secondary'}">Soal #${idx + 1}</span>
+              ${idx === activeIdx ? '<span class="badge bg-light text-dark fw-bold">Sedang Tayang</span>' : ''}
+            </div>
+            <div class="fw-semibold text-white">${item.teks}</div>
+          </button>`;
+      });
+      document.getElementById('admin-soal-list').innerHTML = html;
+    }
+
+    window.publishSoal = function(index) {
+      set(ref(db, 'currentActiveIndex'), index);
+    };
+
+    window.resetLeaderboard = function() {
+      if(confirm("Yakin ingin mereset seluruh skor pemain?")) {
+        remove(ref(db, 'users'));
+        alert("Klasemen berhasil di-reset!");
+      }
+    };
+
+    window.resetClaims = function() {
+      if(confirm("Yakin ingin menghapus semua data klaim soal?")) {
+        remove(ref(db, 'claims'));
+        alert("Klaim soal berhasil di-reset!");
+      }
     };
   </script>
 </body>
