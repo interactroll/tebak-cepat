@@ -33,7 +33,6 @@
     .peta-soal-grid { display: flex; flex-wrap: wrap; gap: 8px; }
     .btn-peta { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #94a3b8; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
     .btn-peta.active { border-color: #38bdf8; background: #0284c7; color: white; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
-    /* Warna Hijau untuk Soal Terklaim di Peta Navigasi */
     .btn-peta.is-claimed { background-color: #15803d !important; color: #ffffff !important; border-color: #22c55e !important; }
 
     .input-custom { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #475569 !important; font-weight: 600; }
@@ -57,7 +56,6 @@
     .badge-rank { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
     .rank-1 { background: #f59e0b; color: #000; } .rank-2 { background: #94a3b8; color: #000; } .rank-3 { background: #b45309; color: #fff; }
 
-    /* Animasi Shake Getar untuk Jawaban Salah */
     @keyframes shakeEffect {
       0%, 100% { transform: translateX(0); }
       20%, 60% { transform: translateX(-10px); }
@@ -113,9 +111,15 @@
         <button onclick="changeFontSize(0.1)" class="btn btn-sm btn-outline-light py-0 px-2 fw-bold">A+</button>
       </div>
 
-      <div class="text-end">
-        <small class="text-slate-400 d-block leading-none">Total Skor</small>
-        <span class="fs-4 fw-bold text-warning"><i class="bi bi-trophy-fill me-1"></i><span id="display-score">0</span></span>
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-end">
+          <small class="text-slate-400 d-block leading-none">Total Skor</small>
+          <span class="fs-4 fw-bold text-warning"><i class="bi bi-trophy-fill me-1"></i><span id="display-score">0</span></span>
+        </div>
+        <!-- Tombol Ganti Akun / Logout Siswa -->
+        <button onclick="userLogout()" class="btn btn-outline-secondary btn-sm" title="Keluar / Ganti Nama">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
       </div>
     </div>
 
@@ -189,7 +193,7 @@
         <button onclick="resetClaims()" class="btn btn-outline-warning btn-sm fw-bold">
           <i class="bi bi-trash me-1"></i> Reset Klaim
         </button>
-        <button onclick="location.reload()" class="btn btn-secondary btn-sm fw-bold">
+        <button onclick="adminLogout()" class="btn btn-secondary btn-sm fw-bold">
           <i class="bi bi-box-arrow-right me-1"></i> Logout
         </button>
       </div>
@@ -291,6 +295,35 @@
     let currentFontSize = 1.1;
     let audioCtx = null;
 
+    // OTOMATIS CEK SESI REFRESH SAAT PEMUATAN HALAMAN
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('tebakcepet_user');
+      const savedRole = localStorage.getItem('tebakcepet_role');
+
+      if (savedRole === 'admin') {
+        document.getElementById('view-login').style.display = 'none';
+        document.getElementById('view-admin').style.display = 'block';
+        initAdminListeners();
+      } else if (savedUser) {
+        currentUser = savedUser;
+        document.getElementById('display-user').innerText = currentUser;
+        document.getElementById('view-login').style.display = 'none';
+        document.getElementById('view-game').style.display = 'block';
+
+        const userRef = ref(db, 'users/' + currentUser);
+        get(userRef).then((snapshot) => {
+          if (!snapshot.exists()) {
+            set(userRef, { score: 0 });
+          } else {
+            userScore = snapshot.val().score || 0;
+            document.getElementById('display-score').innerText = userScore;
+          }
+        });
+
+        initSiswaListeners();
+      }
+    });
+
     function playAudio(type) {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -345,6 +378,7 @@
 
       if(nameInput.toLowerCase() === ADMIN_USERNAME) {
         if(passInput === ADMIN_PASSWORD) {
+          localStorage.setItem('tebakcepet_role', 'admin'); // Simpan sesi admin
           document.getElementById('view-login').style.display = 'none';
           document.getElementById('view-admin').style.display = 'block';
           initAdminListeners();
@@ -355,6 +389,9 @@
       }
 
       currentUser = nameInput;
+      localStorage.setItem('tebakcepet_user', currentUser); // Simpan sesi siswa
+      localStorage.removeItem('tebakcepet_role');
+
       document.getElementById('display-user').innerText = currentUser;
       document.getElementById('view-login').style.display = 'none';
       document.getElementById('view-game').style.display = 'block';
@@ -370,6 +407,19 @@
       });
 
       initSiswaListeners();
+    };
+
+    // FUNGSI LOGOUT (MENGHAPUS SESI TERSIMPAN)
+    window.userLogout = function() {
+      if(confirm("Apakah kamu yakin ingin keluar / ganti nama?")) {
+        localStorage.removeItem('tebakcepet_user');
+        location.reload();
+      }
+    };
+
+    window.adminLogout = function() {
+      localStorage.removeItem('tebakcepet_role');
+      location.reload();
     };
 
     // --- SISWA ENGINE ---
@@ -389,7 +439,7 @@
       onValue(ref(db, 'claims'), (snapshot) => {
         claimsData = snapshot.val() || {};
         renderCurrentSoal();
-        renderPetaSoal(); // Update warna hijau di peta navigasi secara realtime
+        renderPetaSoal();
       });
 
       onValue(ref(db, 'users'), (snapshot) => {
@@ -420,7 +470,6 @@
       document.getElementById('correct-notif-box').style.display = 'none';
     }
 
-    // RENDER PETA NAVIGASI DENGAN WARNA HIJAU JIKA SUDAH DIKLAIM
     function renderPetaSoal() {
       document.getElementById('soal-counter').innerText = `${bankSoalData.length} Soal`;
       let html = '';
