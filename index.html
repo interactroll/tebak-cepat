@@ -3,20 +3,367 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Kuis Prastancy</title>
+  <title>Prastancy - Teman Belajar UTBK</title>
+  
+  <!-- FAVICON -->
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+
+  <!-- BOOTSTRAP 5 & ICONS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    body { background-color: #0f172a; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .card-menu { background: #1e293b; border: 1px solid #334155; border-radius: 16px; width: 100%; max-width: 500px; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+
+    /* NAVBAR */
+    .navbar-brand {
+      font-weight: 800;
+      color: #0f172a;
+      font-size: 1.4rem;
+    }
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: #2563eb;
+      color: white;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      margin-right: 8px;
+    }
+
+    /* HERO SECTION */
+    .hero-section {
+      padding: 40px 0 60px;
+    }
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+    }
+    .text-blue { color: #2563eb; }
+    .hero-desc {
+      color: #64748b;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+    .btn-primary-custom {
+      background-color: #2563eb;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s;
+    }
+    .btn-primary-custom:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    /* CARDS MEDIA AJAR */
+    .section-title {
+      font-weight: 800;
+      font-size: 1.35rem;
+      color: #0f172a;
+      margin-bottom: 20px;
+    }
+    .card-media {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 24px 16px;
+      text-align: center;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      height: 100%;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-media:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08);
+      border-color: #cbd5e1;
+    }
+    .icon-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+    }
+    .icon-blue { background: #dbeafe; color: #2563eb; }
+    .icon-green { background: #dcfce7; color: #16a34a; }
+    .icon-purple { background: #f3e8ff; color: #9333ea; }
+    .icon-orange { background: #ffedd5; color: #ea580c; }
+    .card-media-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #1e293b;
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    /* BANNER WA */
+    .banner-wa {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 20px;
+      padding: 24px 32px;
+    }
+    .btn-whatsapp {
+      background-color: #059669;
+      color: white;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-weight: 700;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-whatsapp:hover {
+      background-color: #047857;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    /* KONTEN EDUKASI */
+    .card-social {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.25s;
+    }
+    .card-social:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px -4px rgba(0,0,0,0.06);
+    }
+    .social-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-right: 16px;
+      flex-shrink: 0;
+    }
+    .bg-tiktok { background: #000; color: white; }
+    .bg-youtube { background: #ff0000; color: white; }
+
+    /* FOOTER */
+    footer {
+      padding: 40px 0;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
   </style>
 </head>
 <body>
-  <div class="card-menu p-4 text-center">
-    <h2 class="fw-bold text-warning mb-4">🚀 PORTAL KUIS PRASTANCY</h2>
-    <div class="d-grid gap-3">
-      <a href="/gamemorfologi" class="btn btn-primary btn-lg fw-bold py-3">🎮 PLAY KUIS MORFOLOGI</a>
-      <a href="/gametandabaca" class="btn btn-success btn-lg fw-bold py-3">📝 PLAY KUIS TANDA BACA</a>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg py-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <span class="brand-icon">P</span> Prastancy
+      </a>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-6">
+          <h1 class="hero-title mb-3">
+            Persiapan <span class="text-blue">UTBK</span> yang terarah, belajar jadi <span class="text-blue">efektif.</span>
+          </h1>
+          <p class="hero-desc mb-4">
+            Media pembelajaran UTBK yang lengkap, terstruktur, dan dibuat untuk membantumu paham konsep, latihan soal, dan berkembang.
+          </p>
+          <button class="btn btn-primary-custom text-white" data-bs-toggle="modal" data-bs-target="#modalKuis">
+            <i class="bi bi-book-half me-2"></i> Mulai Belajar
+          </button>
+        </div>
+        <div class="col-lg-6 text-center">
+          <!-- Mockup Visual -->
+          <div class="p-4 bg-white rounded-5 shadow-sm border text-center">
+             <i class="bi bi-phone text-primary display-1"></i>
+             <h4 class="fw-bold mt-3">Portal Kuis Realtime</h4>
+             <p class="text-muted small">Pilih materi kuis dan bertanding dengan siswa lain secara live!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEDIA AJAR UTBK -->
+  <section class="py-4">
+    <div class="container">
+      <h2 class="section-title">Media Ajar UTBK</h2>
+      <div class="row g-3">
+        
+        <!-- CARD 1: LITERASI BAHASA INDONESIA (KLIK UNTUK MAIN KUIS) -->
+        <div class="col-6 col-md-3">
+          <div class="card-media" data-bs-toggle="modal" data-bs-target="#modalKuis">
+            <div class="icon-box icon-blue">
+              <i class="bi bi-book-fill"></i>
+            </div>
+            <h3 class="card-media-title">Literasi<br>Bahasa Indonesia</h3>
+          </div>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="col-6 col-md-3">
+          <div class="card-media">
+            <div class="icon-box icon-green">
+              <i class="bi bi-calculator-fill"></i>
+            </div>
+            <h3 class="card-media-title">Penalaran<br>Matematika</h3>
+          </div>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="col-6 col-md-3">
+          <div class="card-media">
+            <div class="icon-box icon-purple">
+              <i class="bi bi-lightbulb-fill"></i>
+            </div>
+            <h3 class="card-media-title">Pengetahuan &<br>Pemahaman Umum</h3>
+          </div>
+        </div>
+
+        <!-- CARD 4 -->
+        <div class="col-6 col-md-3">
+          <div class="card-media">
+            <div class="icon-box icon-orange">
+              <i class="bi bi-clipboard-check-fill"></i>
+            </div>
+            <h3 class="card-media-title">Simulasi<br>UTBK</h3>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- BANNER WHATSAPP -->
+  <section class="py-4">
+    <div class="container">
+      <div class="banner-wa d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h3 class="fw-bold h5 mb-1 text-slate-900">Butuh bimbingan privat?</h3>
+          <p class="text-muted small mb-0">Belajar lebih terarah dengan bimbingan yang sesuai kebutuhanmu.</p>
+        </div>
+        <a href="https://wa.me/6281234567890" target="_blank" class="btn-whatsapp">
+          <i class="bi bi-whatsapp fs-5"></i> Chat via WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- KONTEN EDUKASI -->
+  <section class="py-4">
+    <div class="container">
+      <h2 class="section-title">Konten Edukasi</h2>
+      <div class="row g-3">
+        
+        <div class="col-md-6">
+          <a href="https://tiktok.com" target="_blank" class="card-social">
+            <div class="social-icon bg-tiktok">
+              <i class="bi bi-tiktok"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h4 class="fw-bold fs-6 mb-1">TikTok</h4>
+              <p class="text-muted small mb-0">Tips, trik, dan info UTBK dalam konten singkat.</p>
+            </div>
+            <i class="bi bi-chevron-right text-muted fs-5"></i>
+          </a>
+        </div>
+
+        <div class="col-md-6">
+          <a href="https://youtube.com" target="_blank" class="card-social">
+            <div class="social-icon bg-youtube">
+              <i class="bi bi-youtube"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h4 class="fw-bold fs-6 mb-1">YouTube</h4>
+              <p class="text-muted small mb-0">Pembahasan materi dan latihan soal lebih lengkap.</p>
+            </div>
+            <i class="bi bi-chevron-right text-muted fs-5"></i>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-center mb-2">
+        <span class="brand-icon" style="width: 24px; height: 24px; font-size: 0.8rem;">P</span> 
+        <strong class="text-slate-800 ms-1">Prastancy</strong>
+      </div>
+      <p class="mb-1">Teman belajar menuju kampus impian.</p>
+      <p class="mb-0 text-muted">© 2026 Prastancy. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- MODAL PILIH GAME KUIS -->
+  <div class="modal fade" id="modalKuis" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">Pilih Kuis Pembelajaran</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="d-grid gap-3">
+            <a href="/gamemorfologi" class="btn btn-primary btn-lg fw-bold py-3 rounded-3 text-start d-flex align-items-center justify-content-between">
+              <span>🎮 Kuis Morfologi</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+            <a href="/gametandabaca" class="btn btn-success btn-lg fw-bold py-3 rounded-3 text-start d-flex align-items-center justify-content-between">
+              <span>📝 Kuis Tanda Baca</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
