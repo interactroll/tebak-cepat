@@ -19,7 +19,6 @@
     
     .btn-jawaban { color: #ffffff; font-size: var(--font-base); border: none; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; transition: all 0.2s ease; text-align: left; background-color: #334155; width: 100%; cursor: pointer; }
     .btn-jawaban:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.15); }
-    .btn-jawaban:disabled { cursor: not-allowed; opacity: 0.85; }
 
     /* Warna Opsi A-E */
     .bg-opsi-A { background-color: #dc2626; } 
@@ -27,9 +26,6 @@
     .bg-opsi-C { background-color: #d97706; } 
     .bg-opsi-D { background-color: #16a34a; }
     .bg-opsi-E { background-color: #9333ea; }
-
-    .btn-jawaban.correct-ans { background-color: #15803d !important; border: 2px solid #4ade80 !important; }
-    .btn-jawaban.wrong-ans { background-color: #b91c1c !important; opacity: 0.6; }
 
     .ikon-opsi { display: inline-flex; justify-content: center; align-items: center; font-weight: 800; background: rgba(255,255,255,0.25); min-width: 36px; height: 36px; border-radius: 8px; margin-right: 12px; flex-shrink: 0; }
 
@@ -57,6 +53,14 @@
 
     .badge-rank { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
     .rank-1 { background: #f59e0b; color: #000; } .rank-2 { background: #94a3b8; color: #000; } .rank-3 { background: #b45309; color: #fff; }
+
+    /* Animasi Notifikasi Salah */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .shake-anim { animation: shake 0.4s ease-in-out; }
   </style>
 </head>
 <body>
@@ -123,6 +127,11 @@
 
       <h4 id="soal-teks" class="soal-text mb-4">Memuat data soal...</h4>
       
+      <!-- Pop-up Notif Jawaban Salah -->
+      <div id="wrong-notif-box" class="alert alert-danger text-center fw-bold shake-anim py-2 mb-3" style="display:none; border-radius: 10px;">
+        😭 YAH SALAH! COBA PILIH JAWABAN LAIN! ❌
+      </div>
+
       <!-- Opsi Jawaban (A-E) -->
       <div id="opsi-container" class="opsi-grid mb-3"></div>
 
@@ -267,9 +276,38 @@
     let userScore = 0;
     let bankSoalData = [];
     let currentSoalIndex = 0;
-    let answeredQuestions = {};
     let claimsData = {};
     let currentFontSize = 1.1;
+
+    // EFEK SUARA AUDIO
+    function playAudio(type) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'wrong') {
+        // Suara Tetot (Nada Rendah)
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } else if (type === 'correct') {
+        // Suara Menang Ceria
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      }
+    }
 
     document.getElementById('inputName').addEventListener('input', function(e) {
       const val = e.target.value.trim().toLowerCase();
@@ -324,11 +362,11 @@
 
         onValue(ref(db, 'currentActiveIndex'), (snapIndex) => {
           currentSoalIndex = snapIndex.val() || 0;
+          document.getElementById('wrong-notif-box').style.display = 'none'; // Reset notif salah saat berpindah soal
           renderCurrentSoal();
         });
       });
 
-      // Synchronize Klaim Realtime
       onValue(ref(db, 'claims'), (snapshot) => {
         claimsData = snapshot.val() || {};
         renderCurrentSoal();
@@ -369,6 +407,7 @@
 
     window.pindahSoal = function(index) {
       currentSoalIndex = index;
+      document.getElementById('wrong-notif-box').style.display = 'none';
       renderPetaSoal();
       renderCurrentSoal();
     };
@@ -385,13 +424,13 @@
       const opsiContainer = document.getElementById('opsi-container');
       const claimedBox = document.getElementById('claimed-box');
 
-      // JIKA SOAL SUDAH DIKLAIM OLEH SISWA (SIAPAPUN)
+      // JIKA SOAL SUDAH DIKLAIM SESEORANG
       if(currentClaim) {
         elemKlaim.innerHTML = `<i class="bi bi-person-check-fill me-1"></i> Diklaim oleh: <b>${currentClaim}</b>`;
         elemKlaim.className = "badge bg-warning text-dark px-2 py-1";
 
-        // SEMBUNYIKAN OPSI JAWABAN & TAMPILKAN PENGUMUMAN KLAIM
         opsiContainer.style.display = 'none';
+        document.getElementById('wrong-notif-box').style.display = 'none';
         claimedBox.style.display = 'block';
         document.getElementById('claimed-text').innerText = `SOAL INI TELAH DIKLAIM OLEH ${currentClaim.toUpperCase()}! 🏆`;
         return;
@@ -404,23 +443,14 @@
       opsiContainer.style.display = 'grid';
       claimedBox.style.display = 'none';
 
-      const isAnswered = answeredQuestions[currentSoalIndex] !== undefined;
-
       let opsiHtml = '';
       const bgColors = { A: 'bg-opsi-A', B: 'bg-opsi-B', C: 'bg-opsi-C', D: 'bg-opsi-D', E: 'bg-opsi-E' };
 
       for(let key in soal.opsi) {
         if(soal.opsi[key] && soal.opsi[key].toString().trim() !== '') {
-          let extraClass = '';
-          if(isAnswered) {
-            if(key === soal.kunci) extraClass = 'correct-ans';
-            else if(key === answeredQuestions[currentSoalIndex]) extraClass = 'wrong-ans';
-          }
-
           opsiHtml += `
-            <button class="btn-jawaban ${bgColors[key] || 'bg-secondary'} ${extraClass}" 
+            <button class="btn-jawaban ${bgColors[key] || 'bg-secondary'}" 
                     id="btn-opsi-${key}"
-                    ${isAnswered ? 'disabled' : ''} 
                     onclick="jawab('${key}', '${soal.kunci}')">
               <div class="ikon-opsi">${key}</div>
               <div>${soal.opsi[key]}</div>
@@ -431,30 +461,32 @@
     }
 
     window.jawab = function(pilihan, kunci) {
-      if(answeredQuestions[currentSoalIndex] !== undefined || claimsData[currentSoalIndex]) return;
+      if(claimsData[currentSoalIndex]) return;
       
-      answeredQuestions[currentSoalIndex] = pilihan;
       const isCorrect = (pilihan === kunci);
-      
-      const selectedBtn = document.getElementById(`btn-opsi-${pilihan}`);
-      const correctBtn = document.getElementById(`btn-opsi-${kunci}`);
+      const notifWrong = document.getElementById('wrong-notif-box');
 
       if(isCorrect) {
-        if(selectedBtn) selectedBtn.classList.add('correct-ans');
-        confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+        notifWrong.style.display = 'none';
+        playAudio('correct');
+        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+        
         userScore += 100;
         document.getElementById('display-score').innerText = userScore;
         
-        // Simpan Skor & Klaim Soal Ini ke Firebase Realtime
+        // Simpan Klaim & Skor ke Firebase
         update(ref(db, 'users/' + currentUser), { score: userScore });
         update(ref(db, 'claims'), { [currentSoalIndex]: currentUser });
       } else {
-        if(selectedBtn) selectedBtn.classList.add('wrong-ans');
-        if(correctBtn) correctBtn.classList.add('correct-ans');
+        // JIKA SALAH: Putar suara tetot, tampilkan notif nangis, BISA JAWAB ULANG!
+        playAudio('wrong');
+        notifWrong.style.display = 'block';
+        
+        // Hilangkan efek animasi shake agar bisa terpicu lagi di klik berikutnya
+        notifWrong.classList.remove('shake-anim');
+        void notifWrong.offsetWidth;
+        notifWrong.classList.add('shake-anim');
       }
-
-      const buttons = document.querySelectorAll('#opsi-container .btn-jawaban');
-      buttons.forEach(btn => btn.disabled = true);
     };
 
     // --- CONTROL ROOM ADMIN ENGINE ---
