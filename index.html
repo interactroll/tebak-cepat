@@ -29,9 +29,12 @@
 
     .ikon-opsi { display: inline-flex; justify-content: center; align-items: center; font-weight: 800; background: rgba(255,255,255,0.25); min-width: 36px; height: 36px; border-radius: 8px; margin-right: 12px; flex-shrink: 0; }
 
+    /* Style Peta Soal Navigasi */
     .peta-soal-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-    .btn-peta { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #94a3b8; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .btn-peta.active { border-color: #38bdf8; background: #0284c7; color: white; }
+    .btn-peta { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #94a3b8; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+    .btn-peta.active { border-color: #38bdf8; background: #0284c7; color: white; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
+    /* Warna Hijau untuk Soal Terklaim di Peta Navigasi */
+    .btn-peta.is-claimed { background-color: #15803d !important; color: #ffffff !important; border-color: #22c55e !important; }
 
     .input-custom { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #475569 !important; font-weight: 600; }
     .input-custom::placeholder { color: #94a3b8 !important; font-weight: normal; }
@@ -132,7 +135,7 @@
         😭 YAH JAWABAN SALAH! COBA JAWAB OPSI LAINNYA! ❌
       </div>
 
-      <!-- Notif Jawaban Benar & Lanjut Soal -->
+      <!-- Notif Jawaban Benar -->
       <div id="correct-notif-box" class="alert alert-success text-center fw-bold py-3 mb-3" style="display:none; border-radius: 10px;">
         🎉 BENAR! KLAIM BERHASIL (+100 Pts). BERPINDAH SOAL... 🚀
       </div>
@@ -152,7 +155,10 @@
     <div class="card-custom p-3 mb-4" id="box-peta-soal">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="small fw-bold text-slate-400"><i class="bi bi-grid-3x3-gap-fill me-1"></i> NAVIGASI SOAL</span>
-        <span id="soal-counter" class="badge bg-secondary">0 Soal</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i> Terklaim</span>
+          <span id="soal-counter" class="badge bg-secondary">0 Soal</span>
+        </div>
       </div>
       <div id="peta-soal-container" class="peta-soal-grid"></div>
     </div>
@@ -376,12 +382,14 @@
           currentSoalIndex = snapIndex.val() || 0;
           resetAlertBoxes();
           renderCurrentSoal();
+          renderPetaSoal();
         });
       });
 
       onValue(ref(db, 'claims'), (snapshot) => {
         claimsData = snapshot.val() || {};
         renderCurrentSoal();
+        renderPetaSoal(); // Update warna hijau di peta navigasi secara realtime
       });
 
       onValue(ref(db, 'users'), (snapshot) => {
@@ -412,12 +420,15 @@
       document.getElementById('correct-notif-box').style.display = 'none';
     }
 
+    // RENDER PETA NAVIGASI DENGAN WARNA HIJAU JIKA SUDAH DIKLAIM
     function renderPetaSoal() {
       document.getElementById('soal-counter').innerText = `${bankSoalData.length} Soal`;
       let html = '';
       bankSoalData.forEach((_, idx) => {
-        let activeClass = idx === currentSoalIndex ? 'active' : '';
-        html += `<button class="btn-peta ${activeClass}" onclick="pindahSoal(${idx})">${idx + 1}</button>`;
+        let isActive = idx === currentSoalIndex ? 'active' : '';
+        let isClaimed = claimsData[idx] !== undefined ? 'is-claimed' : '';
+        
+        html += `<button class="btn-peta ${isActive} ${isClaimed}" onclick="pindahSoal(${idx})">${idx + 1}</button>`;
       });
       document.getElementById('peta-soal-container').innerHTML = html;
     }
@@ -491,11 +502,9 @@
         userScore += 100;
         document.getElementById('display-score').innerText = userScore;
         
-        // Simpan Klaim & Skor ke Firebase
         update(ref(db, 'users/' + currentUser), { score: userScore });
         update(ref(db, 'claims'), { [currentSoalIndex]: currentUser });
 
-        // AUTOMATIC NEXT QUESTION (Lari ke Soal Berikutnya setelah 1.5 detik)
         setTimeout(() => {
           let nextIndex = (currentSoalIndex + 1) % bankSoalData.length;
           pindahSoal(nextIndex);
