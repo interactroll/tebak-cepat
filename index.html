@@ -20,7 +20,6 @@
     .btn-jawaban { color: #ffffff; font-size: var(--font-base); border: none; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; transition: all 0.2s ease; text-align: left; background-color: #334155; width: 100%; cursor: pointer; }
     .btn-jawaban:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.15); }
 
-    /* Warna Opsi A-E */
     .bg-opsi-A { background-color: #dc2626; } 
     .bg-opsi-B { background-color: #2563eb; } 
     .bg-opsi-C { background-color: #d97706; } 
@@ -29,7 +28,6 @@
 
     .ikon-opsi { display: inline-flex; justify-content: center; align-items: center; font-weight: 800; background: rgba(255,255,255,0.25); min-width: 36px; height: 36px; border-radius: 8px; margin-right: 12px; flex-shrink: 0; }
 
-    /* Style Peta Soal Navigasi */
     .peta-soal-grid { display: flex; flex-wrap: wrap; gap: 8px; }
     .btn-peta { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #94a3b8; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
     .btn-peta.active { border-color: #38bdf8; background: #0284c7; color: white; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
@@ -38,14 +36,12 @@
     .input-custom { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #475569 !important; font-weight: 600; }
     .input-custom::placeholder { color: #94a3b8 !important; font-weight: normal; }
 
-    /* Control Room Admin */
     .admin-card-soal { background: #0f172a; border: 2px solid #334155; border-radius: 12px; transition: all 0.25s ease; }
     .admin-card-soal:hover { border-color: #38bdf8; transform: translateY(-2px); }
     .admin-card-soal.is-live { border-color: #22c55e; background: #064e3b; box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
     .pulse-live { animation: pulse-green 1.5s infinite; }
     @keyframes pulse-green { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-    /* BALAPAN SKOR / LIVE RACE BAR ADMIN */
     .race-track-container { background: #0f172a; border-radius: 12px; padding: 15px; border: 1px solid #334155; }
     .race-item { margin-bottom: 12px; }
     .race-bar-bg { background: #1e293b; height: 26px; border-radius: 13px; overflow: hidden; position: relative; border: 1px solid #334155; }
@@ -63,7 +59,6 @@
     }
     .shake-box { animation: shakeEffect 0.4s ease-in-out; }
 
-    /* Animation Pulsing Lobby */
     .pulse-lobby { animation: pulse-yellow 2s infinite; }
     @keyframes pulse-yellow { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
   </style>
@@ -148,7 +143,6 @@
       </div>
     </div>
 
-    <!-- Kotak Soal Utama -->
     <div class="card-custom p-4 mb-3" id="box-soal">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-2">
         <span class="badge bg-primary fs-6" id="badge-soal-id">Soal #1</span>
@@ -159,20 +153,16 @@
 
       <h4 id="soal-teks" class="soal-text mb-4">Memuat data soal...</h4>
       
-      <!-- Pop-up Notif Jawaban Salah -->
       <div id="wrong-notif-box" class="alert alert-danger text-center fw-bold py-2 mb-3" style="display:none; border-radius: 10px;">
         😭 YAH JAWABAN SALAH! COBA JAWAB OPSI LAINNYA! ❌
       </div>
 
-      <!-- Notif Jawaban Benar -->
       <div id="correct-notif-box" class="alert alert-success text-center fw-bold py-3 mb-3" style="display:none; border-radius: 10px;">
         🎉 BENAR! KLAIM BERHASIL (+100 Pts). BERPINDAH SOAL... 🚀
       </div>
 
-      <!-- Opsi Jawaban (A-E) -->
       <div id="opsi-container" class="opsi-grid mb-3"></div>
 
-      <!-- Tampilan Pengumuman jika Soal Terklaim -->
       <div id="claimed-box" class="alert alert-warning text-center p-4 border-warning my-3" style="display:none; border-radius: 12px; background: rgba(217, 119, 6, 0.15);">
         <i class="bi bi-lock-fill display-4 text-warning d-block mb-2"></i>
         <h5 class="fw-bold text-warning mb-1" id="claimed-text">SOAL INI SUDAH DIKLAIM OLEH X</h5>
@@ -180,7 +170,6 @@
       </div>
     </div>
 
-    <!-- Peta Soal Navigasi -->
     <div class="card-custom p-3 mb-4" id="box-peta-soal">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="small fw-bold text-slate-400"><i class="bi bi-grid-3x3-gap-fill me-1"></i> NAVIGASI SOAL</span>
@@ -192,7 +181,6 @@
       <div id="peta-soal-container" class="peta-soal-grid"></div>
     </div>
 
-    <!-- Klasemen -->
     <div class="card-custom p-4">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-3">
         <h5 class="fw-bold text-success mb-0"><i class="bi bi-broadcast me-2"></i>KLASEMEN SEMENTARA</h5>
@@ -224,7 +212,19 @@
       </div>
     </div>
 
-    <!-- KONTROLER UTAMA RUANG TUNGGU / MULAI KUIS (KHUSUS ADMIN) -->
+    <!-- FITUR IMPOR BANK SOAL DARI GOOGLE SHEETS -->
+    <div class="card-custom p-4 mb-4 border-info">
+      <h5 class="fw-bold text-info mb-2"><i class="bi bi-file-earmark-spreadsheet-fill me-2"></i>IMPOR BANK SOAL (GOOGLE SHEETS)</h5>
+      <p class="small text-slate-400 mb-3">Paste link CSV publik dari Google Sheets kamu di sini untuk memperbarui seluruh soal secara instan:</p>
+      
+      <div class="input-group">
+        <input type="text" id="input-csv-url" class="form-control bg-dark text-white border-secondary" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
+        <button onclick="importSoalDariCSV()" class="btn btn-info fw-bold text-dark">
+          <i class="bi bi-download me-1"></i> IMPOR SOAL NOW
+        </button>
+      </div>
+    </div>
+
     <div class="card-custom p-4 mb-4 border-success">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
@@ -242,7 +242,6 @@
       </div>
     </div>
 
-    <!-- Live Cards Stats -->
     <div class="row g-3 mb-4">
       <div class="col-md-4">
         <div class="card-custom p-3 d-flex align-items-center">
@@ -273,7 +272,6 @@
       </div>
     </div>
 
-    <!-- KOTAK LIVE RACE PROGRESS BAR ADMIN -->
     <div class="card-custom p-4 mb-4 border-warning">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="fw-bold text-warning mb-0"><i class="bi bi-flag-fill me-2"></i>MONITOR BALAPAN SKOR SISWA (LIVE RACE)</h5>
@@ -284,7 +282,6 @@
       </div>
     </div>
 
-    <!-- Quick Live Controller Bar -->
     <div class="card-custom p-3 mb-4 border-primary">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div class="d-flex align-items-center">
@@ -298,7 +295,6 @@
       </div>
     </div>
 
-    <!-- Katalog Bank Soal -->
     <div class="card-custom p-4 mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="fw-bold text-info mb-0"><i class="bi bi-grid-fill me-2"></i>KATALOG BANK SOAL</h5>
@@ -339,7 +335,6 @@
     let currentFontSize = 1.1;
     let audioCtx = null;
 
-    // CEK SESI TERSIMPAN SBLM LOAD
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('tebakcepet_user');
       const savedRole = localStorage.getItem('tebakcepet_role');
@@ -470,7 +465,6 @@
 
     // --- SISWA ENGINE ---
     function initSiswaListeners() {
-      // Synchronize Status Game State secara Realtime untuk Siswa
       onValue(ref(db, 'isGameStarted'), (snapshot) => {
         isGameStarted = snapshot.val() || false;
         
@@ -631,7 +625,6 @@
     let adminLiveIndex = 0;
 
     function initAdminListeners() {
-      // Monitor Status Game State (Lobby vs Running) bagi Admin
       onValue(ref(db, 'isGameStarted'), (snapshot) => {
         const started = snapshot.val() || false;
         const badgeElem = document.getElementById('admin-status-state-badge');
@@ -684,7 +677,51 @@
       });
     }
 
-    // FUNGSI KONTROL GAME STATE KHUSUS ADMIN
+    // FUNGSI IMPOR SOAL CSV DARI GOOGLE SHEETS
+    window.importSoalDariCSV = function() {
+      const url = document.getElementById('input-csv-url').value.trim();
+      if(!url) return alert("Masukkan link CSV Google Sheets terlebih dahulu!");
+
+      fetch(url)
+        .then(res => res.text())
+        .then(csvText => {
+          const lines = csvText.split('\n');
+          let newBankSoal = [];
+
+          for(let i = 1; i < lines.length; i++) {
+            if(!lines[i].trim()) continue;
+            const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+
+            if(cols.length >= 7) {
+              newBankSoal.push({
+                teks: cols[0],
+                opsi: {
+                  A: cols[1],
+                  B: cols[2],
+                  C: cols[3],
+                  D: cols[4],
+                  E: cols[5]
+                },
+                kunci: cols[6].toUpperCase()
+              });
+            }
+          }
+
+          if(newBankSoal.length === 0) return alert("Format CSV tidak valid atau data kosong!");
+
+          set(ref(db, 'bankSoal'), newBankSoal);
+          set(ref(db, 'currentActiveIndex'), 0);
+          remove(ref(db, 'claims'));
+
+          alert(`Berhasil mengimpor ${newBankSoal.length} soal baru!`);
+          document.getElementById('input-csv-url').value = '';
+        })
+        .catch(err => {
+          alert("Gagal mengambil data dari link CSV! Pastikan link di-publish ke web sebagai CSV.");
+          console.error(err);
+        });
+    };
+
     window.setGameState = function(status) {
       set(ref(db, 'isGameStarted'), status);
     };
@@ -729,7 +766,7 @@
     function renderAdminCards(filterText = "") {
       const container = document.getElementById('admin-soal-container');
       if(bankSoalData.length === 0) {
-        container.innerHTML = `<div class="col-12 text-center text-slate-400 py-4"><i class="bi bi-inbox display-4 d-block mb-2"></i>Belum ada soal. Klik <b>'IMPOR SOAL'</b> dari Google Sheets!</div>`;
+        container.innerHTML = `<div class="col-12 text-center text-slate-400 py-4"><i class="bi bi-inbox display-4 d-block mb-2"></i>Belum ada soal. Gunakan menu 'IMPOR BANK SOAL' di atas!</div>`;
         return;
       }
 
