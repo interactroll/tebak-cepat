@@ -62,6 +62,10 @@
       40%, 80% { transform: translateX(10px); }
     }
     .shake-box { animation: shakeEffect 0.4s ease-in-out; }
+
+    /* Animation Pulsing Lobby */
+    .pulse-lobby { animation: pulse-yellow 2s infinite; }
+    @keyframes pulse-yellow { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
   </style>
 </head>
 <body>
@@ -91,7 +95,29 @@
     </div>
   </div>
 
-  <!-- ================= LAYAR 2: ARENA GAME SISWA ================= -->
+  <!-- ================= LAYAR 2A: RUANG TUNGGU (LOBBY SISWA) ================= -->
+  <div id="view-waiting" class="container my-5 text-center" style="display:none; max-width: 600px;">
+    <div class="card-custom p-5">
+      <div class="mb-4">
+        <div class="bg-warning-subtle text-warning d-inline-block p-4 rounded-circle pulse-lobby">
+          <i class="bi bi-hourglass-split display-1"></i>
+        </div>
+      </div>
+      <h3 class="fw-bold text-warning mb-2">SELAMAT DATANG, <span id="lobby-user-name" class="text-info">-</span>!</h3>
+      <p class="text-slate-300 fs-5 mb-4">Kamu sudah berada di <b>Ruang Tunggu Arena</b>.</p>
+      
+      <div class="alert alert-dark border border-secondary p-3 mb-4">
+        <div class="spinner-grow spinner-grow-sm text-warning me-2"></div>
+        <span class="text-slate-300">Menunggu Admin memulai kuis...</span>
+      </div>
+
+      <button onclick="userLogout()" class="btn btn-outline-danger btn-sm">
+        <i class="bi bi-box-arrow-right me-1"></i> Ganti Nama / Keluar
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= LAYAR 2B: ARENA GAME SISWA ================= -->
   <div id="view-game" class="container my-4" style="display:none; max-width: 850px;">
     
     <div class="card-custom p-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -116,7 +142,6 @@
           <small class="text-slate-400 d-block leading-none">Total Skor</small>
           <span class="fs-4 fw-bold text-warning"><i class="bi bi-trophy-fill me-1"></i><span id="display-score">0</span></span>
         </div>
-        <!-- Tombol Ganti Akun / Logout Siswa -->
         <button onclick="userLogout()" class="btn btn-outline-secondary btn-sm" title="Keluar / Ganti Nama">
           <i class="bi bi-box-arrow-right"></i>
         </button>
@@ -196,6 +221,24 @@
         <button onclick="adminLogout()" class="btn btn-secondary btn-sm fw-bold">
           <i class="bi bi-box-arrow-right me-1"></i> Logout
         </button>
+      </div>
+    </div>
+
+    <!-- MAIN GAME STATE CONTROLLER (KONTROLER UTAMA RUANG TUNGGU / MULAI KUIS) -->
+    <div class="card-custom p-4 mb-4 border-success">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h5 class="fw-bold text-white mb-1"><i class="bi bi-play-circle-fill text-success me-2"></i>KONTROL KUIS LIVE</h5>
+          <span id="admin-status-state-badge" class="badge bg-warning text-dark fs-6">Siswa di Ruang Tunggu</span>
+        </div>
+        <div class="d-flex gap-2">
+          <button id="btn-start-quiz" onclick="setGameState(true)" class="btn btn-success btn-lg fw-bold shadow">
+            <i class="bi bi-play-fill me-1"></i> MULAI KUIS SEKARANG 🚀
+          </button>
+          <button id="btn-stop-quiz" onclick="setGameState(false)" class="btn btn-danger btn-lg fw-bold shadow" style="display:none;">
+            <i class="bi bi-pause-fill me-1"></i> KEMBALIKAN KE RUANG TUNGGU ⏸️
+          </button>
+        </div>
       </div>
     </div>
 
@@ -292,10 +335,11 @@
     let bankSoalData = [];
     let currentSoalIndex = 0;
     let claimsData = {};
+    let isGameStarted = false;
     let currentFontSize = 1.1;
     let audioCtx = null;
 
-    // OTOMATIS CEK SESI REFRESH SAAT PEMUATAN HALAMAN
+    // CEK SESI TERSIMPAN SBLM LOAD
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('tebakcepet_user');
       const savedRole = localStorage.getItem('tebakcepet_role');
@@ -307,8 +351,7 @@
       } else if (savedUser) {
         currentUser = savedUser;
         document.getElementById('display-user').innerText = currentUser;
-        document.getElementById('view-login').style.display = 'none';
-        document.getElementById('view-game').style.display = 'block';
+        document.getElementById('lobby-user-name').innerText = currentUser;
 
         const userRef = ref(db, 'users/' + currentUser);
         get(userRef).then((snapshot) => {
@@ -378,7 +421,7 @@
 
       if(nameInput.toLowerCase() === ADMIN_USERNAME) {
         if(passInput === ADMIN_PASSWORD) {
-          localStorage.setItem('tebakcepet_role', 'admin'); // Simpan sesi admin
+          localStorage.setItem('tebakcepet_role', 'admin');
           document.getElementById('view-login').style.display = 'none';
           document.getElementById('view-admin').style.display = 'block';
           initAdminListeners();
@@ -389,12 +432,11 @@
       }
 
       currentUser = nameInput;
-      localStorage.setItem('tebakcepet_user', currentUser); // Simpan sesi siswa
+      localStorage.setItem('tebakcepet_user', currentUser);
       localStorage.removeItem('tebakcepet_role');
 
       document.getElementById('display-user').innerText = currentUser;
-      document.getElementById('view-login').style.display = 'none';
-      document.getElementById('view-game').style.display = 'block';
+      document.getElementById('lobby-user-name').innerText = currentUser;
 
       const userRef = ref(db, 'users/' + currentUser);
       get(userRef).then((snapshot) => {
@@ -409,7 +451,6 @@
       initSiswaListeners();
     };
 
-    // FUNGSI LOGOUT (MENGHAPUS SESI TERSIMPAN)
     window.userLogout = function() {
       if(confirm("Apakah kamu yakin ingin keluar / ganti nama?")) {
         localStorage.removeItem('tebakcepet_user');
@@ -424,6 +465,20 @@
 
     // --- SISWA ENGINE ---
     function initSiswaListeners() {
+      // Synchronize Status Mulai Kuis (Lobby vs Arena)
+      onValue(ref(db, 'isGameStarted'), (snapshot) => {
+        isGameStarted = snapshot.val() || false;
+        
+        document.getElementById('view-login').style.display = 'none';
+        if (isGameStarted) {
+          document.getElementById('view-waiting').style.display = 'none';
+          document.getElementById('view-game').style.display = 'block';
+        } else {
+          document.getElementById('view-game').style.display = 'none';
+          document.getElementById('view-waiting').style.display = 'block';
+        }
+      });
+
       onValue(ref(db, 'bankSoal'), (snapshot) => {
         bankSoalData = snapshot.val() || [];
         renderPetaSoal();
@@ -574,13 +629,33 @@
     let adminLiveIndex = 0;
 
     function initAdminListeners() {
+      // Monitor Status Game State (Lobby/Running)
+      onValue(ref(db, 'isGameStarted'), (snapshot) => {
+        const started = snapshot.val() || false;
+        const badgeElem = document.getElementById('admin-status-state-badge');
+        const btnStart = document.getElementById('btn-start-quiz');
+        const btnStop = document.getElementById('btn-stop-quiz');
+
+        if (started) {
+          badgeElem.className = "badge bg-success text-white fs-6";
+          badgeElem.innerText = "● KUIS SEDANG BERLANGSUNG";
+          btnStart.style.display = 'none';
+          btnStop.style.display = 'inline-block';
+        } else {
+          badgeElem.className = "badge bg-warning text-dark fs-6";
+          badgeElem.innerText = "Siswa di Ruang Tunggu (Lobby)";
+          btnStart.style.display = 'inline-block';
+          btnStop.style.display = 'none';
+        }
+      });
+
       onValue(ref(db, 'bankSoal'), (snapshot) => {
         bankSoalData = snapshot.val() || [];
         document.getElementById('stat-total-soal').innerText = bankSoalData.length;
 
         onValue(ref(db, 'currentActiveIndex'), (snapIndex) => {
           adminLiveIndex = snapIndex.val() || 0;
-          document.getElementById('admin-current-live-text').innerText = `Soal #${adminLiveIndex + 1} Sedang Tayang di Layar Siswa`;
+          document.getElementById('admin-current-live-text').innerText = `Soal #${adminLiveIndex + 1} Sedang Ditayangkan`;
           renderAdminCards();
         });
       });
@@ -606,6 +681,11 @@
         renderAdminCards(e.target.value.toLowerCase());
       });
     }
+
+    // FUNGSI UTAMA ADMIN UNTUK MEMULAI / HENTIKAN KUIS
+    window.setGameState = function(status) {
+      set(ref(db, 'isGameStarted'), status);
+    };
 
     function renderLiveRaceTrack(usersData, targetElementId) {
       let sorted = [];
