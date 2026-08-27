@@ -65,7 +65,7 @@
 </head>
 <body>
 
-  <!-- ================= LAYAR 1: LOGIN UTAMA ================= -->
+  <!-- LAYAR 1: LOGIN UTAMA -->
   <div id="view-login" class="container mt-5" style="max-width: 450px;">
     <div class="card-custom p-4 p-md-5 text-center">
       <div class="mb-3">
@@ -90,7 +90,7 @@
     </div>
   </div>
 
-  <!-- ================= LAYAR 2A: RUANG TUNGGU (LOBBY SISWA) ================= -->
+  <!-- LAYAR 2A: RUANG TUNGGU (LOBBY SISWA) -->
   <div id="view-waiting" class="container my-5 text-center" style="display:none; max-width: 600px;">
     <div class="card-custom p-5">
       <div class="mb-4">
@@ -112,7 +112,7 @@
     </div>
   </div>
 
-  <!-- ================= LAYAR 2B: ARENA GAME SISWA ================= -->
+  <!-- LAYAR 2B: ARENA GAME SISWA -->
   <div id="view-game" class="container my-4" style="display:none; max-width: 850px;">
     
     <div class="card-custom p-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -191,7 +191,7 @@
 
   </div>
 
-  <!-- ================= LAYAR 3: CONTROL ROOM ADMIN ================= -->
+  <!-- LAYAR 3: CONTROL ROOM ADMIN -->
   <div id="view-admin" class="container my-4" style="display:none; max-width: 950px;">
     
     <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -212,10 +212,10 @@
       </div>
     </div>
 
-    <!-- FITUR IMPOR BANK SOAL DARI GOOGLE SHEETS -->
+    <!-- IMPOR GOOGLE SHEETS -->
     <div class="card-custom p-4 mb-4 border-info">
       <h5 class="fw-bold text-info mb-2"><i class="bi bi-file-earmark-spreadsheet-fill me-2"></i>IMPOR BANK SOAL (GOOGLE SHEETS)</h5>
-      <p class="small text-slate-400 mb-3">Paste link CSV publik dari Google Sheets kamu di sini untuk memperbarui seluruh soal secara instan:</p>
+      <p class="small text-slate-400 mb-3">Paste link CSV publik dari Google Sheets kamu di sini:</p>
       
       <div class="input-group">
         <input type="text" id="input-csv-url" class="form-control bg-dark text-white border-secondary" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
@@ -305,7 +305,7 @@
 
   </div>
 
-  <!-- ================= FIREBASE MODULE ================= -->
+  <!-- FIREBASE MODULE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -677,7 +677,7 @@
       });
     }
 
-    // FUNGSI IMPOR SOAL CSV DARI GOOGLE SHEETS
+    // FUNGSI IMPOR SOAL DENGAN PARSER TANGGUNG LENGKAP
     window.importSoalDariCSV = function() {
       const url = document.getElementById('input-csv-url').value.trim();
       if(!url) return alert("Masukkan link CSV Google Sheets terlebih dahulu!");
@@ -685,24 +685,39 @@
       fetch(url)
         .then(res => res.text())
         .then(csvText => {
-          const lines = csvText.split('\n');
+          // Parse baris demi baris
+          const lines = csvText.split(/\r?\n/);
           let newBankSoal = [];
 
           for(let i = 1; i < lines.length; i++) {
             if(!lines[i].trim()) continue;
-            const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+            
+            // Extract kolom
+            const regex = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*)/g;
+            let cols = [];
+            let match;
+            while ((match = regex.exec(lines[i])) !== null) {
+              let val = match[1];
+              if (val !== undefined) {
+                if (val.startsWith('"') && val.endsWith('"')) {
+                  val = val.substring(1, val.length - 1).replace(/""/g, '"');
+                }
+                cols.push(val.trim());
+              }
+            }
 
-            if(cols.length >= 7) {
+            // Jika kolom terpisah нормально
+            if(cols.length >= 6) {
               newBankSoal.push({
                 teks: cols[0],
                 opsi: {
-                  A: cols[1],
-                  B: cols[2],
-                  C: cols[3],
-                  D: cols[4],
-                  E: cols[5]
+                  A: cols[1] || '',
+                  B: cols[2] || '',
+                  C: cols[3] || '',
+                  D: cols[4] || '',
+                  E: cols[5] || ''
                 },
-                kunci: cols[6].toUpperCase()
+                kunci: (cols[6] || '').toUpperCase()
               });
             }
           }
