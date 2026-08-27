@@ -132,6 +132,11 @@
         😭 YAH JAWABAN SALAH! COBA JAWAB OPSI LAINNYA! ❌
       </div>
 
+      <!-- Notif Jawaban Benar & Lanjut Soal -->
+      <div id="correct-notif-box" class="alert alert-success text-center fw-bold py-3 mb-3" style="display:none; border-radius: 10px;">
+        🎉 BENAR! KLAIM BERHASIL (+100 Pts). BERPINDAH SOAL... 🚀
+      </div>
+
       <!-- Opsi Jawaban (A-E) -->
       <div id="opsi-container" class="opsi-grid mb-3"></div>
 
@@ -139,7 +144,7 @@
       <div id="claimed-box" class="alert alert-warning text-center p-4 border-warning my-3" style="display:none; border-radius: 12px; background: rgba(217, 119, 6, 0.15);">
         <i class="bi bi-lock-fill display-4 text-warning d-block mb-2"></i>
         <h5 class="fw-bold text-warning mb-1" id="claimed-text">SOAL INI SUDAH DIKLAIM OLEH X</h5>
-        <p class="small text-slate-300 mb-0">Opsi jawaban telah dikunci. Tunggu admin menayangkan soal berikutnya!</p>
+        <p class="small text-slate-300 mb-0">Opsi jawaban telah dikunci. Silakan pilih nomor soal lain di navigasi bawah!</p>
       </div>
     </div>
 
@@ -280,15 +285,10 @@
     let currentFontSize = 1.1;
     let audioCtx = null;
 
-    // FUNGSI MEMUTAR SUARA SINTESIS (TETOT & JUARA)
     function playAudio(type) {
       try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
 
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -296,7 +296,6 @@
         gain.connect(audioCtx.destination);
 
         if (type === 'wrong') {
-          // Suara Tetot Rendah
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(140, audioCtx.currentTime);
           osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 0.35);
@@ -305,7 +304,6 @@
           osc.start(audioCtx.currentTime);
           osc.stop(audioCtx.currentTime + 0.35);
         } else if (type === 'correct') {
-          // Suara Menang Ceria
           osc.type = 'sine';
           osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
           osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); 
@@ -315,7 +313,7 @@
           osc.start(audioCtx.currentTime);
           osc.stop(audioCtx.currentTime + 0.4);
         }
-      } catch(e) { console.log("Audio play error:", e); }
+      } catch(e) {}
     }
 
     document.getElementById('inputName').addEventListener('input', function(e) {
@@ -332,7 +330,6 @@
       const nameInput = document.getElementById('inputName').value.trim();
       const passInput = document.getElementById('inputPassword').value.trim();
 
-      // Aktifkan Audio Context saat klik Login
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -377,7 +374,7 @@
 
         onValue(ref(db, 'currentActiveIndex'), (snapIndex) => {
           currentSoalIndex = snapIndex.val() || 0;
-          document.getElementById('wrong-notif-box').style.display = 'none'; 
+          resetAlertBoxes();
           renderCurrentSoal();
         });
       });
@@ -410,6 +407,11 @@
       });
     }
 
+    function resetAlertBoxes() {
+      document.getElementById('wrong-notif-box').style.display = 'none';
+      document.getElementById('correct-notif-box').style.display = 'none';
+    }
+
     function renderPetaSoal() {
       document.getElementById('soal-counter').innerText = `${bankSoalData.length} Soal`;
       let html = '';
@@ -422,7 +424,7 @@
 
     window.pindahSoal = function(index) {
       currentSoalIndex = index;
-      document.getElementById('wrong-notif-box').style.display = 'none';
+      resetAlertBoxes();
       renderPetaSoal();
       renderCurrentSoal();
     };
@@ -478,23 +480,32 @@
       
       const isCorrect = (pilihan === kunci);
       const notifWrong = document.getElementById('wrong-notif-box');
+      const notifCorrect = document.getElementById('correct-notif-box');
 
       if(isCorrect) {
         notifWrong.style.display = 'none';
+        notifCorrect.style.display = 'block';
         playAudio('correct');
         confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
         
         userScore += 100;
         document.getElementById('display-score').innerText = userScore;
         
+        // Simpan Klaim & Skor ke Firebase
         update(ref(db, 'users/' + currentUser), { score: userScore });
         update(ref(db, 'claims'), { [currentSoalIndex]: currentUser });
+
+        // AUTOMATIC NEXT QUESTION (Lari ke Soal Berikutnya setelah 1.5 detik)
+        setTimeout(() => {
+          let nextIndex = (currentSoalIndex + 1) % bankSoalData.length;
+          pindahSoal(nextIndex);
+        }, 1500);
+
       } else {
-        // JIKA SALAH: Putar suara tetot, munculkan notif getar 😭
+        notifCorrect.style.display = 'none';
         playAudio('wrong');
         notifWrong.style.display = 'block';
         
-        // Pemicu animasi shake (getar)
         notifWrong.classList.remove('shake-box');
         void notifWrong.offsetWidth;
         notifWrong.classList.add('shake-box');
