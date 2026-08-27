@@ -103,12 +103,12 @@
           <i class="bi bi-hourglass-split display-1"></i>
         </div>
       </div>
-      <h3 class="fw-bold text-warning mb-2">SELAMAT DATANG, <span id="lobby-user-name" class="text-info">-</span>!</h3>
-      <p class="text-slate-300 fs-5 mb-4">Kamu sudah berada di <b>Ruang Tunggu Arena</b>.</p>
+      <h3 class="fw-bold text-warning mb-2">HALO, <span id="lobby-user-name" class="text-info">-</span>! 👋</h3>
+      <p class="text-slate-300 fs-5 mb-4">Kamu sudah terhubung di <b>Ruang Tunggu Arena</b>.</p>
       
-      <div class="alert alert-dark border border-secondary p-3 mb-4">
+      <div class="alert alert-dark border border-warning p-3 mb-4">
         <div class="spinner-grow spinner-grow-sm text-warning me-2"></div>
-        <span class="text-slate-300">Menunggu Admin memulai kuis...</span>
+        <span class="text-warning fw-bold">Kuis Belum Dimulai. Menunggu Admin...</span>
       </div>
 
       <button onclick="userLogout()" class="btn btn-outline-danger btn-sm">
@@ -224,7 +224,7 @@
       </div>
     </div>
 
-    <!-- MAIN GAME STATE CONTROLLER (KONTROLER UTAMA RUANG TUNGGU / MULAI KUIS) -->
+    <!-- KONTROLER UTAMA RUANG TUNGGU / MULAI KUIS (KHUSUS ADMIN) -->
     <div class="card-custom p-4 mb-4 border-success">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
@@ -345,8 +345,7 @@
       const savedRole = localStorage.getItem('tebakcepet_role');
 
       if (savedRole === 'admin') {
-        document.getElementById('view-login').style.display = 'none';
-        document.getElementById('view-admin').style.display = 'block';
+        showView('admin');
         initAdminListeners();
       } else if (savedUser) {
         currentUser = savedUser;
@@ -366,6 +365,13 @@
         initSiswaListeners();
       }
     });
+
+    function showView(viewName) {
+      document.getElementById('view-login').style.display = viewName === 'login' ? 'block' : 'none';
+      document.getElementById('view-waiting').style.display = viewName === 'waiting' ? 'block' : 'none';
+      document.getElementById('view-game').style.display = viewName === 'game' ? 'block' : 'none';
+      document.getElementById('view-admin').style.display = viewName === 'admin' ? 'block' : 'none';
+    }
 
     function playAudio(type) {
       try {
@@ -422,8 +428,7 @@
       if(nameInput.toLowerCase() === ADMIN_USERNAME) {
         if(passInput === ADMIN_PASSWORD) {
           localStorage.setItem('tebakcepet_role', 'admin');
-          document.getElementById('view-login').style.display = 'none';
-          document.getElementById('view-admin').style.display = 'block';
+          showView('admin');
           initAdminListeners();
         } else {
           alert("Password Admin Salah!");
@@ -465,17 +470,14 @@
 
     // --- SISWA ENGINE ---
     function initSiswaListeners() {
-      // Synchronize Status Mulai Kuis (Lobby vs Arena)
+      // Synchronize Status Game State secara Realtime untuk Siswa
       onValue(ref(db, 'isGameStarted'), (snapshot) => {
         isGameStarted = snapshot.val() || false;
         
-        document.getElementById('view-login').style.display = 'none';
         if (isGameStarted) {
-          document.getElementById('view-waiting').style.display = 'none';
-          document.getElementById('view-game').style.display = 'block';
+          showView('game');
         } else {
-          document.getElementById('view-game').style.display = 'none';
-          document.getElementById('view-waiting').style.display = 'block';
+          showView('waiting');
         }
       });
 
@@ -629,7 +631,7 @@
     let adminLiveIndex = 0;
 
     function initAdminListeners() {
-      // Monitor Status Game State (Lobby/Running)
+      // Monitor Status Game State (Lobby vs Running) bagi Admin
       onValue(ref(db, 'isGameStarted'), (snapshot) => {
         const started = snapshot.val() || false;
         const badgeElem = document.getElementById('admin-status-state-badge');
@@ -682,7 +684,7 @@
       });
     }
 
-    // FUNGSI UTAMA ADMIN UNTUK MEMULAI / HENTIKAN KUIS
+    // FUNGSI KONTROL GAME STATE KHUSUS ADMIN
     window.setGameState = function(status) {
       set(ref(db, 'isGameStarted'), status);
     };
