@@ -3,146 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kuis Interactive Arcade - Firebase Realtime</title>
+  <title>Tebak Cepat - Arena Kuis Realtime</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   
   <style>
-    :root {
-      --font-base: 1.1rem;
-    }
-    body { 
-      background-color: #0f172a; 
-      color: #f8fafc; 
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-    }
-    .card-custom { 
-      background: #1e293b; 
-      border: 1px solid #334155; 
-      border-radius: 16px; 
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    }
-    .soal-text {
-      font-size: var(--font-base);
-      line-height: 1.6;
-      font-weight: 500;
-    }
-    .opsi-grid { 
-      display: grid; 
-      grid-template-columns: 1fr 1fr; 
-      gap: 14px; 
-    }
-    @media (max-width: 768px) { 
-      .opsi-grid { grid-template-columns: 1fr; } 
-    }
-    .btn-jawaban { 
-      color: #ffffff; 
-      font-size: var(--font-base); 
-      border: 2px solid transparent; 
-      border-radius: 12px; 
-      padding: 14px 18px; 
-      display: flex; 
-      align-items: center; 
-      transition: all 0.2s ease; 
-      text-align: left; 
-      background-color: #334155;
-      cursor: pointer;
-      width: 100%;
-    }
-    .btn-jawaban:hover:not(:disabled) { 
-      transform: translateY(-2px); 
-      filter: brightness(1.15);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    .btn-jawaban:active:not(:disabled) { transform: scale(0.98); }
+    :root { --font-base: 1.1rem; }
+    body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    .card-custom { background: #1e293b; border: 1px solid #334155; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+    .soal-text { font-size: var(--font-base); line-height: 1.6; font-weight: 500; }
+    
+    .opsi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 768px) { .opsi-grid { grid-template-columns: 1fr; } }
+    
+    .btn-jawaban { color: #ffffff; font-size: var(--font-base); border: none; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; transition: all 0.2s ease; text-align: left; background-color: #334155; width: 100%; cursor: pointer; }
+    .btn-jawaban:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.15); }
     .btn-jawaban:disabled { cursor: not-allowed; opacity: 0.85; }
 
-    /* Warna Khas Opsi */
+    /* Warna Opsi A-E */
     .bg-opsi-A { background-color: #dc2626; } 
     .bg-opsi-B { background-color: #2563eb; } 
     .bg-opsi-C { background-color: #d97706; } 
     .bg-opsi-D { background-color: #16a34a; }
     .bg-opsi-E { background-color: #9333ea; }
 
-    /* Feedback Warna Benar/Salah */
-    .btn-jawaban.correct-ans {
-      background-color: #15803d !important;
-      border-color: #4ade80 !important;
-      box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
-    }
-    .btn-jawaban.wrong-ans {
-      background-color: #b91c1c !important;
-      border-color: #f87171 !important;
-      opacity: 0.6;
-    }
+    .btn-jawaban.correct-ans { background-color: #15803d !important; border: 2px solid #4ade80 !important; }
+    .btn-jawaban.wrong-ans { background-color: #b91c1c !important; opacity: 0.6; }
 
-    .ikon-opsi { 
-      display: inline-flex; 
-      justify-content: center; 
-      align-items: center; 
-      font-weight: 800; 
-      background: rgba(255,255,255,0.25); 
-      min-width: 38px; 
-      height: 38px; 
-      border-radius: 8px; 
-      margin-right: 14px; 
-      flex-shrink: 0;
-    }
+    .ikon-opsi { display: inline-flex; justify-content: center; align-items: center; font-weight: 800; background: rgba(255,255,255,0.25); min-width: 36px; height: 36px; border-radius: 8px; margin-right: 12px; flex-shrink: 0; }
 
-    /* Peta Soal Navigasi */
-    .peta-soal-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .btn-peta {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      border: 1px solid #475569;
-      background: #0f172a;
-      color: #94a3b8;
-      font-weight: bold;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-peta.active {
-      border-color: #38bdf8;
-      background: #0284c7;
-      color: white;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
-    }
+    /* Peta Soal di Bawah */
+    .peta-soal-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn-peta { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #94a3b8; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .btn-peta.active { border-color: #38bdf8; background: #0284c7; color: white; }
 
-    .text-neon { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4); }
-    .badge-rank { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
-    .rank-1 { background: #f59e0b; color: #000; }
-    .rank-2 { background: #94a3b8; color: #000; }
-    .rank-3 { background: #b45309; color: #fff; }
+    /* Perbaikan Input Nama (Font Terang Jelas) */
+    .input-nama-user { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #475569 !important; font-weight: 600; }
+    .input-nama-user::placeholder { color: #94a3b8 !important; font-weight: normal; }
+
+    .text-neon { color: #4ade80; }
+    .badge-rank { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
+    .rank-1 { background: #f59e0b; color: #000; } .rank-2 { background: #94a3b8; color: #000; } .rank-3 { background: #b45309; color: #fff; }
   </style>
 </head>
 <body>
 
-  <!-- ================= LAYAR 1: LOGIN ================= -->
+  <!-- ================= LAYAR 1: LOGIN (Teks Santai & Kontras Jelas) ================= -->
   <div id="view-login" class="container mt-5" style="max-width: 450px;">
     <div class="card-custom p-4 p-md-5 text-center">
       <div class="mb-3">
-        <i class="bi bi-controller text-warning display-3"></i>
+        <i class="bi bi-rocket-takeoff text-warning display-3"></i>
       </div>
-      <h2 class="fw-bold text-warning mb-1">ARCADE QUIZ</h2>
-      <p class="text-slate-400 small mb-4">Sistem Kuis Real-Time Terintegrasi Vercel</p>
+      <h2 class="fw-bold text-warning mb-1">⚡ TEBAK CEPAT</h2>
+      <p class="text-slate-400 small mb-4">Siapa Cepat, Dia Juara! 🚀</p>
       
       <div class="mb-3 text-start">
-        <label class="form-label text-slate-300 small fw-bold">Nama Pemain / Siswa:</label>
-        <input type="text" id="inputName" class="form-control form-control-lg bg-slate-900 text-white border-slate-700" placeholder="Ketik nama lengkap..." autocomplete="off">
+        <label class="form-label text-slate-300 small fw-bold">Siapa nama kamu?</label>
+        <input type="text" id="inputName" class="form-control form-control-lg input-nama-user" placeholder="Ketik nama di sini..." autocomplete="off">
       </div>
       <button onclick="loginUser()" class="btn btn-warning btn-lg w-100 fw-bold shadow-sm py-3 mt-2">
-        <i class="bi bi-play-fill me-1"></i> MASUK ARENA GAME
+        GASKAN MAIN! 🔥
       </button>
     </div>
   </div>
@@ -150,7 +71,7 @@
   <!-- ================= LAYAR 2: GAME ARENA ================= -->
   <div id="view-game" class="container my-4" style="display:none; max-width: 850px;">
     
-    <!-- Header Profil & Kontrol Font Size -->
+    <!-- Header Status -->
     <div class="card-custom p-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div class="d-flex align-items-center">
         <div class="bg-primary text-white rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -162,11 +83,11 @@
         </div>
       </div>
 
-      <!-- Pengatur Ukuran Font -->
+      <!-- Ukuran Font -->
       <div class="d-flex align-items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-pill border border-slate-700">
-        <span class="text-slate-400 small me-1"><i class="bi bi-type"></i> Ukuran Teks:</span>
-        <button onclick="changeFontSize(-0.1)" class="btn btn-sm btn-outline-light py-0 px-2 fw-bold" title="Kecilkan Font">A-</button>
-        <button onclick="changeFontSize(0.1)" class="btn btn-sm btn-outline-light py-0 px-2 fw-bold" title="Besarkan Font">A+</button>
+        <span class="text-slate-400 small me-1"><i class="bi bi-type"></i> Teks:</span>
+        <button onclick="changeFontSize(-0.1)" class="btn btn-sm btn-outline-light py-0 px-2 fw-bold">A-</button>
+        <button onclick="changeFontSize(0.1)" class="btn btn-sm btn-outline-light py-0 px-2 fw-bold">A+</button>
       </div>
 
       <div class="text-end">
@@ -175,47 +96,47 @@
       </div>
     </div>
 
-    <!-- Peta / Navigasi Soal -->
-    <div class="card-custom p-3 mb-3" id="box-peta-soal" style="display:none;">
+    <!-- Kotak Soal Utama -->
+    <div class="card-custom p-4 mb-3" id="box-soal">
+      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-2">
+        <span class="badge bg-primary fs-6" id="badge-soal-id">Soal #1</span>
+        <!-- Info Klaim Soal -->
+        <span id="status-klaim" class="badge bg-dark border border-secondary text-warning px-2 py-1">
+          <i class="bi bi-person-check me-1"></i> Belum diklaim siapapun
+        </span>
+      </div>
+
+      <h4 id="soal-teks" class="soal-text mb-4">Memuat data soal...</h4>
+      
+      <!-- Opsi Jawaban (A - E) -->
+      <div id="opsi-container" class="opsi-grid mb-3"></div>
+    </div>
+
+    <!-- Peta Navigasi Soal (Posisinya Sekarang Di Bawah Kotak Soal) -->
+    <div class="card-custom p-3 mb-4" id="box-peta-soal">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <span class="small fw-bold text-slate-400"><i class="bi bi-grid-3x3-gap-fill me-1"></i> PETA SOAL AVAILABLE</span>
+        <span class="small fw-bold text-slate-400"><i class="bi bi-grid-3x3-gap-fill me-1"></i> NAVIGASI SOAL</span>
         <span id="soal-counter" class="badge bg-secondary">0 Soal</span>
       </div>
       <div id="peta-soal-container" class="peta-soal-grid"></div>
     </div>
 
-    <!-- Kotak Soal Utama -->
-    <div class="card-custom p-4 mb-4" id="box-soal">
-      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-2">
-        <span class="badge bg-primary fs-6" id="badge-soal-id">Soal #1</span>
-        <span id="status-terjawab" class="badge bg-outline-success text-success border border-success px-2 py-1" style="display:none;"><i class="bi bi-check-circle me-1"></i> Sudah Dijawab</span>
-      </div>
-
-      <h4 id="soal-teks" class="soal-text mb-4">Memuat data soal dari server...</h4>
-      
-      <!-- Opsi Jawaban (A, B, C, D, E) -->
-      <div id="opsi-container" class="opsi-grid"></div>
-    </div>
-
     <!-- Leaderboard Real-Time -->
     <div class="card-custom p-4">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-3">
-        <h5 class="fw-bold text-neon mb-0"><i class="bi bi-broadcast me-2"></i>LIVE RANKING REAL-TIME</h5>
-        <span class="badge bg-success-subtle text-success border border-success"><i class="bi bi-lightning-charge-fill me-1"></i> 0.01s Sync</span>
+        <h5 class="fw-bold text-neon mb-0"><i class="bi bi-broadcast me-2"></i>KLASEMEN SEMENTARA</h5>
+        <span class="badge bg-success-subtle text-success border border-success">Live Sync</span>
       </div>
-      <div id="leaderboard-list">
-        <div class="text-center text-slate-500 py-3"><div class="spinner-border spinner-border-sm me-2"></div>Memuat peringkat...</div>
-      </div>
+      <div id="leaderboard-list"></div>
     </div>
 
   </div>
 
-  <!-- ================= FIREBASE MODULE SCRIPT ================= -->
+  <!-- ================= FIREBASE MODULE ================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Konfigurasi Firebase Milikmu
     const firebaseConfig = {
       apiKey: "AIzaSyDeGAiaUfFbeDaAb4GZEu0cufVZDJADvms",
       authDomain: "tebak-cepet.firebaseapp.com",
@@ -233,26 +154,23 @@
     let userScore = 0;
     let bankSoalData = [];
     let currentSoalIndex = 0;
-    let answeredQuestions = {}; // Menyimpan histori jawaban user di lokal
-    let currentFontSize = 1.1; // rem
+    let answeredQuestions = {};
+    let currentFontSize = 1.1;
 
-    // Pengatur Ukuran Font
     window.changeFontSize = function(delta) {
-      currentFontSize = Math.max(0.85, Math.min(1.6, currentFontSize + delta));
+      currentFontSize = Math.max(0.85, Math.min(1.5, currentFontSize + delta));
       document.documentElement.style.setProperty('--font-base', `${currentFontSize}rem`);
     };
 
-    // 1. Login User
     window.loginUser = function() {
       const nameInput = document.getElementById('inputName').value.trim();
-      if(!nameInput) return alert("Silakan masukkan nama kamu terlebih dahulu!");
+      if(!nameInput) return alert("Isi nama kamu dulu ya!");
       
       currentUser = nameInput;
       document.getElementById('display-user').innerText = currentUser;
       document.getElementById('view-login').style.display = 'none';
       document.getElementById('view-game').style.display = 'block';
 
-      // Cek/Daftarkan User ke Firebase
       const userRef = ref(db, 'users/' + currentUser);
       get(userRef).then((snapshot) => {
         if (!snapshot.exists()) {
@@ -266,40 +184,41 @@
       initRealtimeListeners();
     };
 
-    // 2. Listener Real-Time Firebase
     function initRealtimeListeners() {
-      // Synchronize Bank Soal
+      // Sync Soal
       onValue(ref(db, 'bankSoal'), (snapshot) => {
         const data = snapshot.val();
         if(data && Array.isArray(data) && data.length > 0) {
           bankSoalData = data;
           renderPetaSoal();
           renderCurrentSoal();
-        } else {
-          // Listen fallback currentSoal tunggal
-          onValue(ref(db, 'currentSoal'), (snapSingle) => {
-            const singleData = snapSingle.val();
-            if(singleData) {
-              bankSoalData = [singleData];
-              renderPetaSoal();
-              renderCurrentSoal();
-            }
-          });
         }
       });
 
-      // Synchronize Live Leaderboard
+      // Sync Klaim Soal per Soal
+      onValue(ref(db, 'claims'), (snapshot) => {
+        const claims = snapshot.val() || {};
+        const currentClaim = claims[currentSoalIndex];
+        const elem = document.getElementById('status-klaim');
+        if(currentClaim) {
+          elem.innerHTML = `<i class="bi bi-person-check-fill me-1"></i> Diklaim oleh: <b>${currentClaim}</b>`;
+          elem.className = "badge bg-warning text-dark px-2 py-1";
+        } else {
+          elem.innerHTML = `<i class="bi bi-clock me-1"></i> Belum diklaim siapapun`;
+          elem.className = "badge bg-dark border border-secondary text-slate-400 px-2 py-1";
+        }
+      });
+
+      // Sync Leaderboard
       onValue(ref(db, 'users'), (snapshot) => {
         const users = snapshot.val();
         if(users) {
-          let sortedUsers = [];
-          for(let u in users) {
-            sortedUsers.push({ name: u, score: users[u].score || 0 });
-          }
-          sortedUsers.sort((a,b) => b.score - a.score);
+          let sorted = [];
+          for(let u in users) sorted.push({ name: u, score: users[u].score || 0 });
+          sorted.sort((a,b) => b.score - a.score);
 
           let html = '';
-          sortedUsers.forEach((item, idx) => {
+          sorted.forEach((item, idx) => {
             let rankClass = idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : 'bg-slate-700 text-white'));
             let isMe = item.name === currentUser ? 'bg-slate-800 border border-primary' : '';
             html += `
@@ -316,15 +235,8 @@
       });
     }
 
-    // 3. Render Peta Soal Navigasi
     function renderPetaSoal() {
-      if(bankSoalData.length <= 1) {
-        document.getElementById('box-peta-soal').style.display = 'none';
-        return;
-      }
-      document.getElementById('box-peta-soal').style.display = 'block';
       document.getElementById('soal-counter').innerText = `${bankSoalData.length} Soal`;
-
       let html = '';
       bankSoalData.forEach((_, idx) => {
         let activeClass = idx === currentSoalIndex ? 'active' : '';
@@ -339,7 +251,6 @@
       renderCurrentSoal();
     };
 
-    // 4. Render Soal Aktif ke Layar
     function renderCurrentSoal() {
       if(!bankSoalData[currentSoalIndex]) return;
       
@@ -347,22 +258,15 @@
       document.getElementById('badge-soal-id').innerText = `Soal #${currentSoalIndex + 1}`;
       document.getElementById('soal-teks').innerText = soal.teks;
 
-      const isAlreadyAnswered = answeredQuestions[currentSoalIndex] !== undefined;
-      document.getElementById('status-terjawab').style.display = isAlreadyAnswered ? 'inline-block' : 'none';
+      const isAnswered = answeredQuestions[currentSoalIndex] !== undefined;
 
       let opsiHtml = '';
-      const bgColors = {
-        A: 'bg-opsi-A',
-        B: 'bg-opsi-B',
-        C: 'bg-opsi-C',
-        D: 'bg-opsi-D',
-        E: 'bg-opsi-E'
-      };
+      const bgColors = { A: 'bg-opsi-A', B: 'bg-opsi-B', C: 'bg-opsi-C', D: 'bg-opsi-D', E: 'bg-opsi-E' };
 
       for(let key in soal.opsi) {
         if(soal.opsi[key] && soal.opsi[key].toString().trim() !== '') {
           let extraClass = '';
-          if(isAlreadyAnswered) {
+          if(isAnswered) {
             if(key === soal.kunci) extraClass = 'correct-ans';
             else if(key === answeredQuestions[currentSoalIndex]) extraClass = 'wrong-ans';
           }
@@ -370,7 +274,7 @@
           opsiHtml += `
             <button class="btn-jawaban ${bgColors[key] || 'bg-secondary'} ${extraClass}" 
                     id="btn-opsi-${key}"
-                    ${isAlreadyAnswered ? 'disabled' : ''} 
+                    ${isAnswered ? 'disabled' : ''} 
                     onclick="jawab('${key}', '${soal.kunci}')">
               <div class="ikon-opsi">${key}</div>
               <div>${soal.opsi[key]}</div>
@@ -380,34 +284,31 @@
       document.getElementById('opsi-container').innerHTML = opsiHtml;
     }
 
-    // 5. Eksekusi Pilihan Jawaban
     window.jawab = function(pilihan, kunci) {
-      if(answeredQuestions[currentSoalIndex] !== undefined) return; // Cegah jawab ganda
+      if(answeredQuestions[currentSoalIndex] !== undefined) return;
       
       answeredQuestions[currentSoalIndex] = pilihan;
-
       const isCorrect = (pilihan === kunci);
       
-      // Update visual tombol instan
       const selectedBtn = document.getElementById(`btn-opsi-${pilihan}`);
       const correctBtn = document.getElementById(`btn-opsi-${kunci}`);
 
       if(isCorrect) {
         if(selectedBtn) selectedBtn.classList.add('correct-ans');
-        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+        confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
         userScore += 100;
         document.getElementById('display-score').innerText = userScore;
-        // Sync ke Firebase
+        
+        // Update Skor & Klaim Soal Pertama
         update(ref(db, 'users/' + currentUser), { score: userScore });
+        update(ref(db, 'claims'), { [currentSoalIndex]: currentUser });
       } else {
         if(selectedBtn) selectedBtn.classList.add('wrong-ans');
         if(correctBtn) correctBtn.classList.add('correct-ans');
       }
 
-      // Disable semua tombol opsi untuk soal ini
       const buttons = document.querySelectorAll('#opsi-container .btn-jawaban');
       buttons.forEach(btn => btn.disabled = true);
-      document.getElementById('status-terjawab').style.display = 'inline-block';
     };
   </script>
 </body>
