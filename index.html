@@ -47,7 +47,7 @@
     .pulse-live { animation: pulse-green 1.5s infinite; }
     @keyframes pulse-green { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-    /* STYLES KHUSUS BALAPAN SKOR / LIVE RACE BAR ADMIN */
+    /* BALAPAN SKOR / LIVE RACE BAR ADMIN */
     .race-track-container { background: #0f172a; border-radius: 12px; padding: 15px; border: 1px solid #334155; }
     .race-item { margin-bottom: 12px; }
     .race-bar-bg { background: #1e293b; height: 26px; border-radius: 13px; overflow: hidden; position: relative; border: 1px solid #334155; }
@@ -112,6 +112,7 @@
       </div>
     </div>
 
+    <!-- Kotak Soal Utama -->
     <div class="card-custom p-4 mb-3" id="box-soal">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-2">
         <span class="badge bg-primary fs-6" id="badge-soal-id">Soal #1</span>
@@ -121,9 +122,19 @@
       </div>
 
       <h4 id="soal-teks" class="soal-text mb-4">Memuat data soal...</h4>
+      
+      <!-- Opsi Jawaban (A-E) -->
       <div id="opsi-container" class="opsi-grid mb-3"></div>
+
+      <!-- Tampilan Pengumuman jika Soal Terklaim -->
+      <div id="claimed-box" class="alert alert-warning text-center p-4 border-warning my-3" style="display:none; border-radius: 12px; background: rgba(217, 119, 6, 0.15);">
+        <i class="bi bi-lock-fill display-4 text-warning d-block mb-2"></i>
+        <h5 class="fw-bold text-warning mb-1" id="claimed-text">SOAL INI SUDAH DIKLAIM OLEH X</h5>
+        <p class="small text-slate-300 mb-0">Opsi jawaban telah dikunci. Tunggu admin menayangkan soal berikutnya!</p>
+      </div>
     </div>
 
+    <!-- Peta Soal Navigasi -->
     <div class="card-custom p-3 mb-4" id="box-peta-soal">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="small fw-bold text-slate-400"><i class="bi bi-grid-3x3-gap-fill me-1"></i> NAVIGASI SOAL</span>
@@ -132,6 +143,7 @@
       <div id="peta-soal-container" class="peta-soal-grid"></div>
     </div>
 
+    <!-- Klasemen -->
     <div class="card-custom p-4">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-3">
         <h5 class="fw-bold text-success mb-0"><i class="bi bi-broadcast me-2"></i>KLASEMEN SEMENTARA</h5>
@@ -145,7 +157,6 @@
   <!-- ================= LAYAR 3: CONTROL ROOM ADMIN ================= -->
   <div id="view-admin" class="container my-4" style="display:none; max-width: 950px;">
     
-    <!-- Top Header -->
     <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
       <div>
         <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM</h3>
@@ -195,7 +206,7 @@
       </div>
     </div>
 
-    <!-- KOTAK LIVE RACE PROGRESS BAR ADMIN (BALAPAN SKOR REALTIME) -->
+    <!-- KOTAK LIVE RACE PROGRESS BAR ADMIN -->
     <div class="card-custom p-4 mb-4 border-warning">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="fw-bold text-warning mb-0"><i class="bi bi-flag-fill me-2"></i>MONITOR BALAPAN SKOR SISWA (LIVE RACE)</h5>
@@ -257,6 +268,7 @@
     let bankSoalData = [];
     let currentSoalIndex = 0;
     let answeredQuestions = {};
+    let claimsData = {};
     let currentFontSize = 1.1;
 
     document.getElementById('inputName').addEventListener('input', function(e) {
@@ -316,17 +328,10 @@
         });
       });
 
+      // Synchronize Klaim Realtime
       onValue(ref(db, 'claims'), (snapshot) => {
-        const claims = snapshot.val() || {};
-        const currentClaim = claims[currentSoalIndex];
-        const elem = document.getElementById('status-klaim');
-        if(currentClaim) {
-          elem.innerHTML = `<i class="bi bi-person-check-fill me-1"></i> Diklaim oleh: <b>${currentClaim}</b>`;
-          elem.className = "badge bg-warning text-dark px-2 py-1";
-        } else {
-          elem.innerHTML = `<i class="bi bi-clock me-1"></i> Belum diklaim siapapun`;
-          elem.className = "badge bg-dark border border-secondary text-slate-400 px-2 py-1";
-        }
+        claimsData = snapshot.val() || {};
+        renderCurrentSoal();
       });
 
       onValue(ref(db, 'users'), (snapshot) => {
@@ -352,44 +357,6 @@
       });
     }
 
-    // ENGINE BALAPAN SKOR LIVE RACE (ADMIN)
-    function renderLiveRaceTrack(usersData, targetElementId) {
-      let sorted = [];
-      for(let u in usersData) sorted.push({ name: u, score: usersData[u].score || 0 });
-      sorted.sort((a,b) => b.score - a.score);
-
-      const targetElem = document.getElementById(targetElementId);
-      if(!targetElem) return;
-
-      if(sorted.length === 0) {
-        targetElem.innerHTML = `<div class="text-center text-slate-500 py-2">Belum ada siswa yang masuk arena.</div>`;
-        return;
-      }
-
-      let maxScore = Math.max(...sorted.map(s => s.score), 100);
-
-      let html = '';
-      sorted.forEach((item, idx) => {
-        let percent = Math.min(100, Math.max(6, (item.score / maxScore) * 100));
-        let isTop = idx === 0;
-
-        html += `
-          <div class="race-item">
-            <div class="d-flex justify-content-between align-items-center small mb-1">
-              <span class="fw-bold text-slate-300">
-                ${isTop ? '👑 ' : ''}${idx + 1}. ${item.name}
-              </span>
-              <span class="fw-bold text-warning font-monospace">${item.score} Pts</span>
-            </div>
-            <div class="race-bar-bg">
-              <div class="race-bar-fill ${isTop ? 'rank-1-bar' : ''}" style="width: ${percent}%;"></div>
-              <span class="race-avatar">🏎️</span>
-            </div>
-          </div>`;
-      });
-      targetElem.innerHTML = html;
-    }
-
     function renderPetaSoal() {
       document.getElementById('soal-counter').innerText = `${bankSoalData.length} Soal`;
       let html = '';
@@ -412,6 +379,30 @@
       const soal = bankSoalData[currentSoalIndex];
       document.getElementById('badge-soal-id').innerText = `Soal #${currentSoalIndex + 1}`;
       document.getElementById('soal-teks').innerText = soal.teks;
+
+      const currentClaim = claimsData[currentSoalIndex];
+      const elemKlaim = document.getElementById('status-klaim');
+      const opsiContainer = document.getElementById('opsi-container');
+      const claimedBox = document.getElementById('claimed-box');
+
+      // JIKA SOAL SUDAH DIKLAIM OLEH SISWA (SIAPAPUN)
+      if(currentClaim) {
+        elemKlaim.innerHTML = `<i class="bi bi-person-check-fill me-1"></i> Diklaim oleh: <b>${currentClaim}</b>`;
+        elemKlaim.className = "badge bg-warning text-dark px-2 py-1";
+
+        // SEMBUNYIKAN OPSI JAWABAN & TAMPILKAN PENGUMUMAN KLAIM
+        opsiContainer.style.display = 'none';
+        claimedBox.style.display = 'block';
+        document.getElementById('claimed-text').innerText = `SOAL INI TELAH DIKLAIM OLEH ${currentClaim.toUpperCase()}! 🏆`;
+        return;
+      }
+
+      // JIKA SOAL BELUM DIKLAIM
+      elemKlaim.innerHTML = `<i class="bi bi-clock me-1"></i> Belum diklaim siapapun`;
+      elemKlaim.className = "badge bg-dark border border-secondary text-slate-400 px-2 py-1";
+      
+      opsiContainer.style.display = 'grid';
+      claimedBox.style.display = 'none';
 
       const isAnswered = answeredQuestions[currentSoalIndex] !== undefined;
 
@@ -436,11 +427,11 @@
             </button>`;
         }
       }
-      document.getElementById('opsi-container').innerHTML = opsiHtml;
+      opsiContainer.innerHTML = opsiHtml;
     }
 
     window.jawab = function(pilihan, kunci) {
-      if(answeredQuestions[currentSoalIndex] !== undefined) return;
+      if(answeredQuestions[currentSoalIndex] !== undefined || claimsData[currentSoalIndex]) return;
       
       answeredQuestions[currentSoalIndex] = pilihan;
       const isCorrect = (pilihan === kunci);
@@ -454,6 +445,7 @@
         userScore += 100;
         document.getElementById('display-score').innerText = userScore;
         
+        // Simpan Skor & Klaim Soal Ini ke Firebase Realtime
         update(ref(db, 'users/' + currentUser), { score: userScore });
         update(ref(db, 'claims'), { [currentSoalIndex]: currentUser });
       } else {
@@ -500,6 +492,43 @@
       document.getElementById('admin-search-soal').addEventListener('input', function(e) {
         renderAdminCards(e.target.value.toLowerCase());
       });
+    }
+
+    function renderLiveRaceTrack(usersData, targetElementId) {
+      let sorted = [];
+      for(let u in usersData) sorted.push({ name: u, score: usersData[u].score || 0 });
+      sorted.sort((a,b) => b.score - a.score);
+
+      const targetElem = document.getElementById(targetElementId);
+      if(!targetElem) return;
+
+      if(sorted.length === 0) {
+        targetElem.innerHTML = `<div class="text-center text-slate-500 py-2">Belum ada siswa yang masuk arena.</div>`;
+        return;
+      }
+
+      let maxScore = Math.max(...sorted.map(s => s.score), 100);
+
+      let html = '';
+      sorted.forEach((item, idx) => {
+        let percent = Math.min(100, Math.max(6, (item.score / maxScore) * 100));
+        let isTop = idx === 0;
+
+        html += `
+          <div class="race-item">
+            <div class="d-flex justify-content-between align-items-center small mb-1">
+              <span class="fw-bold text-slate-300">
+                ${isTop ? '👑 ' : ''}${idx + 1}. ${item.name}
+              </span>
+              <span class="fw-bold text-warning font-monospace">${item.score} Pts</span>
+            </div>
+            <div class="race-bar-bg">
+              <div class="race-bar-fill ${isTop ? 'rank-1-bar' : ''}" style="width: ${percent}%;"></div>
+              <span class="race-avatar">🏎️</span>
+            </div>
+          </div>`;
+      });
+      targetElem.innerHTML = html;
     }
 
     function renderAdminCards(filterText = "") {
