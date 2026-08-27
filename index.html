@@ -41,9 +41,12 @@
     .input-custom { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #475569 !important; font-weight: 600; }
     .input-custom::placeholder { color: #94a3b8 !important; font-weight: normal; }
 
-    .btn-soal-admin { text-align: left; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 10px; width: 100%; transition: all 0.2s; }
-    .btn-soal-admin:hover { background: #1e293b; border-color: #38bdf8; }
-    .btn-soal-admin.active { border-color: #22c55e; background: #14532d; }
+    /* Style Interaktif Admin Control Room */
+    .admin-card-soal { background: #0f172a; border: 2px solid #334155; border-radius: 12px; transition: all 0.25s ease; }
+    .admin-card-soal:hover { border-color: #38bdf8; transform: translateY(-2px); }
+    .admin-card-soal.is-live { border-color: #22c55e; background: #064e3b; box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
+    .pulse-live { animation: pulse-green 1.5s infinite; }
+    @keyframes pulse-green { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
     .badge-rank { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
     .rank-1 { background: #f59e0b; color: #000; } .rank-2 { background: #94a3b8; color: #000; } .rank-3 { background: #b45309; color: #fff; }
@@ -60,13 +63,11 @@
       <h2 class="fw-bold text-warning mb-1">⚡ TEBAK CEPAT</h2>
       <p class="text-slate-400 small mb-4">Siapa Cepat, Dia Juara! 🚀</p>
       
-      <!-- Form Input Username -->
       <div class="mb-3 text-start">
         <label class="form-label text-slate-300 small fw-bold">Username / Nama:</label>
         <input type="text" id="inputName" class="form-control form-control-lg input-custom" placeholder="Ketik nama kamu..." autocomplete="off">
       </div>
 
-      <!-- Form Input Password (Muncul Otomatis Jika Ngetik Admin) -->
       <div class="mb-3 text-start" id="box-password" style="display:none;">
         <label class="form-label text-warning small fw-bold"><i class="bi bi-key-fill me-1"></i> Password Admin:</label>
         <input type="password" id="inputPassword" class="form-control form-control-lg input-custom border-warning" placeholder="Ketik password admin...">
@@ -81,7 +82,6 @@
   <!-- ================= LAYAR 2: ARENA GAME SISWA ================= -->
   <div id="view-game" class="container my-4" style="display:none; max-width: 850px;">
     
-    <!-- Header Status -->
     <div class="card-custom p-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div class="d-flex align-items-center">
         <div class="bg-primary text-white rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -93,7 +93,6 @@
         </div>
       </div>
 
-      <!-- Ukuran Font -->
       <div class="d-flex align-items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-pill border border-slate-700">
         <span class="text-slate-400 small me-1"><i class="bi bi-type"></i> Teks:</span>
         <button onclick="changeFontSize(-0.1)" class="btn btn-sm btn-outline-light py-0 px-2 fw-bold">A-</button>
@@ -106,7 +105,6 @@
       </div>
     </div>
 
-    <!-- Kotak Soal Utama -->
     <div class="card-custom p-4 mb-3" id="box-soal">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-2">
         <span class="badge bg-primary fs-6" id="badge-soal-id">Soal #1</span>
@@ -116,12 +114,9 @@
       </div>
 
       <h4 id="soal-teks" class="soal-text mb-4">Memuat data soal...</h4>
-      
-      <!-- Opsi Jawaban (A - E) -->
       <div id="opsi-container" class="opsi-grid mb-3"></div>
     </div>
 
-    <!-- Peta Navigasi Soal (Di Bawah Kotak Soal) -->
     <div class="card-custom p-3 mb-4" id="box-peta-soal">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="small fw-bold text-slate-400"><i class="bi bi-grid-3x3-gap-fill me-1"></i> NAVIGASI SOAL</span>
@@ -130,7 +125,6 @@
       <div id="peta-soal-container" class="peta-soal-grid"></div>
     </div>
 
-    <!-- Leaderboard -->
     <div class="card-custom p-4">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-3">
         <h5 class="fw-bold text-success mb-0"><i class="bi bi-broadcast me-2"></i>KLASEMEN SEMENTARA</h5>
@@ -141,29 +135,83 @@
 
   </div>
 
-  <!-- ================= LAYAR 3: DASHBOARD ADMIN ================= -->
-  <div id="view-admin" class="container my-4" style="display:none; max-width: 850px;">
-    <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <!-- ================= LAYAR 3: CONTROL ROOM ADMIN SUPER INTERAKTIF ================= -->
+  <div id="view-admin" class="container my-4" style="display:none; max-width: 950px;">
+    
+    <!-- Top Header -->
+    <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
       <div>
-        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-shield-lock-fill me-2"></i>DASHBOARD ADMIN</h3>
-        <p class="text-slate-400 small mb-0">Kendali Soal & Klasemen Real-Time</p>
+        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM</h3>
+        <p class="text-slate-400 small mb-0">Pusat Kendali Live Quiz & Monitoring Real-Time</p>
       </div>
-      <div>
-        <button onclick="resetLeaderboard()" class="btn btn-danger btn-sm fw-bold me-2">
-          <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Klasemen
+      <div class="d-flex gap-2 flex-wrap">
+        <button onclick="resetLeaderboard()" class="btn btn-outline-danger btn-sm fw-bold">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Skor
         </button>
-        <button onclick="resetClaims()" class="btn btn-warning btn-sm fw-bold">
+        <button onclick="resetClaims()" class="btn btn-outline-warning btn-sm fw-bold">
           <i class="bi bi-trash me-1"></i> Reset Klaim
+        </button>
+        <button onclick="location.reload()" class="btn btn-secondary btn-sm fw-bold">
+          <i class="bi bi-box-arrow-right me-1"></i> Logout
         </button>
       </div>
     </div>
 
-    <div class="card-custom p-4">
-      <h5 class="fw-bold text-info mb-3"><i class="bi bi-broadcast me-2"></i>KONTROL SOAL LIVE</h5>
-      <p class="text-slate-400 small">Klik salah satu soal untuk langsung mentayangkannya di layar siswa:</p>
-      
-      <div id="admin-soal-list" class="d-grid gap-2"></div>
+    <!-- Live Cards Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card-custom p-3 d-flex align-items-center">
+          <div class="bg-primary-subtle text-primary p-3 rounded-3 me-3 fs-3"><i class="bi bi-journal-text"></i></div>
+          <div>
+            <small class="text-slate-400 d-block">Total Soal</small>
+            <h4 class="fw-bold text-white mb-0" id="stat-total-soal">0</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-custom p-3 d-flex align-items-center">
+          <div class="bg-success-subtle text-success p-3 rounded-3 me-3 fs-3"><i class="bi bi-people-fill"></i></div>
+          <div>
+            <small class="text-slate-400 d-block">Pemain Aktif</small>
+            <h4 class="fw-bold text-white mb-0" id="stat-total-pemain">0</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-custom p-3 d-flex align-items-center">
+          <div class="bg-warning-subtle text-warning p-3 rounded-3 me-3 fs-3"><i class="bi bi-trophy-fill"></i></div>
+          <div>
+            <small class="text-slate-400 d-block">Pemimpin Klasemen</small>
+            <h5 class="fw-bold text-warning mb-0" id="stat-leader">-</h5>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Quick Live Controller Bar -->
+    <div class="card-custom p-3 mb-4 border-primary">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center">
+          <span class="badge bg-success me-2 pulse-live">● LIVE NOW</span>
+          <span class="fw-bold text-white" id="admin-current-live-text">Soal #1 Sedang Ditayangkan</span>
+        </div>
+        <div class="d-flex gap-2">
+          <button onclick="navLiveSoal(-1)" class="btn btn-sm btn-outline-light"><i class="bi bi-chevron-left me-1"></i> Soal Sblm</button>
+          <button onclick="navLiveSoal(1)" class="btn btn-sm btn-primary fw-bold">Soal Nanti <i class="bi bi-chevron-right ms-1"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- List Soal Cards Interaktif -->
+    <div class="card-custom p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-info mb-0"><i class="bi bi-grid-fill me-2"></i>KATALOG BANK SOAL</h5>
+        <input type="text" id="admin-search-soal" class="form-control form-control-sm bg-dark text-white border-secondary" style="max-width: 250px;" placeholder="Cari soal...">
+      </div>
+      
+      <div id="admin-soal-container" class="row g-3"></div>
+    </div>
+
   </div>
 
   <!-- ================= FIREBASE MODULE ================= -->
@@ -184,9 +232,8 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // KREDENSIAL ADMIN
     const ADMIN_USERNAME = "admin";
-    const ADMIN_PASSWORD = "123"; // Ganti password admin di sini jika mau
+    const ADMIN_PASSWORD = "123";
 
     let currentUser = "";
     let userScore = 0;
@@ -195,7 +242,6 @@
     let answeredQuestions = {};
     let currentFontSize = 1.1;
 
-    // Monitor Input Username (Tampilkan Input Password jika ketik Admin)
     document.getElementById('inputName').addEventListener('input', function(e) {
       const val = e.target.value.trim().toLowerCase();
       document.getElementById('box-password').style.display = (val === ADMIN_USERNAME) ? 'block' : 'none';
@@ -206,14 +252,12 @@
       document.documentElement.style.setProperty('--font-base', `${currentFontSize}rem`);
     };
 
-    // FUNGSI LOGIN / AKSES
     window.handleLogin = function() {
       const nameInput = document.getElementById('inputName').value.trim();
       const passInput = document.getElementById('inputPassword').value.trim();
 
       if(!nameInput) return alert("Isi nama kamu dulu!");
 
-      // DEDEKSI ADMIN
       if(nameInput.toLowerCase() === ADMIN_USERNAME) {
         if(passInput === ADMIN_PASSWORD) {
           document.getElementById('view-login').style.display = 'none';
@@ -225,7 +269,6 @@
         return;
       }
 
-      // LOGIN SISWA BIASA
       currentUser = nameInput;
       document.getElementById('display-user').innerText = currentUser;
       document.getElementById('view-login').style.display = 'none';
@@ -244,9 +287,8 @@
       initSiswaListeners();
     };
 
-    // --- LOGIKA ARENA SISWA ---
+    // --- SISWA ENGINE ---
     function initSiswaListeners() {
-      // Sync Bank Soal & Soal Aktif dari Admin
       onValue(ref(db, 'bankSoal'), (snapshot) => {
         bankSoalData = snapshot.val() || [];
         renderPetaSoal();
@@ -257,7 +299,6 @@
         });
       });
 
-      // Sync Klaim Soal
       onValue(ref(db, 'claims'), (snapshot) => {
         const claims = snapshot.val() || {};
         const currentClaim = claims[currentSoalIndex];
@@ -271,7 +312,6 @@
         }
       });
 
-      // Sync Leaderboard
       onValue(ref(db, 'users'), (snapshot) => {
         const users = snapshot.val();
         if(users) {
@@ -372,40 +412,88 @@
       buttons.forEach(btn => btn.disabled = true);
     };
 
-    // --- LOGIKA DASHBOARD ADMIN ---
+    // --- CONTROL ROOM ADMIN ENGINE ---
+    let adminLiveIndex = 0;
+
     function initAdminListeners() {
+      // Monitor Bank Soal & Current Active Index
       onValue(ref(db, 'bankSoal'), (snapshot) => {
-        const bankSoal = snapshot.val() || [];
+        bankSoalData = snapshot.val() || [];
+        document.getElementById('stat-total-soal').innerText = bankSoalData.length;
+
         onValue(ref(db, 'currentActiveIndex'), (snapIndex) => {
-          const activeIdx = snapIndex.val() || 0;
-          renderAdminSoal(bankSoal, activeIdx);
+          adminLiveIndex = snapIndex.val() || 0;
+          document.getElementById('admin-current-live-text').innerText = `Soal #${adminLiveIndex + 1} Sedang Tayang di Layar Siswa`;
+          renderAdminCards();
         });
+      });
+
+      // Monitor Stats Pemain & Leaderboard
+      onValue(ref(db, 'users'), (snapshot) => {
+        const users = snapshot.val() || {};
+        const userList = Object.keys(users);
+        document.getElementById('stat-total-pemain').innerText = userList.length;
+
+        if(userList.length > 0) {
+          let sorted = [];
+          for(let u in users) sorted.push({ name: u, score: users[u].score || 0 });
+          sorted.sort((a,b) => b.score - a.score);
+          document.getElementById('stat-leader').innerText = `${sorted[0].name} (${sorted[0].score} pts)`;
+        } else {
+          document.getElementById('stat-leader').innerText = "-";
+        }
+      });
+
+      // Filter Pencarian Soal
+      document.getElementById('admin-search-soal').addEventListener('input', function(e) {
+        renderAdminCards(e.target.value.toLowerCase());
       });
     }
 
-    function renderAdminSoal(bankSoal, activeIdx) {
-      if(!bankSoal || bankSoal.length === 0) {
-        document.getElementById('admin-soal-list').innerHTML = `<div class="alert alert-secondary">Bank soal kosong. Silakan klik 'IMPOR SOAL' dari Google Sheets!</div>`;
+    function renderAdminCards(filterText = "") {
+      const container = document.getElementById('admin-soal-container');
+      if(bankSoalData.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-slate-400 py-4"><i class="bi bi-inbox display-4 d-block mb-2"></i>Belum ada soal. Klik <b>'IMPOR SOAL'</b> dari Google Sheets!</div>`;
         return;
       }
 
       let html = '';
-      bankSoal.forEach((item, idx) => {
-        let isActive = idx === activeIdx ? 'active' : '';
+      bankSoalData.forEach((item, idx) => {
+        if(filterText && !item.teks.toLowerCase().includes(filterText)) return;
+
+        const isLive = idx === adminLiveIndex;
         html += `
-          <button class="btn btn-soal-admin p-3 ${isActive}" onclick="publishSoal(${idx})">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="badge ${idx === activeIdx ? 'bg-success' : 'bg-secondary'}">Soal #${idx + 1}</span>
-              ${idx === activeIdx ? '<span class="badge bg-light text-dark fw-bold">Sedang Tayang</span>' : ''}
+          <div class="col-md-6">
+            <div class="admin-card-soal p-3 ${isLive ? 'is-live' : ''}">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge ${isLive ? 'bg-success' : 'bg-slate-700'}">Soal #${idx + 1}</span>
+                <span class="badge bg-warning text-dark"><i class="bi bi-key-fill me-1"></i> Kunci: ${item.kunci}</span>
+              </div>
+              <p class="fw-semibold text-white mb-3" style="min-height: 48px;">${item.teks}</p>
+              
+              <!-- Opsi Preview Badge -->
+              <div class="d-flex flex-wrap gap-1 mb-3">
+                ${Object.keys(item.opsi).map(k => `<span class="badge ${k === item.kunci ? 'bg-success border border-light' : 'bg-dark text-slate-400'}">${k}: ${item.opsi[k]}</span>`).join('')}
+              </div>
+
+              <button onclick="publishSoal(${idx})" class="btn ${isLive ? 'btn-success disabled' : 'btn-outline-primary'} w-100 fw-bold btn-sm">
+                ${isLive ? '<i class="bi bi-check-circle-fill me-1"></i> SEDANG TAYANG' : '<i class="bi bi-broadcast me-1"></i> TAYANGKAN KE SISWA'}
+              </button>
             </div>
-            <div class="fw-semibold text-white">${item.teks}</div>
-          </button>`;
+          </div>`;
       });
-      document.getElementById('admin-soal-list').innerHTML = html;
+      container.innerHTML = html;
     }
 
     window.publishSoal = function(index) {
       set(ref(db, 'currentActiveIndex'), index);
+    };
+
+    window.navLiveSoal = function(direction) {
+      let newIndex = adminLiveIndex + direction;
+      if(newIndex >= 0 && newIndex < bankSoalData.length) {
+        publishSoal(newIndex);
+      }
     };
 
     window.resetLeaderboard = function() {
