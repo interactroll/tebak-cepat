@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tebak Cepat - Arena Kuis Realtime</title>
+  <title>Tebak Cepat - Kuis Morfologi</title>
+
+  <!-- FAVICON UTAMA -->
+  <link rel="icon" type="image/png" href="../logo.png">
+  <link rel="apple-touch-icon" href="../logo.png">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -19,6 +24,9 @@
     
     .btn-jawaban { color: #ffffff; font-size: var(--font-base); border: none; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; transition: all 0.2s ease; text-align: left; background-color: #334155; width: 100%; cursor: pointer; }
     .btn-jawaban:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.15); }
+    .btn-jawaban:disabled { cursor: not-allowed; opacity: 0.55; }
+    
+    .opsi-correct-highlight { border: 3px solid #22c55e !important; background-color: #16a34a !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
 
     .bg-opsi-A { background-color: #dc2626; } 
     .bg-opsi-B { background-color: #2563eb; } 
@@ -65,14 +73,15 @@
 </head>
 <body>
 
-  <!-- LAYAR 1: LOGIN UTAMA -->
+  <!-- LAYAR 1: LOGIN -->
   <div id="view-login" class="container mt-5" style="max-width: 450px;">
     <div class="card-custom p-4 p-md-5 text-center">
       <div class="mb-3">
-        <i class="bi bi-rocket-takeoff text-warning display-3"></i>
+        <img src="../logo.png" alt="Logo Prastancy" style="height: 60px; width: auto;" onerror="this.style.display='none'; document.getElementById('rocket-icon').style.display='inline-block';">
+        <i id="rocket-icon" class="bi bi-rocket-takeoff text-warning display-3" style="display:none;"></i>
       </div>
-      <h2 class="fw-bold text-warning mb-1">⚡ TEBAK CEPAT</h2>
-      <p class="text-slate-400 small mb-4">Siapa Cepat, Dia Juara! 🚀</p>
+      <h2 class="fw-bold text-warning mb-1">⚡ KUIS MORFOLOGI</h2>
+      <p class="text-slate-400 small mb-4">Benar +100 | Salah -50 (3x Salah = Banned 15s) 🚀</p>
       
       <div class="mb-3 text-start">
         <label class="form-label text-slate-300 small fw-bold">Username / Nama:</label>
@@ -90,7 +99,7 @@
     </div>
   </div>
 
-  <!-- LAYAR 2A: RUANG TUNGGU (LOBBY SISWA) -->
+  <!-- LAYAR 2A: RUANG TUNGGU -->
   <div id="view-waiting" class="container my-5 text-center" style="display:none; max-width: 600px;">
     <div class="card-custom p-5">
       <div class="mb-4">
@@ -99,7 +108,7 @@
         </div>
       </div>
       <h3 class="fw-bold text-warning mb-2">HALO, <span id="lobby-user-name" class="text-info">-</span>! 👋</h3>
-      <p class="text-slate-300 fs-5 mb-4">Kamu sudah terhubung di <b>Ruang Tunggu Arena</b>.</p>
+      <p class="text-slate-300 fs-5 mb-4">Kamu sudah terhubung di <b>Ruang Tunggu Arena (Morfologi)</b>.</p>
       
       <div class="alert alert-dark border border-warning p-3 mb-4">
         <div class="spinner-grow spinner-grow-sm text-warning me-2"></div>
@@ -153,21 +162,27 @@
 
       <h4 id="soal-teks" class="soal-text mb-4">Memuat data soal...</h4>
       
-      <div id="wrong-notif-box" class="alert alert-danger text-center fw-bold py-2 mb-3" style="display:none; border-radius: 10px;">
-        😭 YAH JAWABAN SALAH! COBA JAWAB OPSI LAINNYA! ❌
+      <!-- NOTIF PENALTY -->
+      <div id="penalty-notif-box" class="alert alert-danger text-center fw-bold py-3 mb-3 border-danger shadow-lg" style="display:none; border-radius: 10px;">
+        <i class="bi bi-exclamation-triangle-fill display-5 d-block mb-2"></i>
+        🚫 TERLALU BANYAK SALAH! Tombol dikunci selama <span id="penalty-timer" class="fs-4">15</span> detik.
       </div>
 
+      <!-- NOTIF SALAH/BENAR -->
+      <div id="wrong-notif-box" class="alert alert-danger text-center fw-bold py-2 mb-3" style="display:none; border-radius: 10px;">
+        😭 YAH JAWABAN SALAH! (-50 Pts).
+      </div>
       <div id="correct-notif-box" class="alert alert-success text-center fw-bold py-3 mb-3" style="display:none; border-radius: 10px;">
         🎉 BENAR! KLAIM BERHASIL (+100 Pts). BERPINDAH SOAL... 🚀
       </div>
 
-      <div id="opsi-container" class="opsi-grid mb-3"></div>
-
-      <div id="claimed-box" class="alert alert-warning text-center p-4 border-warning my-3" style="display:none; border-radius: 12px; background: rgba(217, 119, 6, 0.15);">
-        <i class="bi bi-lock-fill display-4 text-warning d-block mb-2"></i>
-        <h5 class="fw-bold text-warning mb-1" id="claimed-text">SOAL INI SUDAH DIKLAIM OLEH X</h5>
-        <p class="small text-slate-300 mb-0">Opsi jawaban telah dikunci. Silakan pilih nomor soal lain di navigasi bawah!</p>
+      <!-- BOX CLAIMED (REVIEW) -->
+      <div id="claimed-box" class="alert alert-warning text-center p-3 border-warning mb-3" style="display:none; border-radius: 12px; background: rgba(217, 119, 6, 0.15);">
+        <h6 class="fw-bold text-warning mb-1" id="claimed-text">SOAL INI SUDAH DIKLAIM OLEH X</h6>
+        <p class="small text-slate-300 mb-0">Kamu hanya bisa membaca ulang untuk review. Jawaban yang benar ditandai warna hijau.</p>
       </div>
+
+      <div id="opsi-container" class="opsi-grid mb-3"></div>
     </div>
 
     <div class="card-custom p-3 mb-4" id="box-peta-soal">
@@ -196,7 +211,7 @@
     
     <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
       <div>
-        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM</h3>
+        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM (MORFOLOGI)</h3>
         <p class="text-slate-400 small mb-0">Pusat Kendali Live Quiz & Monitoring Real-Time</p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
@@ -321,6 +336,7 @@
     let isGameStarted = false;
     let currentFontSize = 1.1;
     let audioCtx = null;
+    let penaltyInterval = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('tebakcepet_user');
@@ -454,9 +470,9 @@
     function initSiswaListeners() {
       onValue(ref(db, 'isGameStarted'), (snapshot) => {
         isGameStarted = snapshot.val() || false;
-        
         if (isGameStarted) {
           showView('game');
+          startPenaltyChecker();
         } else {
           showView('waiting');
         }
@@ -508,13 +524,41 @@
       document.getElementById('correct-notif-box').style.display = 'none';
     }
 
+    // --- FITUR PENALTY ANTI-CHEAT ---
+    function startPenaltyChecker() {
+      clearInterval(penaltyInterval);
+      penaltyInterval = setInterval(() => {
+        let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
+        let now = Date.now();
+        let penaltyBox = document.getElementById('penalty-notif-box');
+        
+        if(penaltyUntil > now) {
+          let remaining = Math.ceil((penaltyUntil - now) / 1000);
+          document.getElementById('penalty-timer').innerText = remaining;
+          penaltyBox.style.display = 'block';
+          
+          document.getElementById('wrong-notif-box').style.display = 'none';
+          document.getElementById('correct-notif-box').style.display = 'none';
+
+          // Kunci paksa semua tombol
+          document.querySelectorAll('.btn-jawaban').forEach(b => { 
+            b.disabled = true; 
+          });
+        } else {
+          if(penaltyBox.style.display === 'block') {
+             penaltyBox.style.display = 'none';
+             renderCurrentSoal(); // Kembalikan ke state awal
+          }
+        }
+      }, 500);
+    }
+
     function renderPetaSoal() {
       document.getElementById('soal-counter').innerText = `${bankSoalData.length} Soal`;
       let html = '';
       bankSoalData.forEach((_, idx) => {
         let isActive = idx === currentSoalIndex ? 'active' : '';
         let isClaimed = claimsData[idx] !== undefined ? 'is-claimed' : '';
-        
         html += `<button class="btn-peta ${isActive} ${isClaimed}" onclick="pindahSoal(${idx})">${idx + 1}</button>`;
       });
       document.getElementById('peta-soal-container').innerHTML = html;
@@ -538,33 +582,45 @@
       const elemKlaim = document.getElementById('status-klaim');
       const opsiContainer = document.getElementById('opsi-container');
       const claimedBox = document.getElementById('claimed-box');
+      
+      let isClaimed = !!currentClaim;
+      let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
+      let isPenalty = Date.now() < penaltyUntil;
 
-      if(currentClaim) {
+      if(isClaimed) {
         elemKlaim.innerHTML = `<i class="bi bi-person-check-fill me-1"></i> Diklaim oleh: <b>${currentClaim}</b>`;
         elemKlaim.className = "badge bg-warning text-dark px-2 py-1";
-
-        opsiContainer.style.display = 'none';
         document.getElementById('wrong-notif-box').style.display = 'none';
+        
         claimedBox.style.display = 'block';
-        document.getElementById('claimed-text').innerText = `SOAL INI TELAH DIKLAIM OLEH ${currentClaim.toUpperCase()}! 🏆`;
-        return;
+        document.getElementById('claimed-text').innerText = `🏆 DIKLAIM OLEH ${currentClaim.toUpperCase()}`;
+      } else {
+        elemKlaim.innerHTML = `<i class="bi bi-clock me-1"></i> Belum diklaim siapapun`;
+        elemKlaim.className = "badge bg-dark border border-secondary text-slate-400 px-2 py-1";
+        claimedBox.style.display = 'none';
       }
-
-      elemKlaim.innerHTML = `<i class="bi bi-clock me-1"></i> Belum diklaim siapapun`;
-      elemKlaim.className = "badge bg-dark border border-secondary text-slate-400 px-2 py-1";
-      
-      opsiContainer.style.display = 'grid';
-      claimedBox.style.display = 'none';
 
       let opsiHtml = '';
       const bgColors = { A: 'bg-opsi-A', B: 'bg-opsi-B', C: 'bg-opsi-C', D: 'bg-opsi-D', E: 'bg-opsi-E' };
 
       for(let key in soal.opsi) {
         if(soal.opsi[key] && soal.opsi[key].toString().trim() !== '') {
+          let extraClass = '';
+          let isDisabled = isClaimed || isPenalty ? 'disabled' : '';
+          
+          if(isClaimed) {
+             if(key === soal.kunci) {
+                 extraClass = 'opsi-correct-highlight'; // Highlight hijau
+             } else {
+                 extraClass = 'opacity-25'; // Pilihan lain meredup
+             }
+          }
+
           opsiHtml += `
-            <button class="btn-jawaban ${bgColors[key] || 'bg-secondary'}" 
+            <button class="btn-jawaban ${bgColors[key] || 'bg-secondary'} ${extraClass}" 
                     id="btn-opsi-${key}"
-                    onclick="jawab('${key}', '${soal.kunci}')">
+                    onclick="jawab('${key}', '${soal.kunci}')"
+                    ${isDisabled}>
               <div class="ikon-opsi">${key}</div>
               <div>${soal.opsi[key]}</div>
             </button>`;
@@ -576,11 +632,16 @@
     window.jawab = function(pilihan, kunci) {
       if(claimsData[currentSoalIndex]) return;
       
+      let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
+      if(Date.now() < penaltyUntil) return; // Mencegah klik saat kena penalty
+      
       const isCorrect = (pilihan === kunci);
       const notifWrong = document.getElementById('wrong-notif-box');
       const notifCorrect = document.getElementById('correct-notif-box');
 
       if(isCorrect) {
+        localStorage.setItem('tebakcepet_mistakes', 0); // Reset salah
+
         notifWrong.style.display = 'none';
         notifCorrect.style.display = 'block';
         playAudio('correct');
@@ -598,13 +659,37 @@
         }, 1500);
 
       } else {
-        notifCorrect.style.display = 'none';
-        playAudio('wrong');
-        notifWrong.style.display = 'block';
-        
-        notifWrong.classList.remove('shake-box');
-        void notifWrong.offsetWidth;
-        notifWrong.classList.add('shake-box');
+        // Hukuman Poin Minus & Banned
+        userScore -= 50;
+        document.getElementById('display-score').innerText = userScore;
+        update(ref(db, 'users/' + currentUser), { score: userScore });
+
+        let mistakes = parseInt(localStorage.getItem('tebakcepet_mistakes') || '0');
+        mistakes++;
+
+        if(mistakes >= 3) {
+           // Banned 15 detik
+           let pUntil = Date.now() + 15000;
+           localStorage.setItem('tebakcepet_penalty_until', pUntil);
+           localStorage.setItem('tebakcepet_mistakes', 0); // Reset hitungan usai dibanned
+           
+           notifCorrect.style.display = 'none';
+           notifWrong.style.display = 'none';
+           playAudio('wrong');
+           startPenaltyChecker(); 
+        } else {
+           localStorage.setItem('tebakcepet_mistakes', mistakes);
+
+           notifCorrect.style.display = 'none';
+           playAudio('wrong');
+           
+           notifWrong.innerHTML = `😭 YAH JAWABAN SALAH! (-50 Pts).<br><small class="text-warning">Awas! Salah ${3 - mistakes}x lagi = Tombol Dibekukan!</small>`;
+           notifWrong.style.display = 'block';
+           
+           notifWrong.classList.remove('shake-box');
+           void notifWrong.offsetWidth;
+           notifWrong.classList.add('shake-box');
+        }
       }
     };
 
@@ -685,7 +770,9 @@
 
       let html = '';
       sorted.forEach((item, idx) => {
-        let percent = Math.min(100, Math.max(6, (item.score / maxScore) * 100));
+        let percent = Math.max(6, (item.score / maxScore) * 100); 
+        // Cegah persentase minus (bar mundur ke luar)
+        if(item.score < 0) percent = 4;
         let isTop = idx === 0;
 
         html += `
@@ -697,7 +784,7 @@
               <span class="fw-bold text-warning font-monospace">${item.score} Pts</span>
             </div>
             <div class="race-bar-bg">
-              <div class="race-bar-fill ${isTop ? 'rank-1-bar' : ''}" style="width: ${percent}%;"></div>
+              <div class="race-bar-fill ${isTop ? 'rank-1-bar' : ''}" style="width: ${percent}%; background: ${item.score < 0 ? '#dc2626' : ''};"></div>
               <span class="race-avatar">🏎️</span>
             </div>
           </div>`;
@@ -708,7 +795,7 @@
     function renderAdminCards(filterText = "") {
       const container = document.getElementById('admin-soal-container');
       if(bankSoalData.length === 0) {
-        container.innerHTML = `<div class="col-12 text-center text-slate-400 py-4"><i class="bi bi-inbox display-4 d-block mb-2"></i>Belum ada soal. Kirim soal dari Google Sheets lewat Apps Script!</div>`;
+        container.innerHTML = `<div class="col-12 text-center text-slate-400 py-4"><i class="bi bi-inbox display-4 d-block mb-2"></i>Belum ada soal. Kirim soal dari Google Sheets!</div>`;
         return;
       }
 
