@@ -23,7 +23,6 @@
     .logo-text { font-size: 2.5rem; font-weight: 800; color: var(--accent-yellow); text-shadow: 2px 2px 0px #d97706, 4px 4px 0px #b45309; text-align: center; line-height: 1.1; }
     .card-custom { background: var(--bg-card); border: 1px solid #3d2c7a; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     
-    /* Teks Justify (Rata Kanan Kiri) */
     .soal-text-justify, .btn-jawaban { text-align: justify; text-justify: inter-word; }
     
     .opsi-grid { display: flex; flex-direction: column; gap: 12px; }
@@ -49,7 +48,6 @@
     .donut-chart { width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(#4ade80 0% 0%, #3f2e7a 0% 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto; position: relative; }
     .donut-inner { width: 90px; height: 90px; background: var(--bg-card); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; }
 
-    /* Live Race Track (Admin) */
     .admin-race-track { background: #180e33; border-radius: 12px; padding: 12px; border: 1px solid #3d2c7a; max-height: 220px; overflow-y: auto; }
     .race-item { margin-bottom: 8px; }
     .race-bar-bg { background: #2B1D5C; height: 22px; border-radius: 11px; overflow: hidden; position: relative; border: 1px solid #4a3596; }
@@ -67,7 +65,6 @@
     .result-correct { background-color: #16a34a; }
     .result-wrong { background-color: #b91c1c; }
 
-    /* Podium Klasemen Akhir */
     .podium-box { display: flex; align-items: flex-end; justify-content: center; gap: 15px; margin-top: 20px; }
     .podium-item { background: #3f2e7a; border-radius: 12px 12px 0 0; text-align: center; padding: 15px 10px; width: 90px; }
     .podium-1 { height: 160px; background: linear-gradient(to top, #d97706, #fbbf24); color: #000; }
@@ -99,7 +96,12 @@
 
   <!-- ================= LOBBY SISWA ================= -->
   <div id="view-waiting" class="container my-5" style="display:none; max-width: 600px;">
-    <div class="card-custom p-5 text-center">
+    <div class="card-custom p-5 text-center position-relative">
+      <!-- Tombol Logout di Lobby Siswa -->
+      <button onclick="userLogout()" class="btn btn-outline-danger btn-sm position-absolute top-0 end-0 m-4">
+        <i class="bi bi-box-arrow-right"></i> Keluar
+      </button>
+
       <div class="logo-text mb-4" style="font-size: 2rem;">TEBAK RAME!</div>
       <div class="bg-dark d-inline-block p-4 rounded-4 mb-4 border border-secondary">
         <i class="bi bi-lock-fill text-slate-400 display-4 d-block mb-2"></i>
@@ -117,8 +119,13 @@
   <div id="view-game" class="container my-4" style="display:none; max-width: 800px;">
     
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <div class="badge bg-dark border border-secondary fs-6 py-2 px-3">
-        <span id="game-avatar"></span> <span id="display-user" class="ms-1"></span>
+      <div class="d-flex align-items-center gap-2">
+        <div class="badge bg-dark border border-secondary fs-6 py-2 px-3">
+          <span id="game-avatar"></span> <span id="display-user" class="ms-1"></span>
+        </div>
+        <button onclick="userLogout()" class="btn btn-outline-danger btn-sm" title="Keluar">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
       </div>
       <div class="text-center">
         <div class="text-slate-400 small fw-bold">PIN Game</div>
@@ -210,7 +217,10 @@
         <button onclick="mulaiKuisDariLobby()" class="btn btn-success fw-bold shadow"><i class="bi bi-play-fill"></i> Mulai Kuis</button>
         <button onclick="akhiriKuisKeLobby()" class="btn btn-danger fw-bold shadow"><i class="bi bi-stop-fill"></i> Akhiri Kuis</button>
       </div>
-      <button onclick="resetData()" class="btn btn-outline-danger btn-sm">Reset Sistem</button>
+      <div class="d-flex gap-2">
+        <button onclick="resetData()" class="btn btn-outline-danger btn-sm">Reset Sistem</button>
+        <button onclick="adminLogout()" class="btn btn-secondary btn-sm fw-bold"><i class="bi bi-box-arrow-right"></i> Logout</button>
+      </div>
     </div>
 
     <div class="row g-4">
@@ -231,7 +241,6 @@
             <span class="text-slate-400 small me-2">detik</span>
           </div>
 
-          <!-- LIVE RACE KLASEMEN (DI ATAS PREVIEW SOAL) -->
           <h6 class="text-warning fw-bold mb-2"><i class="bi bi-flag-fill"></i> Live Race Klasemen Siswa:</h6>
           <div class="admin-race-track mb-4" id="admin-race-container">
             <div class="text-center text-slate-500 py-3 small">Belum ada siswa di arena.</div>
@@ -271,7 +280,7 @@
         </div>
 
         <div class="card-custom p-4">
-          <h6 class="fw-bold text-white mb-3">Daftar Siswa Aktif</h6>
+          <h6 class="fw-bold text-white mb-3">Daftar Peserta Aktif (<span id="count-peserta">0</span>)</h6>
           <div id="admin-lobby-list" class="lobby-grid"></div>
         </div>
       </div>
@@ -390,13 +399,28 @@
       document.getElementById('game-avatar').innerText = userAvatar;
       document.getElementById('lobby-avatar').innerText = userAvatar;
       
-      get(ref(db, `${ROOT}/users/${currentUser}`)).then(snap => {
-        if(!snap.exists()) {
-          set(ref(db, `${ROOT}/users/${currentUser}`), { score: 0, avatar: userAvatar, cStreak: 0, wStreak: 0, isBanned: false });
-        }
-      });
+      // Simpan user ke firebase agar langsung muncul di daftar peserta admin (bahkan di lobby)
+      set(ref(db, `${ROOT}/users/${currentUser}`), { score: 0, avatar: userAvatar, cStreak: 0, wStreak: 0, isBanned: false });
       
       initSiswaListeners();
+    };
+
+    window.userLogout = function() {
+      if(confirm("Apakah kamu yakin ingin keluar?")) {
+        // Hapus data user dari firebase saat logout
+        remove(ref(db, `${ROOT}/users/${currentUser}`)).then(() => {
+          localStorage.removeItem('serentak_user');
+          localStorage.removeItem('serentak_avatar');
+          location.reload();
+        });
+      }
+    };
+
+    window.adminLogout = function() {
+      if(confirm("Keluar dari panel admin?")) {
+        localStorage.removeItem('serentak_role');
+        location.reload();
+      }
     };
 
     function initSiswaListeners() {
@@ -677,26 +701,31 @@
     }
 
     function updateAdminLobby() {
-      let total = Object.keys(liveUsers).length;
+      let totalUsers = Object.keys(liveUsers);
+      let total = totalUsers.length;
       let ans = Object.keys(liveAnswers).length;
       
+      document.getElementById('count-peserta').innerText = total;
       document.getElementById('admin-ans-count').innerText = ans;
-      document.getElementById('admin-total-user').innerText = total;
+      document.getElementById('admin-total-user').innerText = total || 1;
       
       let pct = total === 0 ? 0 : (ans / total) * 100;
       document.getElementById('admin-donut').style.background = `conic-gradient(#4ade80 ${pct}%, #3f2e7a ${pct}% 100%)`;
 
       let html = '';
-      for(let u in liveUsers) {
-        let isDone = liveAnswers[u] ? '<i class="bi bi-check-circle-fill text-success ms-auto"></i>' : '<i class="bi bi-circle text-secondary ms-auto"></i>';
-        let avatar = liveUsers[u].avatar || '👤';
-        let isBanned = liveUsers[u].isBanned ? '<span class="badge bg-danger ms-1" style="font-size:0.6rem;">BANNED</span>' : '';
-        html += `<div class="lobby-item"><span>${avatar}</span> <span class="text-truncate">${u}${isBanned}</span> ${isDone}</div>`;
+      if(total === 0) {
+        html = `<div class="text-slate-500 small col-12">Belum ada peserta di lobby.</div>`;
+      } else {
+        totalUsers.forEach(u => {
+          let isDone = liveAnswers[u] ? '<i class="bi bi-check-circle-fill text-success ms-auto"></i>' : '<i class="bi bi-circle text-secondary ms-auto"></i>';
+          let avatar = liveUsers[u].avatar || '👤';
+          let isBanned = liveUsers[u].isBanned ? '<span class="badge bg-danger ms-1" style="font-size:0.6rem;">BANNED</span>' : '';
+          html += `<div class="lobby-item"><span>${avatar}</span> <span class="text-truncate">${u}${isBanned}</span> ${liveState.status !== 'lobby' ? isDone : ''}</div>`;
+        });
       }
       document.getElementById('admin-lobby-list').innerHTML = html;
     }
 
-    // RENDER LIVE RACE KLASEMEN DI ADMIN
     function renderAdminRaceTrack() {
       let sorted = [];
       for(let u in liveUsers) sorted.push({ name: u, score: liveUsers[u].score || 0, avatar: liveUsers[u].avatar || '🏎️' });
@@ -737,6 +766,7 @@
 
     window.akhiriKuisKeLobby = function() {
       if(confirm("Kembalikan seluruh siswa ke Ruang Tunggu (Lobby)?")) {
+        remove(ref(db, `${ROOT}/liveAnswers`));
         update(ref(db, `${ROOT}/state`), { status: 'lobby', index: 0 });
       }
     };
@@ -845,7 +875,7 @@
     };
 
     window.resetData = function() {
-      if(confirm("Hapus skor siswa dan kembalikan ke awal?")) {
+      if(confirm("Hapus seluruh skor dan data peserta dari database?")) {
         remove(ref(db, ROOT)).then(() => {
           update(ref(db, `${ROOT}/state`), { status: 'lobby', index: 0 });
         });
