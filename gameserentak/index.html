@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tebak Santai! - Kuis Serentak</title>
+  <title>Tebak Rame! - Kuis Serentak</title>
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -23,15 +23,17 @@
     .logo-text { font-size: 2.5rem; font-weight: 800; color: var(--accent-yellow); text-shadow: 2px 2px 0px #d97706, 4px 4px 0px #b45309; text-align: center; line-height: 1.1; }
     .card-custom { background: var(--bg-card); border: 1px solid #3d2c7a; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     
+    /* Teks Justify (Rata Kanan Kiri) */
+    .soal-text-justify, .btn-jawaban { text-align: justify; text-justify: inter-word; }
+    
     .opsi-grid { display: flex; flex-direction: column; gap: 12px; }
-    .btn-jawaban { color: #ffffff; font-size: var(--font-base); font-weight: 600; border: none; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; transition: all 0.2s ease; text-align: left; background-color: #3f2e7a; width: 100%; cursor: pointer; border: 2px solid transparent; }
+    .btn-jawaban { color: #ffffff; font-size: var(--font-base); font-weight: 600; border: none; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; transition: all 0.2s ease; background-color: #3f2e7a; width: 100%; cursor: pointer; border: 2px solid transparent; }
     .btn-jawaban:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.2); border-color: var(--accent-yellow); }
     .btn-jawaban:disabled { cursor: not-allowed; }
     
     .btn-jawaban.selected { border: 3px solid var(--accent-yellow); background-color: #5b42a9 !important; opacity: 1; transform: scale(1.02); }
     .btn-jawaban.correct { border: 3px solid #4ade80; background-color: #16a34a !important; opacity: 1; }
     .btn-jawaban.wrong { border: 3px solid #f87171; background-color: #dc2626 !important; opacity: 1; }
-    .btn-jawaban.dimmed { opacity: 0.4; }
 
     .ikon-opsi { display: inline-flex; justify-content: center; align-items: center; font-weight: 800; background: rgba(255,255,255,0.25); min-width: 40px; height: 40px; border-radius: 10px; margin-right: 15px; flex-shrink: 0; font-size: 1.2rem; }
 
@@ -47,6 +49,14 @@
     .donut-chart { width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(#4ade80 0% 0%, #3f2e7a 0% 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto; position: relative; }
     .donut-inner { width: 90px; height: 90px; background: var(--bg-card); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; }
 
+    /* Live Race Track (Admin) */
+    .admin-race-track { background: #180e33; border-radius: 12px; padding: 12px; border: 1px solid #3d2c7a; max-height: 220px; overflow-y: auto; }
+    .race-item { margin-bottom: 8px; }
+    .race-bar-bg { background: #2B1D5C; height: 22px; border-radius: 11px; overflow: hidden; position: relative; border: 1px solid #4a3596; }
+    .race-bar-fill { height: 100%; background: linear-gradient(90deg, #2563eb, #38bdf8); border-radius: 11px; transition: width 0.5s ease; }
+    .race-bar-fill.rank-1-bar { background: linear-gradient(90deg, #d97706, #fbbf24); }
+    .race-avatar { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; font-weight: bold; }
+
     @keyframes pulse-lock { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     .icon-lock { font-size: 5rem; color: #a78bfa; animation: pulse-lock 2s infinite; }
     .icon-banned { font-size: 5rem; color: #f87171; }
@@ -56,11 +66,18 @@
     .result-screen { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; }
     .result-correct { background-color: #16a34a; }
     .result-wrong { background-color: #b91c1c; }
+
+    /* Podium Klasemen Akhir */
+    .podium-box { display: flex; align-items: flex-end; justify-content: center; gap: 15px; margin-top: 20px; }
+    .podium-item { background: #3f2e7a; border-radius: 12px 12px 0 0; text-align: center; padding: 15px 10px; width: 90px; }
+    .podium-1 { height: 160px; background: linear-gradient(to top, #d97706, #fbbf24); color: #000; }
+    .podium-2 { height: 120px; background: linear-gradient(to top, #64748b, #94a3b8); }
+    .podium-3 { height: 90px; background: linear-gradient(to top, #9a3412, #c2410c); }
   </style>
 </head>
 <body>
 
-  <!-- ================= FASE 1: LOGIN ================= -->
+  <!-- ================= LOGIN ================= -->
   <div id="view-login" class="container mt-5" style="max-width: 450px;">
     <div class="card-custom p-4 p-md-5">
       <div class="logo-text mb-2">TEBAK<br>RAME!</div>
@@ -80,7 +97,7 @@
     </div>
   </div>
 
-  <!-- ================= FASE 1: LOBBY SISWA ================= -->
+  <!-- ================= LOBBY SISWA ================= -->
   <div id="view-waiting" class="container my-5" style="display:none; max-width: 600px;">
     <div class="card-custom p-5 text-center">
       <div class="logo-text mb-4" style="font-size: 2rem;">TEBAK RAME!</div>
@@ -96,7 +113,7 @@
     </div>
   </div>
 
-  <!-- ================= FASE 2, 3 & 4: ARENA SISWA ================= -->
+  <!-- ================= ARENA SISWA ================= -->
   <div id="view-game" class="container my-4" style="display:none; max-width: 800px;">
     
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -122,7 +139,7 @@
         <div class="spinner-border text-danger mt-4" role="status"></div>
       </div>
 
-      <!-- SCREEN: SOAL & JAWAB (Fase 2) -->
+      <!-- SCREEN: SOAL -->
       <div id="screen-soal">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <span class="badge bg-secondary text-white px-3 py-2 rounded-pill" id="badge-soal-id">Soal 1 dari X</span>
@@ -133,11 +150,11 @@
           </div>
         </div>
         
-        <h3 id="soal-teks" class="text-center text-white fw-bold mb-4">Memuat soal...</h3>
+        <h4 id="soal-teks" class="text-white fw-bold mb-4 soal-text-justify">Memuat soal...</h4>
         <div id="opsi-container" class="opsi-grid"></div>
       </div>
 
-      <!-- SCREEN: BLIND ANSWER LOCKED (Fase 3) -->
+      <!-- SCREEN: LOCKED -->
       <div id="screen-locked" class="result-screen" style="display:none; background: var(--bg-card);">
         <i class="bi bi-lock-fill icon-lock mb-3"></i>
         <h3 class="fw-bold text-white mb-1">Jawaban Terkunci!</h3>
@@ -152,7 +169,7 @@
         </div>
       </div>
 
-      <!-- SCREEN: REVEAL HASIL (Fase 4) -->
+      <!-- SCREEN: REVEAL -->
       <div id="screen-reveal" class="result-screen" style="display:none;">
         <h1 id="reveal-title" class="fw-bold text-white mb-2 display-4">BENAR!</h1>
         <div id="reveal-streak" class="streak-badge mb-3" style="display:none;"><i class="bi bi-fire"></i> Streak x2</div>
@@ -161,9 +178,16 @@
         <div class="w-100 bg-dark p-3 rounded-4 border border-secondary mt-2" style="max-width: 500px;">
           <small class="text-slate-400 d-block text-center mb-2">Jawaban yang benar adalah:</small>
           <div id="reveal-correct-box" class="btn-jawaban correct mx-auto" style="cursor:default;">
-            <div class="ikon-opsi" id="reveal-correct-key">C</div><div id="reveal-correct-text">Jakarta</div>
+            <div class="ikon-opsi" id="reveal-correct-key">C</div><div id="reveal-correct-text" class="soal-text-justify">Jakarta</div>
           </div>
         </div>
+      </div>
+
+      <!-- SCREEN: KLASEMEN AKHIR -->
+      <div id="screen-leaderboard" class="result-screen" style="display:none; background: #180e33;">
+        <h2 class="fw-bold text-warning mb-3">🏆 KLASEMEN AKHIR KUIS</h2>
+        <div class="podium-box" id="podium-container"></div>
+        <div class="w-100 bg-dark p-3 rounded-4 border border-secondary mt-3 text-start" style="max-width: 500px; max-height: 180px; overflow-y: auto;" id="final-leaderboard-list"></div>
       </div>
       
     </div>
@@ -180,13 +204,13 @@
   <!-- ================= LAYAR ADMIN ================= -->
   <div id="view-admin" class="container my-4" style="display:none; max-width: 1000px;">
     
-    <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center">
+    <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
       <div class="logo-text" style="font-size: 1.5rem;">TEBAK RAME!</div>
-      <div class="text-center">
-        <span class="text-slate-400 small">PIN Game</span><br>
-        <span class="fs-4 fw-bold">428 593</span>
+      <div class="d-flex gap-2">
+        <button onclick="mulaiKuisDariLobby()" class="btn btn-success fw-bold shadow"><i class="bi bi-play-fill"></i> Mulai Kuis</button>
+        <button onclick="akhiriKuisKeLobby()" class="btn btn-danger fw-bold shadow"><i class="bi bi-stop-fill"></i> Akhiri Kuis</button>
       </div>
-      <button onclick="resetData()" class="btn btn-outline-danger btn-sm">Reset & Logout</button>
+      <button onclick="resetData()" class="btn btn-outline-danger btn-sm">Reset Sistem</button>
     </div>
 
     <div class="row g-4">
@@ -196,7 +220,7 @@
           <div class="d-flex gap-2 mb-3">
             <select id="admin-select-soal" class="form-select bg-dark text-white border-secondary" onchange="previewSoalAdmin()"></select>
             <button class="btn btn-success fw-bold px-4 text-nowrap" id="btn-tayang" onclick="tayangkanSoal()">
-              <i class="bi bi-play-fill"></i> Tayangkan
+              <i class="bi bi-broadcast"></i> Tayangkan
             </button>
           </div>
           
@@ -207,9 +231,15 @@
             <span class="text-slate-400 small me-2">detik</span>
           </div>
 
-          <h6 class="text-slate-400 mb-2">Preview Soal:</h6>
+          <!-- LIVE RACE KLASEMEN (DI ATAS PREVIEW SOAL) -->
+          <h6 class="text-warning fw-bold mb-2"><i class="bi bi-flag-fill"></i> Live Race Klasemen Siswa:</h6>
+          <div class="admin-race-track mb-4" id="admin-race-container">
+            <div class="text-center text-slate-500 py-3 small">Belum ada siswa di arena.</div>
+          </div>
+
+          <h6 class="text-slate-400 mb-2">Preview Soal (Kunci Disembunyikan):</h6>
           <div class="bg-dark p-3 rounded-4 border border-secondary">
-            <p id="admin-preview-teks" class="fw-bold text-white mb-3">-</p>
+            <p id="admin-preview-teks" class="fw-bold text-white mb-3 soal-text-justify">-</p>
             <div id="admin-preview-opsi" class="d-flex flex-column gap-2"></div>
           </div>
         </div>
@@ -234,6 +264,10 @@
               <div class="display-3 fw-bold text-warning" id="admin-timer-text">0</div>
             </div>
           </div>
+
+          <button onclick="tampilkanKlasemenAkhir()" class="btn btn-warning w-100 fw-bold mt-3 shadow">
+            <i class="bi bi-trophy-fill me-1"></i> TAMPILKAN KLASEMEN AKHIR
+          </button>
         </div>
 
         <div class="card-custom p-4">
@@ -405,6 +439,11 @@
           clearInterval(timerInterval);
           renderSiswaUI();
         }
+        else if (state.status === 'leaderboard') {
+          showView('game');
+          clearInterval(timerInterval);
+          renderSiswaUI();
+        }
       });
     }
 
@@ -449,22 +488,17 @@
     }
 
     function renderSiswaUI() {
-      if(!bankSoalData[liveState.index]) return;
-      let soal = bankSoalData[liveState.index];
-      let myData = liveUsers[currentUser] || {};
-      
-      document.getElementById('badge-soal-id').innerText = `Soal ${liveState.index + 1} dari ${bankSoalData.length}`;
-      document.getElementById('soal-teks').innerText = soal.teks;
-      
       const scrBanned = document.getElementById('screen-banned');
       const scrSoal = document.getElementById('screen-soal');
       const scrLocked = document.getElementById('screen-locked');
       const scrReveal = document.getElementById('screen-reveal');
+      const scrLeaderboard = document.getElementById('screen-leaderboard');
       const botProgress = document.getElementById('bottom-progress-box');
 
-      if(myData.isBanned && liveState.status !== 'reveal') {
+      let myData = liveUsers[currentUser] || {};
+      if(myData.isBanned && liveState.status !== 'reveal' && liveState.status !== 'leaderboard') {
          scrBanned.style.display = 'flex';
-         scrSoal.style.display = 'none'; scrLocked.style.display = 'none'; scrReveal.style.display = 'none'; botProgress.style.display = 'none';
+         scrSoal.style.display = 'none'; scrLocked.style.display = 'none'; scrReveal.style.display = 'none'; scrLeaderboard.style.display = 'none'; botProgress.style.display = 'none';
          return;
       } else {
          scrBanned.style.display = 'none';
@@ -472,7 +506,13 @@
 
       if (liveState.status === 'playing') {
         scrReveal.style.display = 'none';
+        scrLeaderboard.style.display = 'none';
         
+        if(!bankSoalData[liveState.index]) return;
+        let soal = bankSoalData[liveState.index];
+        document.getElementById('badge-soal-id').innerText = `Soal ${liveState.index + 1} dari ${bankSoalData.length}`;
+        document.getElementById('soal-teks').innerText = soal.teks;
+
         if (myCurrentAnswer) {
           scrSoal.style.display = 'none';
           botProgress.style.display = 'none';
@@ -487,7 +527,7 @@
           for(let key in soal.opsi) {
             if(soal.opsi[key]) {
               html += `<button class="btn-jawaban ${bgColors[key] || 'bg-secondary'}" onclick="submitJawaban('${key}')">
-                <div class="ikon-opsi">${key}</div><div>${soal.opsi[key]}</div>
+                <div class="ikon-opsi">${key}</div><div class="soal-text-justify">${soal.opsi[key]}</div>
               </button>`;
             }
           }
@@ -495,8 +535,12 @@
         }
       } 
       else if (liveState.status === 'reveal') {
+        if(!bankSoalData[liveState.index]) return;
+        let soal = bankSoalData[liveState.index];
+
         scrSoal.style.display = 'none';
         scrLocked.style.display = 'none';
+        scrLeaderboard.style.display = 'none';
         botProgress.style.display = 'none';
         scrReveal.style.display = 'flex';
         
@@ -538,6 +582,36 @@
            playAudio('wrong');
         }
       }
+      else if (liveState.status === 'leaderboard') {
+        scrSoal.style.display = 'none';
+        scrLocked.style.display = 'none';
+        scrReveal.style.display = 'none';
+        botProgress.style.display = 'none';
+        scrLeaderboard.style.display = 'flex';
+
+        let sorted = [];
+        for(let u in liveUsers) sorted.push({ name: u, score: liveUsers[u].score || 0, avatar: liveUsers[u].avatar || '👤' });
+        sorted.sort((a,b) => b.score - a.score);
+
+        let p1 = sorted[0] || { name: '-', score: 0, avatar: '👑' };
+        let p2 = sorted[1] || { name: '-', score: 0, avatar: '🥈' };
+        let p3 = sorted[2] || { name: '-', score: 0, avatar: '🥉' };
+
+        document.getElementById('podium-container').innerHTML = `
+          <div class="podium-item podium-2"><div class="fs-4">${p2.avatar}</div><b class="small text-truncate d-block">${p2.name}</b><span class="text-white small">${p2.score}</span></div>
+          <div class="podium-item podium-1"><div class="fs-3">👑</div><b class="small text-truncate d-block">${p1.name}</b><span class="text-dark fw-bold">${p1.score}</span></div>
+          <div class="podium-item podium-3"><div class="fs-4">${p3.avatar}</div><b class="small text-truncate d-block">${p3.name}</b><span class="text-white small">${p3.score}</span></div>
+        `;
+
+        let listHtml = '';
+        sorted.forEach((item, idx) => {
+          listHtml += `<div class="d-flex justify-content-between align-items-center p-2 mb-1 bg-slate-900 rounded border border-secondary">
+            <span><b>#${idx+1}</b> ${item.avatar} ${item.name}</span> <b class="text-warning">${item.score} Pts</b>
+          </div>`;
+        });
+        document.getElementById('final-leaderboard-list').innerHTML = listHtml;
+        confetti({ particleCount: 100, spread: 90, origin: { y: 0.5 } });
+      }
     }
 
     window.submitJawaban = function(pilih) {
@@ -549,10 +623,8 @@
       let left = Math.max(0, liveState.duration - elapsed);
       
       update(ref(db, `${ROOT}/liveAnswers/${currentUser}`), { ans: pilih, timeLeft: left });
-      renderSyswaUIIfActive();
+      renderSiswaUI();
     };
-
-    function renderSyswaUIIfActive() { renderSiswaUI(); }
 
     function initAdminListeners() {
       onValue(ref(db, 'bankSoal'), snap => { 
@@ -566,6 +638,7 @@
       onValue(ref(db, `${ROOT}/users`), snap => {
         liveUsers = snap.val() || {};
         updateAdminLobby();
+        renderAdminRaceTrack();
       });
 
       onValue(ref(db, `${ROOT}/liveAnswers`), snap => {
@@ -583,20 +656,22 @@
         const btnStop = document.getElementById('btn-stop-early');
         const timerBox = document.getElementById('admin-timer-box');
 
-        if(state.status === 'lobby' || state.status === 'reveal') {
-          badge.className = state.status === 'lobby' ? "badge bg-secondary" : "badge bg-info text-dark";
-          badge.innerText = state.status === 'lobby' ? "Siswa di Lobby" : "Pengumuman Hasil";
-          btnTayang.style.display = 'inline-block';
-          btnStop.style.display = 'none';
-          timerBox.style.display = 'none';
+        if(state.status === 'lobby') {
+          badge.className = "badge bg-secondary"; badge.innerText = "Siswa di Lobby";
+          btnTayang.style.display = 'inline-block'; btnStop.style.display = 'none'; timerBox.style.display = 'none';
           clearInterval(timerInterval); isAdminTimerRunning = false;
-        } else {
-          badge.className = "badge bg-success pulse-lock";
-          badge.innerText = "🔴 ARENA LIVE";
-          btnTayang.style.display = 'none';
-          btnStop.style.display = 'inline-block';
-          timerBox.style.display = 'block';
+        } else if(state.status === 'playing') {
+          badge.className = "badge bg-success pulse-lock"; badge.innerText = "🔴 ARENA LIVE";
+          btnTayang.style.display = 'none'; btnStop.style.display = 'inline-block'; timerBox.style.display = 'block';
           if(!isAdminTimerRunning) startAdminTimer();
+        } else if(state.status === 'reveal') {
+          badge.className = "badge bg-info text-dark"; badge.innerText = "Pengumuman Hasil";
+          btnTayang.style.display = 'inline-block'; btnTayang.innerText = "Lanjut Soal Berikutnya ➡️";
+          btnStop.style.display = 'none'; timerBox.style.display = 'none';
+        } else if(state.status === 'leaderboard') {
+          badge.className = "badge bg-warning text-dark"; badge.innerText = "Klasemen Akhir Ditampilkan";
+          btnTayang.style.display = 'inline-block'; btnTayang.innerText = "Mulai Dari Awal 🔄";
+          btnStop.style.display = 'none'; timerBox.style.display = 'none';
         }
       });
     }
@@ -621,6 +696,51 @@
       document.getElementById('admin-lobby-list').innerHTML = html;
     }
 
+    // RENDER LIVE RACE KLASEMEN DI ADMIN
+    function renderAdminRaceTrack() {
+      let sorted = [];
+      for(let u in liveUsers) sorted.push({ name: u, score: liveUsers[u].score || 0, avatar: liveUsers[u].avatar || '🏎️' });
+      sorted.sort((a,b) => b.score - a.score);
+
+      const targetElem = document.getElementById('admin-race-container');
+      if(!targetElem) return;
+
+      if(sorted.length === 0) {
+        targetElem.innerHTML = `<div class="text-center text-slate-500 py-3 small">Belum ada siswa di arena.</div>`;
+        return;
+      }
+
+      let maxScore = Math.max(...sorted.map(s => s.score), 100);
+      let html = '';
+      sorted.forEach((item, idx) => {
+        let percent = Math.max(8, (item.score / maxScore) * 100);
+        let isTop = idx === 0;
+
+        html += `
+          <div class="race-item">
+            <div class="d-flex justify-content-between align-items-center small mb-1 text-slate-300">
+              <span class="fw-bold">${isTop ? '👑 ' : ''}${idx + 1}. ${item.avatar} ${item.name}</span>
+              <span class="text-warning fw-bold font-monospace">${item.score} Pts</span>
+            </div>
+            <div class="race-bar-bg">
+              <div class="race-bar-fill ${isTop ? 'rank-1-bar' : ''}" style="width: ${percent}%;"></div>
+              <span class="race-avatar">🏎️</span>
+            </div>
+          </div>`;
+      });
+      targetElem.innerHTML = html;
+    }
+
+    window.mulaiKuisDariLobby = function() {
+      update(ref(db, `${ROOT}/state`), { status: 'playing', index: 0, startTime: Date.now(), duration: 30 });
+    };
+
+    window.akhiriKuisKeLobby = function() {
+      if(confirm("Kembalikan seluruh siswa ke Ruang Tunggu (Lobby)?")) {
+        update(ref(db, `${ROOT}/state`), { status: 'lobby', index: 0 });
+      }
+    };
+
     window.previewSoalAdmin = function() {
       let idx = document.getElementById('admin-select-soal').value;
       if(!bankSoalData[idx]) return;
@@ -628,19 +748,31 @@
       document.getElementById('admin-preview-teks').innerText = s.teks;
       let html = '';
       for(let k in s.opsi) {
-        if(s.opsi[k]) html += `<div class="p-2 rounded ${k === s.kunci ? 'bg-success text-white fw-bold' : 'bg-secondary text-slate-300'}">${k}. ${s.opsi[k]}</div>`;
+        if(s.opsi[k]) html += `<div class="p-2 rounded bg-secondary text-slate-300 soal-text-justify">${k}. ${s.opsi[k]}</div>`;
       }
       document.getElementById('admin-preview-opsi').innerHTML = html;
     };
 
     window.tayangkanSoal = function() {
-      let idx = document.getElementById('admin-select-soal').value;
+      let currentIdx = liveState.index;
+      if(liveState.status === 'reveal') {
+         currentIdx += 1;
+         if(currentIdx >= bankSoalData.length) {
+            tampilkanKlasemenAkhir();
+            return;
+         }
+      } else if(liveState.status === 'leaderboard') {
+         currentIdx = 0;
+      } else {
+         currentIdx = parseInt(document.getElementById('admin-select-soal').value);
+      }
+
       let dur = parseInt(document.getElementById('admin-durasi').value) || 30;
       
       remove(ref(db, `${ROOT}/liveAnswers`)).then(() => {
         update(ref(db, `${ROOT}/state`), {
           status: 'playing',
-          index: parseInt(idx),
+          index: currentIdx,
           startTime: Date.now(),
           duration: dur
         });
@@ -706,6 +838,10 @@
       
       updates[`${ROOT}/state/status`] = 'reveal';
       update(ref(db), updates);
+    };
+
+    window.tampilkanKlasemenAkhir = function() {
+      update(ref(db, `${ROOT}/state`), { status: 'leaderboard' });
     };
 
     window.resetData = function() {
