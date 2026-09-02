@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tebak Rame! - Kuis Serentak</title>
+  <title>Tebak Santai! - Kuis Serentak</title>
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   
-  <!-- Font Poppins untuk kesan Fun & Modern -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <style>
@@ -22,16 +21,13 @@
     body { background-color: var(--bg-main); color: #f8fafc; font-family: 'Poppins', sans-serif; min-height: 100vh; overflow-x: hidden; }
     
     .logo-text { font-size: 2.5rem; font-weight: 800; color: var(--accent-yellow); text-shadow: 2px 2px 0px #d97706, 4px 4px 0px #b45309; text-align: center; line-height: 1.1; }
-    
     .card-custom { background: var(--bg-card); border: 1px solid #3d2c7a; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     
-    /* Tombol Jawaban Vertikal */
     .opsi-grid { display: flex; flex-direction: column; gap: 12px; }
     .btn-jawaban { color: #ffffff; font-size: var(--font-base); font-weight: 600; border: none; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; transition: all 0.2s ease; text-align: left; background-color: #3f2e7a; width: 100%; cursor: pointer; border: 2px solid transparent; }
     .btn-jawaban:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.2); border-color: var(--accent-yellow); }
     .btn-jawaban:disabled { cursor: not-allowed; }
     
-    /* Status Jawaban Fase 3 & 4 */
     .btn-jawaban.selected { border: 3px solid var(--accent-yellow); background-color: #5b42a9 !important; opacity: 1; transform: scale(1.02); }
     .btn-jawaban.correct { border: 3px solid #4ade80; background-color: #16a34a !important; opacity: 1; }
     .btn-jawaban.wrong { border: 3px solid #f87171; background-color: #dc2626 !important; opacity: 1; }
@@ -39,30 +35,24 @@
 
     .ikon-opsi { display: inline-flex; justify-content: center; align-items: center; font-weight: 800; background: rgba(255,255,255,0.25); min-width: 40px; height: 40px; border-radius: 10px; margin-right: 15px; flex-shrink: 0; font-size: 1.2rem; }
 
-    /* Timer Bar */
     .timer-container { background: rgba(0,0,0,0.3); height: 12px; border-radius: 6px; overflow: hidden; margin-top: 8px; }
     .timer-bar { height: 100%; background: var(--accent-yellow); transition: width 0.1s linear; }
 
-    /* Progress Menjawab */
     .progress-container { background: rgba(0,0,0,0.3); height: 8px; border-radius: 4px; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: #4ade80; transition: width 0.3s ease; }
 
-    /* Layout Fase 1 Lobby Admin */
     .lobby-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
     .lobby-item { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; }
     
-    /* Layout Fase 3 Admin Donut Chart Dummy */
     .donut-chart { width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(#4ade80 0% 0%, #3f2e7a 0% 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto; position: relative; }
     .donut-inner { width: 90px; height: 90px; background: var(--bg-card); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; }
 
-    /* Animasi Banned / Kunci */
     @keyframes pulse-lock { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     .icon-lock { font-size: 5rem; color: #a78bfa; animation: pulse-lock 2s infinite; }
     .icon-banned { font-size: 5rem; color: #f87171; }
 
     .streak-badge { background: linear-gradient(45deg, #f59e0b, #ef4444); padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); }
 
-    /* Notifikasi Hasil */
     .result-screen { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; }
     .result-correct { background-color: #16a34a; }
     .result-wrong { background-color: #b91c1c; }
@@ -109,7 +99,6 @@
   <!-- ================= FASE 2, 3 & 4: ARENA SISWA ================= -->
   <div id="view-game" class="container my-4" style="display:none; max-width: 800px;">
     
-    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div class="badge bg-dark border border-secondary fs-6 py-2 px-3">
         <span id="game-avatar"></span> <span id="display-user" class="ms-1"></span>
@@ -123,7 +112,6 @@
       </div>
     </div>
 
-    <!-- MAIN CARD -->
     <div class="card-custom p-4 p-md-5 mb-4 position-relative" style="min-height: 450px;">
       
       <!-- SCREEN: BANNED -->
@@ -170,7 +158,6 @@
         <div id="reveal-streak" class="streak-badge mb-3" style="display:none;"><i class="bi bi-fire"></i> Streak x2</div>
         <h3 id="reveal-points" class="fw-bold text-warning mb-4">+850 Poin</h3>
         
-        <!-- Opsi Benar Ditampilkan -->
         <div class="w-100 bg-dark p-3 rounded-4 border border-secondary mt-2" style="max-width: 500px;">
           <small class="text-slate-400 d-block text-center mb-2">Jawaban yang benar adalah:</small>
           <div id="reveal-correct-box" class="btn-jawaban correct mx-auto" style="cursor:default;">
@@ -181,7 +168,6 @@
       
     </div>
 
-    <!-- PROGRESS BAWAH (Saat belum jawab) -->
     <div class="card-custom p-3" id="bottom-progress-box">
       <div class="d-flex justify-content-between small text-slate-300 mb-2 px-1">
         <span>Progres Jawaban</span>
@@ -204,10 +190,7 @@
     </div>
 
     <div class="row g-4">
-      <!-- Kolom Kiri: Kontrol Admin -->
       <div class="col-lg-7">
-        
-        <!-- Box Kontrol Tayang -->
         <div class="card-custom p-4 mb-4">
           <h5 class="fw-bold text-white mb-3">Kontrol Soal</h5>
           <div class="d-flex gap-2 mb-3">
@@ -224,19 +207,15 @@
             <span class="text-slate-400 small me-2">detik</span>
           </div>
 
-          <!-- Preview -->
           <h6 class="text-slate-400 mb-2">Preview Soal:</h6>
           <div class="bg-dark p-3 rounded-4 border border-secondary">
             <p id="admin-preview-teks" class="fw-bold text-white mb-3">-</p>
             <div id="admin-preview-opsi" class="d-flex flex-column gap-2"></div>
           </div>
         </div>
-
       </div>
 
-      <!-- Kolom Kanan: Status Live -->
       <div class="col-lg-5">
-        
         <div class="card-custom p-4 mb-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <span id="admin-status-badge" class="badge bg-secondary px-3 py-2">Siswa di Lobby</span>
@@ -261,20 +240,24 @@
           <h6 class="fw-bold text-white mb-3">Daftar Siswa Aktif</h6>
           <div id="admin-lobby-list" class="lobby-grid"></div>
         </div>
-
       </div>
     </div>
   </div>
 
+  <!-- FIREBASE MODULE & LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDeGAiaUfFbeDaAb4GZEu0cufVZDJADvms",
-      authDomain: "tebak-cepet.firebaseapp.com",
-      databaseURL: "https://tebak-cepet-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "tebak-cepet"
+      apiKey: "AIzaSyC4oeoFSfcVcjh3TGawdMClAydyYd3aHKs",
+      authDomain: "tebaksantai-relasimakna.firebaseapp.com",
+      databaseURL: "https://tebaksantai-relasimakna-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tebaksantai-relasimakna",
+      storageBucket: "tebaksantai-relasimakna.firebasestorage.app",
+      messagingSenderId: "418969997834",
+      appId: "1:418969997834:web:d8fccc041e87d16dd005f3",
+      measurementId: "G-CS9CGVZPJY"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -290,7 +273,6 @@
     let bankSoalData = [];
     let audioCtx = null;
     
-    // State Live
     let liveState = { status: 'lobby', index: 0, startTime: 0, duration: 30 };
     let liveUsers = {};
     let liveAnswers = {};
@@ -374,7 +356,6 @@
       document.getElementById('game-avatar').innerText = userAvatar;
       document.getElementById('lobby-avatar').innerText = userAvatar;
       
-      // Init user data di DB
       get(ref(db, `${ROOT}/users/${currentUser}`)).then(snap => {
         if(!snap.exists()) {
           set(ref(db, `${ROOT}/users/${currentUser}`), { score: 0, avatar: userAvatar, cStreak: 0, wStreak: 0, isBanned: false });
@@ -384,7 +365,6 @@
       initSiswaListeners();
     };
 
-    // ================= FASE 2-4: SISWA ENGINE =================
     function initSiswaListeners() {
       onValue(ref(db, 'bankSoal'), snap => { bankSoalData = snap.val() || []; });
       
@@ -415,7 +395,7 @@
         else if (state.status === 'playing') {
           showView('game');
           if(isNewRound) {
-             myCurrentAnswer = null; // Reset
+             myCurrentAnswer = null; 
              startClientTimer();
           }
           renderSiswaUI();
@@ -458,7 +438,6 @@
         timerText.innerText = left;
         timerBar.style.width = ((left / liveState.duration) * 100) + "%";
         
-        // Peringatan Merah
         if(left <= 5) {
            timerText.className = "fs-4 text-danger pulse-lock";
            timerBar.style.backgroundColor = "#ef4444";
@@ -483,7 +462,6 @@
       const scrReveal = document.getElementById('screen-reveal');
       const botProgress = document.getElementById('bottom-progress-box');
 
-      // CEK HUKUMAN BANNED
       if(myData.isBanned && liveState.status !== 'reveal') {
          scrBanned.style.display = 'flex';
          scrSoal.style.display = 'none'; scrLocked.style.display = 'none'; scrReveal.style.display = 'none'; botProgress.style.display = 'none';
@@ -496,12 +474,10 @@
         scrReveal.style.display = 'none';
         
         if (myCurrentAnswer) {
-          // Fase 3: Sudah Jawab -> Terkunci
           scrSoal.style.display = 'none';
           botProgress.style.display = 'none';
           scrLocked.style.display = 'flex';
         } else {
-          // Fase 2: Belum Jawab -> Pilih Opsi
           scrLocked.style.display = 'none';
           scrSoal.style.display = 'block';
           botProgress.style.display = 'block';
@@ -519,7 +495,6 @@
         }
       } 
       else if (liveState.status === 'reveal') {
-        // Fase 4: Pengumuman
         scrSoal.style.display = 'none';
         scrLocked.style.display = 'none';
         botProgress.style.display = 'none';
@@ -573,13 +548,12 @@
       let elapsed = Math.floor((now - liveState.startTime) / 1000);
       let left = Math.max(0, liveState.duration - elapsed);
       
-      // Kirim jawaban & sisa waktu ke Firebase
       update(ref(db, `${ROOT}/liveAnswers/${currentUser}`), { ans: pilih, timeLeft: left });
-      renderSiswaUI();
+      renderSyswaUIIfActive();
     };
 
+    function renderSyswaUIIfActive() { renderSiswaUI(); }
 
-    // ================= FASE ADMIN ENGINE =================
     function initAdminListeners() {
       onValue(ref(db, 'bankSoal'), snap => { 
         bankSoalData = snap.val() || []; 
@@ -596,7 +570,7 @@
 
       onValue(ref(db, `${ROOT}/liveAnswers`), snap => {
         liveAnswers = snap.val() || {};
-        updateAdminLobby(); // Update centang
+        updateAdminLobby();
       });
 
       onValue(ref(db, `${ROOT}/state`), snap => {
@@ -684,7 +658,6 @@
       }, 500);
     }
 
-    // LOGIKA PERHITUNGAN SKOR & HUKUMAN (Admin yang mengeksekusi agar sentral)
     window.tutupDanEvaluasi = function() {
       if(liveState.status !== 'playing') return;
       clearInterval(timerInterval); isAdminTimerRunning = false;
@@ -692,7 +665,6 @@
       let soal = bankSoalData[liveState.index];
       let updates = {};
       
-      // Evaluasi semua user yang aktif di Lobby
       for(let u in liveUsers) {
         let user = liveUsers[u];
         let ansData = liveAnswers[u];
@@ -703,14 +675,12 @@
         let isBanned = user.isBanned || false;
 
         if (isBanned) {
-           // Jika dia di-banned ronde ini, cabut banned-nya untuk ronde depan
            updates[`${ROOT}/users/${u}/isBanned`] = false;
-           updates[`${ROOT}/users/${u}/wStreak`] = 0; // Reset
+           updates[`${ROOT}/users/${u}/wStreak`] = 0;
            continue; 
         }
 
         if (ansData && ansData.ans === soal.kunci) {
-           // BENAR: Base 500 + Sisa Waktu (Max 500) + Streak Bonus
            let timeRatio = ansData.timeLeft / liveState.duration;
            let timeBonus = Math.floor(timeRatio * 500);
            cStreak += 1;
@@ -721,9 +691,8 @@
            updates[`${ROOT}/users/${u}/score`] = newScore;
            updates[`${ROOT}/users/${u}/cStreak`] = cStreak;
            updates[`${ROOT}/users/${u}/wStreak`] = wStreak;
-           updates[`${ROOT}/liveAnswers/${u}/ptsEarned`] = pts; // Simpan untuk UI siswa
+           updates[`${ROOT}/liveAnswers/${u}/ptsEarned`] = pts;
         } else {
-           // SALAH / TIDAK JAWAB
            cStreak = 0;
            wStreak += 1;
            updates[`${ROOT}/users/${u}/cStreak`] = cStreak;
@@ -735,7 +704,6 @@
         }
       }
       
-      // Update Database Sekaligus & Ganti State ke Reveal
       updates[`${ROOT}/state/status`] = 'reveal';
       update(ref(db), updates);
     };
