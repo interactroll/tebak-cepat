@@ -15,11 +15,12 @@
     .btn-record { width: 80px; height: 80px; border-radius: 50%; font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto; transition: all 0.3s ease; }
     .btn-record.recording { animation: pulse-red 1.5s infinite; background-color: #dc2626 !important; border-color: #f87171 !important; }
     @keyframes pulse-red { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(220, 38, 38, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
+    .teks-bacaan { background-color: #130B2E; border-left: 4px solid #ffc107; line-height: 1.8; text-align: justify; }
   </style>
 </head>
 <body>
 
-  <div class="container my-5" style="max-width: 600px;">
+  <div class="container my-5" style="max-width: 650px;">
     <div class="card-custom p-4 p-md-5">
       
       <!-- HEADER -->
@@ -40,10 +41,18 @@
 
       <hr class="border-secondary my-4">
 
-      <!-- INSTRUKSI -->
-      <div class="bg-dark p-3 rounded-3 border border-secondary mb-4">
-        <h6 class="fw-bold text-warning mb-1"><i class="bi bi-info-circle-fill me-1"></i> Instruksi Tugas:</h6>
-        <p class="small text-slate-300 mb-0">Bacalah teks materi dengan lafal dan intonasi yang jelas. Tekan tombol mikrofon di bawah untuk mulai merekam suara.</p>
+      <!-- INSTRUKSI & TEKS BACAAN -->
+      <div class="mb-4">
+        <h6 class="fw-bold text-warning mb-2"><i class="bi bi-file-text-fill me-1"></i> Teks Materi Bacaan:</h6>
+        <p class="small text-slate-300 mb-3">Bacalah teks di bawah ini dengan lafal, intonasi, dan kejelasan suara yang baik sambil merekam.</p>
+        
+        <div class="teks-bacaan p-3 rounded-2 text-light small">
+          Organisasi Meteorologi Dunia melaporkan bahwa periode 2015 hingga 2025 tercatat sebagai sebelas tahun terpanas sepanjang sejarah pengukuran. Suhu rata-rata global tahun ini diperkirakan mencapai sekitar 1,43 derajat Celsius di atas masa praindustri. Lebih dari sembilan puluh persen kelebihan panas bumi kini tersimpan di lautan, yang pemanasannya semakin cepat dalam beberapa dekade terakhir.
+          <br><br>
+          Akibatnya, gletser dan es laut terus menyusut dari tahun ke tahun. Permukaan air laut global kini tercatat sekitar sebelas sentimeter lebih tinggi dibandingkan tahun 1993. Kondisi ini merusak ekosistem pesisir serta memicu banjir dan intrusi air asin ke sumber air tanah. Bahkan, laju kenaikan permukaan air laut tercatat hampir dua kali lipat dibandingkan dua dekade sebelumnya. Sepanjang tahun lalu, dunia mencatat ratusan peristiwa cuaca ekstrem yang memicu perpindahan penduduk terbesar dalam enam belas tahun terakhir.
+          <br><br>
+          Para ilmuwan menegaskan bahwa akumulasi gas rumah kaca akibat aktivitas manusia menjadi pendorong utama krisis ini. WMO memperkirakan peluang pemanasan global melampaui ambang batas 1,5 derajat Celsius dalam lima tahun ke depan mencapai tujuh puluh persen.
+        </div>
       </div>
 
       <!-- AREA PEREKAM -->
@@ -88,11 +97,11 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // 🟢 DATA CLOUDINARY MILIKMU
+    // DATA CLOUDINARY
     const CLOUDINARY_CLOUD_NAME = "glcjciex";
     const CLOUDINARY_UPLOAD_PRESET = "eeikzkc6";
 
-    // 🟢 CONFIG FIREBASE PROJECT "MEMBACA"
+    // CONFIG FIREBASE PROJECT "MEMBACA"
     const firebaseConfig = {
       apiKey: "AIzaSyDstnLiiLiQsTdsjFTIa3C5CVMxjfw8VlQ",
       authDomain: "membaca-94a61.firebaseapp.com",
@@ -174,7 +183,6 @@
       btnKirim.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Mengunggah...`;
 
       try {
-        // 1. Upload File ke Cloudinary
         const formData = new FormData();
         formData.append('file', audioBlob);
         formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET); 
@@ -192,7 +200,6 @@
 
         const downloadURL = fileData.secure_url;
 
-        // 2. Simpan URL dan Metadata ke Realtime Database Project Membaca
         const tugasRef = ref(db, 'tugasSuara');
         const newTugasRef = push(tugasRef);
         await set(newTugasRef, {
@@ -207,7 +214,6 @@
         btnKirim.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> TERKIRIM`;
         btnKirim.className = "btn btn-success btn-lg w-100 fw-bold shadow";
         
-        // 3. Pantau Perubahan Nilai Realtime dari Admin
         onValue(newTugasRef, (snapshot) => {
           const data = snapshot.val();
           if (data) {
