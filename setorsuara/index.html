@@ -1,1 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setor Suara - Prastancy.fun</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { background-color: #1A103C; color: #f8fafc; font-family: 'Poppins', sans-serif; min-height: 100vh; }
+    .card-custom { background: #2B1D5C; border: 1px solid #3d2c7a; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .btn-record { width: 80px; height: 80px; border-radius: 50%; font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto; transition: all 0.3s ease; }
+    .btn-record.recording { animation: pulse-red 1.5s infinite; background-color: #dc2626 !important; border-color: #f87171 !important; }
+    @keyframes pulse-red { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(220, 38, 38, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
+  </style>
+</head>
+<body>
 
+  <div class="container my-5" style="max-width: 600px;">
+    <div class="card-custom p-4 p-md-5">
+      
+      <!-- HEADER -->
+      <div class="text-center mb-4">
+        <h2 class="fw-bold text-warning"><i class="bi bi-mic-fill me-2"></i>SETOR SUARA</h2>
+        <p class="text-slate-300 small">Tugas Keterampilan Berbicara — Prastancy.fun</p>
+      </div>
+
+      <!-- FORM IDENTITAS -->
+      <div class="mb-3">
+        <label class="form-label text-slate-300 fw-bold">Nama Lengkap:</label>
+        <input type="text" id="inputNama" class="form-control bg-dark text-white border-secondary" placeholder="Ketik nama lengkapmu...">
+      </div>
+      <div class="mb-4">
+        <label class="form-label text-slate-300 fw-bold">Kelas:</label>
+        <input type="text" id="inputKelas" class="form-control bg-dark text-white border-secondary" placeholder="Contoh: XI-A">
+      </div>
+
+      <hr class="border-secondary my-4">
+
+      <!-- INSTRUKSI -->
+      <div class="bg-dark p-3 rounded-3 border border-secondary mb-4">
+        <h6 class="fw-bold text-warning mb-1"><i class="bi bi-info-circle-fill me-1"></i> Instruksi Tugas:</h6>
+        <p class="small text-slate-300 mb-0">Bacalah teks materi dengan lafal dan intonasi yang jelas. Tekan tombol mikrofon di bawah untuk mulai merekam suara.</p>
+      </div>
+
+      <!-- AREA PEREKAM -->
+      <div class="text-center mb-4">
+        <div id="timerDisplay" class="display-6 fw-bold text-warning mb-3">00:00</div>
+        
+        <button id="btnRecord" onclick="toggleRecording()" class="btn btn-danger btn-record shadow">
+          <i class="bi bi-mic-fill" id="iconMic"></i>
+        </button>
+        <p id="statusRecord" class="small text-slate-400 mt-2">Klik tombol untuk mulai merekam</p>
+      </div>
+
+      <!-- AUDIO PREVIEW -->
+      <div id="previewContainer" class="mb-4 text-center" style="display:none;">
+        <label class="form-label text-slate-300 fw-bold d-block">Cek Hasil Rekaman:</label>
+        <audio id="audioPreview" controls class="w-100 mb-2"></audio>
+      </div>
+
+      <!-- TOMBOL KIRIM -->
+      <button id="btnKirim" onclick="uploadAudio()" class="btn btn-warning btn-lg w-100 fw-bold shadow" disabled>
+        <i class="bi bi-send-fill me-1"></i> KIRIM TUGAS
+      </button>
+
+      <!-- HASIL / EVALUASI DARI GURU -->
+      <div id="hasilBox" class="mt-4 p-3 bg-dark rounded-3 border border-success" style="display:none;">
+        <h6 class="fw-bold text-success mb-2"><i class="bi bi-check-circle-fill me-1"></i> Tugas Berhasil Terkirim!</h6>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span>Nilai Guru:</span>
+          <span id="displayNilai" class="badge bg-warning text-dark fs-6">Belum Dinilai</span>
+        </div>
+        <div class="small text-slate-300">
+          <strong>Catatan Guru:</strong>
+          <p id="displayCatatan" class="mb-0 italic text-slate-400">-</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FIREBASE MODULES -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // 🔴 GANTI DUA BARIS INI DENGAN DATA CLOUDINARY MILIKMU:
+    const CLOUDINARY_CLOUD_NAME = "ISI_CLOUD_NAME_KAMU";
+    const CLOUDINARY_UPLOAD_PRESET = "ISI_UPLOAD_PRESET_KAMU";
+
+    // 🟢 CONFIG FIREBASE PROJECT "MEMBACA"
+    const firebaseConfig = {
+      apiKey: "AIzaSyDstnLiiLiQsTdsjFTIa3C5CVMxjfw8VlQ",
+      authDomain: "membaca-94a61.firebaseapp.com",
+      databaseURL: "https://membaca-94a61-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "membaca-94a61",
+      storageBucket: "membaca-94a61.firebasestorage.app",
+      messagingSenderId: "1061288011959",
+      appId: "1:1061288011959:web:b0c454e707484f907a4532"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob = null;
+    let isRecording = false;
+    let timerInterval = null;
+    let secondsElapsed = 0;
+
+    window.toggleRecording = async function() {
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+          mediaRecorder.onstop = () => {
+            audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            document.getElementById('audioPreview').src = audioUrl;
+            document.getElementById('previewContainer').style.display = 'block';
+            document.getElementById('btnKirim').disabled = false;
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+          
+          document.getElementById('btnRecord').classList.add('recording');
+          document.getElementById('iconMic').className = 'bi bi-stop-fill';
+          document.getElementById('statusRecord').innerText = 'Sedang merekam... Tekan lagi untuk berhenti.';
+          
+          secondsElapsed = 0;
+          timerInterval = setInterval(() => {
+            secondsElapsed++;
+            let m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+            let s = String(secondsElapsed % 60).padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+          }, 1000);
+
+        } catch (err) {
+          alert('Izin mikrofon ditolak atau tidak didukung di browser ini.');
+        }
+      } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        clearInterval(timerInterval);
+        
+        document.getElementById('btnRecord').classList.remove('recording');
+        document.getElementById('iconMic').className = 'bi bi-mic-fill';
+        document.getElementById('statusRecord').innerText = 'Rekaman selesai. Dengarkan ulang atau klik kirim.';
+      }
+    };
+
+    window.uploadAudio = async function() {
+      const nama = document.getElementById('inputNama').value.trim();
+      const kelas = document.getElementById('inputKelas').value.trim();
+
+      if (!nama || !kelas) {
+        alert('Mohon isi Nama Lengkap dan Kelas terlebih dahulu!');
+        return;
+      }
+
+      if (!audioBlob) return;
+
+      const btnKirim = document.getElementById('btnKirim');
+      btnKirim.disabled = true;
+      btnKirim.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Mengunggah...`;
+
+      try {
+        // 1. Upload File ke Cloudinary
+        const formData = new FormData();
+        formData.append('file', audioBlob);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET); 
+
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const fileData = await res.json();
+        
+        if(!fileData.secure_url) {
+          throw new Error('Gagal mendapatkan URL audio dari Cloudinary.');
+        }
+
+        const downloadURL = fileData.secure_url;
+
+        // 2. Simpan URL dan Metadata ke Realtime Database Project Membaca
+        const tugasRef = ref(db, 'tugasSuara');
+        const newTugasRef = push(tugasRef);
+        await set(newTugasRef, {
+          nama: nama,
+          kelas: kelas,
+          audioUrl: downloadURL,
+          waktu: new Date().toLocaleString('id-ID'),
+          nilai: null,
+          catatan: ""
+        });
+
+        btnKirim.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> TERKIRIM`;
+        btnKirim.className = "btn btn-success btn-lg w-100 fw-bold shadow";
+        
+        // 3. Pantau Perubahan Nilai Realtime dari Admin
+        onValue(newTugasRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            document.getElementById('hasilBox').style.display = 'block';
+            if (data.nilai !== null) {
+              document.getElementById('displayNilai').innerText = `${data.nilai} / 100`;
+            }
+            if (data.catatan) {
+              document.getElementById('displayCatatan').innerText = data.catatan;
+            }
+          }
+        });
+
+      } catch (error) {
+        console.error(error);
+        alert('Gagal mengunggah rekaman. Pastikan konfigurasi Cloudinary & Internet benar.');
+        btnKirim.disabled = false;
+        btnKirim.innerHTML = `<i class="bi bi-send-fill me-1"></i> KIRIM TUGAS`;
+      }
+    };
+  </script>
+</body>
+</html>
