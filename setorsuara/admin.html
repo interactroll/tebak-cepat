@@ -1,1 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Penilaian Setor Suara</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { background-color: #1A103C; color: #f8fafc; font-family: 'Poppins', sans-serif; min-height: 100vh; }
+    .card-custom { background: #2B1D5C; border: 1px solid #3d2c7a; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    audio { height: 35px; border-radius: 20px; }
+  </style>
+</head>
+<body>
 
+  <!-- KOTAK LOGIN ADMIN -->
+  <div id="loginBox" class="container my-5" style="max-width: 400px;">
+    <div class="card-custom p-4 text-center">
+      <h4 class="fw-bold text-warning mb-3"><i class="bi bi-shield-lock-fill me-2"></i>ADMIN LOGIN</h4>
+      <input type="password" id="passAdmin" class="form-control bg-dark text-white border-secondary mb-3 text-center" placeholder="Masukkan Password Admin...">
+      <button onclick="loginAdmin()" class="btn btn-warning w-100 fw-bold">MASUK DASHBOARD</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD ADMIN -->
+  <div id="adminContent" class="container my-5" style="display:none; max-width: 950px;">
+    <div class="card-custom p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-warning mb-0"><i class="bi bi-journal-check me-2"></i>Daftar Tugas Rekaman Siswa</h3>
+        <button onclick="location.reload()" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle border-secondary">
+          <thead>
+            <tr class="text-warning">
+              <th>Waktu</th>
+              <th>Nama Siswa</th>
+              <th>Kelas</th>
+              <th>Audio Rekaman</th>
+              <th style="width: 100px;">Nilai</th>
+              <th>Catatan Guru</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tabelTugas">
+            <tr><td colspan="7" class="text-center text-slate-400 py-3">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIREBASE MODULES -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // 🟢 CONFIG FIREBASE PROJECT "MEMBACA"
+    const firebaseConfig = {
+      apiKey: "AIzaSyDstnLiiLiQsTdsjFTIa3C5CVMxjfw8VlQ",
+      authDomain: "membaca-94a61.firebaseapp.com",
+      databaseURL: "https://membaca-94a61-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "membaca-94a61",
+      storageBucket: "membaca-94a61.firebasestorage.app",
+      messagingSenderId: "1061288011959",
+      appId: "1:1061288011959:web:b0c454e707484f907a4532"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.loginAdmin = function() {
+      const pass = document.getElementById('passAdmin').value;
+      if (pass === "123") { // 🔑 Password default admin
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('adminContent').style.display = 'block';
+        loadTugasSiswa();
+      } else {
+        alert("Password Admin Salah!");
+      }
+    };
+
+    function loadTugasSiswa() {
+      const tugasRef = ref(db, 'tugasSuara');
+      onValue(tugasRef, (snapshot) => {
+        const data = snapshot.val();
+        const tbody = document.getElementById('tabelTugas');
+        
+        if (!data) {
+          tbody.innerHTML = `<tr><td colspan="7" class="text-center text-slate-400 py-3">Belum ada tugas dikirim dari siswa.</td></tr>`;
+          return;
+        }
+
+        let html = '';
+        for (let key in data) {
+          let item = data[key];
+          html += `
+            <tr>
+              <td class="small text-slate-400">${item.waktu || '-'}</td>
+              <td class="fw-bold">${item.nama}</td>
+              <td><span class="badge bg-secondary">${item.kelas}</span></td>
+              <td><audio src="${item.audioUrl}" controls></audio></td>
+              <td>
+                <input type="number" id="nilai_${key}" class="form-control form-control-sm bg-dark text-white border-warning" value="${item.nilai !== null ? item.nilai : ''}" placeholder="0-100">
+              </td>
+              <td>
+                <input type="text" id="catatan_${key}" class="form-control form-control-sm bg-dark text-white border-secondary" value="${item.catatan || ''}" placeholder="Catatan...">
+              </td>
+              <td>
+                <button onclick="simpanNilai('${key}')" class="btn btn-warning btn-sm fw-bold"><i class="bi bi-save"></i> Simpan</button>
+              </td>
+            </tr>
+          `;
+        }
+        tbody.innerHTML = html;
+      });
+    }
+
+    window.simpanNilai = function(key) {
+      const nilaiVal = document.getElementById(`nilai_${key}`).value;
+      const catatanVal = document.getElementById(`catatan_${key}`).value;
+
+      if (nilaiVal === "") {
+        alert("Isi nilai terlebih dahulu!");
+        return;
+      }
+
+      update(ref(db, `tugasSuara/${key}`), {
+        nilai: parseInt(nilaiVal),
+        catatan: catatanVal
+      }).then(() => {
+        alert("Nilai dan catatan berhasil tersimpan!");
+      }).catch((err) => {
+        alert("Gagal menyimpan data: " + err.message);
+      });
+    };
+  </script>
+</body>
+</html>
