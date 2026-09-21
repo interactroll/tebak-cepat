@@ -171,15 +171,26 @@
         😭 YAH JAWABAN SALAH! (-50 Pts).
       </div>
       <div id="correct-notif-box" class="alert alert-success text-center fw-bold py-3 mb-3" style="display:none; border-radius: 10px;">
-        🎉 BENAR! KLAIM BERHASIL (+100 Pts). Tunggu soal berikutnya dari admin... 🚀
+        🎉 BENAR! KLAIM BERHASIL (+100 Pts). Silakan lanjut ke soal berikutnya... 🚀
       </div>
 
       <div id="claimed-box" class="alert alert-warning text-center p-3 border-warning mb-3" style="display:none; border-radius: 12px; background: rgba(217, 119, 6, 0.15);">
         <h6 class="fw-bold text-warning mb-1" id="claimed-text">SOAL INI SUDAH DIKLAIM OLEH X</h6>
-        <p class="small text-slate-300 mb-0">Tunggu soal berikutnya dari admin. Jawaban yang benar ditandai warna hijau.</p>
+        <p class="small text-slate-300 mb-0">Kamu bisa pindah ke soal lain yang belum diklaim. Jawaban benar ditandai warna hijau.</p>
       </div>
 
       <div id="opsi-container" class="opsi-grid mb-3"></div>
+
+      <!-- TOMBOL NAVIGASI KHUSUS FASE 5 (KUIS) -->
+      <div id="siswa-nav-container" class="d-flex justify-content-between align-items-center pt-3 border-top border-slate-700" style="display:none !important;">
+        <button id="btn-siswa-prev" onclick="siswaNavSoal(-1)" class="btn btn-outline-light fw-bold">
+          <i class="bi bi-chevron-left me-1"></i> Soal Sebelumnya
+        </button>
+        <span class="text-slate-400 small" id="siswa-soal-pos-text">1 dari 35</span>
+        <button id="btn-siswa-next" onclick="siswaNavSoal(1)" class="btn btn-warning fw-bold">
+          Soal Berikutnya <i class="bi bi-chevron-right ms-1"></i>
+        </button>
+      </div>
     </div>
 
     <div class="card-custom p-4">
@@ -307,10 +318,8 @@
     const ADMIN_PASSWORD = "123";
 
     // ===== KONFIGURASI FASE =====
-    // Urutan bankSoal: 7 soal pretest A, 8 soal pretest B, 35 soal kuis (total 50).
-    // start/end = index soal (mulai dari 0, inklusif).
     const PHASES = {
-      lobby:     { label: 'Lobby',                      soal: false },
+      lobby:      { label: 'Lobby',                     soal: false },
       pretest_a: { label: 'Pretest A (7 soal, ketepatan)', short: 'Pretest A', soal: true, start: 0,  end: 6  },
       pretest_b: { label: 'Pretest B (8 soal, klaim)',  short: 'Pretest B', soal: true, start: 7,  end: 14 },
       jeda:      { label: 'Jeda (materi di luar web)',  soal: false },
@@ -466,7 +475,6 @@
       if (siswaInited) return;
       siswaInited = true;
 
-      // Fase: tampilan siswa sepenuhnya mengikuti nilai phase di Firebase
       onValue(ref(db, 'phase'), (snapshot) => {
         currentPhase = snapshot.val() || 'lobby';
         resetAlertBoxes();
@@ -479,9 +487,13 @@
       });
 
       onValue(ref(db, 'currentActiveIndex'), (snapshot) => {
-        currentSoalIndex = snapshot.val() || 0;
-        resetAlertBoxes();
-        renderCurrentSoal();
+        // Pada Fase Kuis (35 soal), navigasi bersifat mandiri oleh siswa.
+        // Di fase pretest, layar otomatis berpindah mengikuti Admin.
+        if (currentPhase !== 'kuis') {
+          currentSoalIndex = snapshot.val() || 0;
+          resetAlertBoxes();
+          renderCurrentSoal();
+        }
       });
 
       onValue(ref(db, 'claims'), (snapshot) => {
@@ -516,6 +528,10 @@
       if (isSoalPhase(currentPhase)) {
         showView('game');
         startPenaltyChecker();
+        // Jika baru masuk Fase Kuis, arahkan awal ke soal pertama kuis (indeks 15)
+        if (currentPhase === 'kuis' && (currentSoalIndex < PHASES.kuis.start || currentSoalIndex > PHASES.kuis.end)) {
+          currentSoalIndex = PHASES.kuis.start;
+        }
         renderCurrentSoal();
       } else {
         const t = WAITING_TEXT[currentPhase] || WAITING_TEXT.lobby;
@@ -532,7 +548,6 @@
       document.getElementById('correct-notif-box').style.display = 'none';
     }
 
-    // --- FITUR PENALTY (masih localStorage, dipindah ke Firebase di tahap 3) ---
     function startPenaltyChecker() {
       clearInterval(penaltyInterval);
       penaltyInterval = setInterval(() => {
@@ -563,7 +578,6 @@
       const cfg = PHASES[currentPhase];
       const soal = bankSoalData[currentSoalIndex];
 
-      // Soal yang tayang harus berada dalam rentang fase yang sedang berjalan
       const inRange = currentSoalIndex >= cfg.start && currentSoalIndex <= cfg.end;
       if(!soal || !inRange) {
         document.getElementById('badge-fase').innerText = cfg.short;
@@ -572,13 +586,27 @@
         document.getElementById('opsi-container').innerHTML = '';
         document.getElementById('claimed-box').style.display = 'none';
         document.getElementById('status-klaim').innerHTML = '';
+        document.getElementById('siswa-nav-container').style.setProperty('display', 'none', 'important');
         return;
       }
 
       const total = Math.min(cfg.end, bankSoalData.length - 1) - cfg.start + 1;
+      const currentPos = currentSoalIndex - cfg.start + 1;
+
       document.getElementById('badge-fase').innerText = cfg.short;
-      document.getElementById('badge-soal-id').innerText = `Soal ${currentSoalIndex - cfg.start + 1} / ${total}`;
+      document.getElementById('badge-soal-id').innerText = `Soal ${currentPos} / ${total}`;
       document.getElementById('soal-teks').innerText = soal.teks;
+
+      // TOMBOL NAVIGASI HANYA TAMPIL DI FASE 5 ('kuis')
+      const navContainer = document.getElementById('siswa-nav-container');
+      if (currentPhase === 'kuis') {
+        navContainer.style.setProperty('display', 'flex', 'important');
+        document.getElementById('siswa-soal-pos-text').innerText = `${currentPos} dari ${total}`;
+        document.getElementById('btn-siswa-prev').disabled = currentSoalIndex <= cfg.start;
+        document.getElementById('btn-siswa-next').disabled = currentSoalIndex >= cfg.end || currentSoalIndex >= bankSoalData.length - 1;
+      } else {
+        navContainer.style.setProperty('display', 'none', 'important');
+      }
 
       const currentClaim = claimsData[currentSoalIndex];
       const elemKlaim = document.getElementById('status-klaim');
@@ -627,8 +655,20 @@
       opsiContainer.innerHTML = opsiHtml;
     }
 
-    // NOTE: logika jawab masih versi lama (klaim + penalti localStorage).
-    // Tahap 2 mengganti perilaku Pretest A, tahap 3 membuat klaim atomik.
+    // Fungsi Navigasi Khusus Fase 5 untuk Siswa
+    window.siswaNavSoal = function(direction) {
+      if(currentPhase !== 'kuis') return;
+      const cfg = PHASES.kuis;
+      const maxIdx = Math.min(cfg.end, bankSoalData.length - 1);
+      const newIndex = currentSoalIndex + direction;
+
+      if(newIndex >= cfg.start && newIndex <= maxIdx) {
+        currentSoalIndex = newIndex;
+        resetAlertBoxes();
+        renderCurrentSoal();
+      }
+    };
+
     window.jawab = function(pilihan, kunci) {
       if(!isSoalPhase(currentPhase)) return;
       if(claimsData[currentSoalIndex]) return;
@@ -653,7 +693,6 @@
 
         update(ref(db, 'users/' + currentUser), { score: userScore });
         update(ref(db, 'claims'), { [currentSoalIndex]: currentUser });
-        // Tidak ada auto-pindah soal: siswa menunggu admin menayangkan soal berikutnya.
       } else {
         userScore -= 50;
         document.getElementById('display-score').innerText = userScore;
@@ -756,7 +795,6 @@
       if(!confirm(`Pindah ke fase: ${PHASES[phaseKey].label}?`)) return;
 
       const updates = { phase: phaseKey };
-      // Masuk fase soal -> otomatis tayangkan soal pertama fase itu
       if(PHASES[phaseKey].soal) updates.currentActiveIndex = PHASES[phaseKey].start;
       update(ref(db), updates);
     };
@@ -822,7 +860,6 @@
         return;
       }
 
-      // Di fase soal: hanya tampilkan soal milik fase itu. Di luar fase soal: tampilkan semua (tanpa tombol tayang).
       const soalPhase = isSoalPhase(currentPhase);
       const cfg = PHASES[currentPhase];
       label.innerText = soalPhase ? `(${cfg.short}: soal ${cfg.start + 1}-${Math.min(cfg.end, bankSoalData.length - 1) + 1})` : '(semua soal)';
@@ -849,7 +886,7 @@
               <p class="fw-semibold text-white mb-3" style="min-height: 48px;">${item.teks}</p>
 
               <div class="d-flex flex-wrap gap-1 mb-3">
-                ${Object.keys(item.opsi).map(k => `<span class="badge ${k === item.kunci ? 'bg-success border border-light' : 'bg-dark text-slate-400'}">${k}: ${item.opsi[k]}</span>`).join('')}
+                ${Object.keys(item.opsi).map(k => `<span class="badge ${k === item.kunci ? 'bg-success border border-light' : 'bg-dark text-slate-400'}">${k}:${item.opsi[k]}</span>`).join('')}
               </div>
               ${btn}
             </div>
