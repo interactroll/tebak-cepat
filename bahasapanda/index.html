@@ -1,1 +1,891 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tebak Cepat - Kuis Morfologi</title>
 
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <style>
+    :root { --font-base: 1.1rem; }
+    body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    .card-custom { background: #1e293b; border: 1px solid #334155; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+    .soal-text { font-size: var(--font-base); line-height: 1.6; font-weight: 500; }
+
+    .opsi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 768px) { .opsi-grid { grid-template-columns: 1fr; } }
+
+    .btn-jawaban { color: #ffffff; font-size: var(--font-base); border: none; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; transition: all 0.2s ease; text-align: left; background-color: #334155; width: 100%; cursor: pointer; }
+    .btn-jawaban:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.15); }
+    .btn-jawaban:disabled { cursor: not-allowed; opacity: 0.55; }
+
+    .opsi-correct-highlight { border: 3px solid #22c55e !important; background-color: #16a34a !important; opacity: 1 !important; box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
+
+    .bg-opsi-A { background-color: #dc2626; }
+    .bg-opsi-B { background-color: #2563eb; }
+    .bg-opsi-C { background-color: #d97706; }
+    .bg-opsi-D { background-color: #16a34a; }
+    .bg-opsi-E { background-color: #9333ea; }
+
+    .ikon-opsi { display: inline-flex; justify-content: center; align-items: center; font-weight: 800; background: rgba(255,255,255,0.25); min-width: 36px; height: 36px; border-radius: 8px; margin-right: 12px; flex-shrink: 0; }
+
+    .input-custom { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #475569 !important; font-weight: 600; }
+    .input-custom::placeholder { color: #94a3b8 !important; font-weight: normal; }
+
+    .admin-card-soal { background: #0f172a; border: 2px solid #334155; border-radius: 12px; transition: all 0.25s ease; }
+    .admin-card-soal:hover { border-color: #38bdf8; transform: translateY(-2px); }
+    .admin-card-soal.is-live { border-color: #22c55e; background: #064e3b; box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
+    .pulse-live { animation: pulse-green 1.5s infinite; }
+    @keyframes pulse-green { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+    .race-track-container { background: #0f172a; border-radius: 12px; padding: 15px; border: 1px solid #334155; }
+    .race-item { margin-bottom: 12px; }
+    .race-bar-bg { background: #1e293b; height: 26px; border-radius: 13px; overflow: hidden; position: relative; border: 1px solid #334155; }
+    .race-bar-fill { height: 100%; background: linear-gradient(90deg, #2563eb, #38bdf8); border-radius: 13px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .race-bar-fill.rank-1-bar { background: linear-gradient(90deg, #d97706, #f59e0b); }
+    .race-avatar { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; font-weight: bold; color: #ffffff; text-shadow: 0 0 4px #000; }
+
+    .badge-rank { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
+    .rank-1 { background: #f59e0b; color: #000; } .rank-2 { background: #94a3b8; color: #000; } .rank-3 { background: #b45309; color: #fff; }
+
+    @keyframes shakeEffect {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+    .shake-box { animation: shakeEffect 0.4s ease-in-out; }
+
+    .pulse-lobby { animation: pulse-yellow 2s infinite; }
+    @keyframes pulse-yellow { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+    .phase-btn { text-align: left; }
+    .phase-btn.is-current { border-color: #22c55e !important; background: #064e3b !important; color: #fff !important; }
+  </style>
+</head>
+<body>
+
+  <!-- LAYAR 1: LOGIN -->
+  <div id="view-login" class="container mt-5" style="max-width: 450px;">
+    <div class="card-custom p-4 p-md-5 text-center">
+      <div class="mb-3">
+        <img src="logo.png" alt="Logo Prastancy" style="height: 60px; width: auto;" onerror="this.style.display='none'; document.getElementById('rocket-icon').style.display='inline-block';">
+        <i id="rocket-icon" class="bi bi-rocket-takeoff text-warning display-3" style="display:none;"></i>
+      </div>
+      <h2 class="fw-bold text-warning mb-1">⚡ KUIS MORFOLOGI</h2>
+      <p class="text-slate-400 small mb-4">Benar +100 | Salah -50 (3x Salah = Banned 15s) 🚀</p>
+
+      <div class="mb-3 text-start">
+        <label class="form-label text-slate-300 small fw-bold">Username / Nama:</label>
+        <input type="text" id="inputName" class="form-control form-control-lg input-custom" placeholder="Ketik nama kamu..." autocomplete="off">
+      </div>
+
+      <div class="mb-3 text-start" id="box-password" style="display:none;">
+        <label class="form-label text-warning small fw-bold"><i class="bi bi-key-fill me-1"></i> Password Admin:</label>
+        <input type="password" id="inputPassword" class="form-control form-control-lg input-custom border-warning" placeholder="Ketik password admin...">
+      </div>
+
+      <button onclick="handleLogin()" class="btn btn-warning btn-lg w-100 fw-bold shadow-sm py-3 mt-2">
+        MASUK ARENA 🔥
+      </button>
+    </div>
+  </div>
+
+  <!-- LAYAR 2A: RUANG TUNGGU (lobby / jeda / selesai) -->
+  <div id="view-waiting" class="container my-5 text-center" style="display:none; max-width: 600px;">
+    <div class="card-custom p-5">
+      <div class="mb-4">
+        <div class="bg-warning-subtle text-warning d-inline-block p-4 rounded-circle pulse-lobby">
+          <i id="waiting-icon" class="bi bi-hourglass-split display-1"></i>
+        </div>
+      </div>
+      <h3 class="fw-bold text-warning mb-2">HALO, <span id="lobby-user-name" class="text-info">-</span>! 👋</h3>
+      <p id="waiting-desc" class="text-slate-300 fs-5 mb-4">Kamu sudah terhubung di <b>Ruang Tunggu Arena (Morfologi)</b>.</p>
+
+      <div class="alert alert-dark border border-warning p-3 mb-4">
+        <div class="spinner-grow spinner-grow-sm text-warning me-2" id="waiting-spinner"></div>
+        <span id="waiting-status" class="text-warning fw-bold">Kuis Belum Dimulai. Menunggu Admin...</span>
+      </div>
+
+      <button onclick="userLogout()" class="btn btn-outline-danger btn-sm">
+        <i class="bi bi-box-arrow-right me-1"></i> Ganti Nama / Keluar
+      </button>
+    </div>
+  </div>
+
+  <!-- LAYAR 2B: ARENA GAME SISWA -->
+  <div id="view-game" class="container my-4" style="display:none; max-width: 850px;">
+
+    <div class="card-custom p-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div class="d-flex align-items-center">
+        <div class="bg-primary text-white rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+          <i class="bi bi-person-fill fs-5"></i>
+        </div>
+        <div>
+          <small class="text-slate-400 d-block leading-none">Pemain</small>
+          <b id="display-user" class="text-info fs-6">-</b>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-pill border border-slate-700">
+        <span class="text-slate-400 small me-1"><i class="bi bi-type"></i> Teks:</span>
+        <button onclick="changeFontSize(-0.1)" class="btn btn-sm btn-outline-light py-0 px-2 fw-bold">A-</button>
+        <button onclick="changeFontSize(0.1)" class="btn btn-sm btn-outline-light py-0 px-2 fw-bold">A+</button>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-end">
+          <small class="text-slate-400 d-block leading-none">Total Skor</small>
+          <span class="fs-4 fw-bold text-warning"><i class="bi bi-trophy-fill me-1"></i><span id="display-score">0</span></span>
+        </div>
+        <button onclick="userLogout()" class="btn btn-outline-secondary btn-sm" title="Keluar / Ganti Nama">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="card-custom p-4 mb-3" id="box-soal">
+      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-2 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-info text-dark" id="badge-fase">Fase</span>
+          <span class="badge bg-primary fs-6" id="badge-soal-id">Soal 1</span>
+        </div>
+        <span id="status-klaim" class="badge bg-dark border border-secondary text-slate-400 px-2 py-1">
+          <i class="bi bi-clock me-1"></i> Belum diklaim siapapun
+        </span>
+      </div>
+
+      <h4 id="soal-teks" class="soal-text mb-4">Memuat data soal...</h4>
+
+      <div id="penalty-notif-box" class="alert alert-danger text-center fw-bold py-3 mb-3 border-danger shadow-lg" style="display:none; border-radius: 10px;">
+        <i class="bi bi-exclamation-triangle-fill display-5 d-block mb-2"></i>
+        🚫 TERLALU BANYAK SALAH! Tombol dikunci selama <span id="penalty-timer" class="fs-4">15</span> detik.
+      </div>
+
+      <div id="wrong-notif-box" class="alert alert-danger text-center fw-bold py-2 mb-3" style="display:none; border-radius: 10px;">
+        😭 YAH JAWABAN SALAH! (-50 Pts).
+      </div>
+      <div id="correct-notif-box" class="alert alert-success text-center fw-bold py-3 mb-3" style="display:none; border-radius: 10px;">
+        🎉 BENAR! KLAIM BERHASIL (+100 Pts). Tunggu soal berikutnya dari admin... 🚀
+      </div>
+
+      <div id="claimed-box" class="alert alert-warning text-center p-3 border-warning mb-3" style="display:none; border-radius: 12px; background: rgba(217, 119, 6, 0.15);">
+        <h6 class="fw-bold text-warning mb-1" id="claimed-text">SOAL INI SUDAH DIKLAIM OLEH X</h6>
+        <p class="small text-slate-300 mb-0">Tunggu soal berikutnya dari admin. Jawaban yang benar ditandai warna hijau.</p>
+      </div>
+
+      <div id="opsi-container" class="opsi-grid mb-3"></div>
+    </div>
+
+    <div class="card-custom p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-slate-700 pb-3">
+        <h5 class="fw-bold text-success mb-0"><i class="bi bi-broadcast me-2"></i>KLASEMEN SEMENTARA</h5>
+        <span class="badge bg-success-subtle text-success border border-success">Live Sync</span>
+      </div>
+      <div id="leaderboard-list"></div>
+    </div>
+
+  </div>
+
+  <!-- LAYAR 3: CONTROL ROOM ADMIN -->
+  <div id="view-admin" class="container my-4" style="display:none; max-width: 950px;">
+
+    <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM (MORFOLOGI)</h3>
+        <p class="text-slate-400 small mb-0">Pusat Kendali Live Quiz & Monitoring Real-Time</p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <button onclick="resetLeaderboard()" class="btn btn-outline-danger btn-sm fw-bold">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Skor
+        </button>
+        <button onclick="resetClaims()" class="btn btn-outline-warning btn-sm fw-bold">
+          <i class="bi bi-trash me-1"></i> Reset Klaim
+        </button>
+        <button onclick="adminLogout()" class="btn btn-secondary btn-sm fw-bold">
+          <i class="bi bi-box-arrow-right me-1"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- KONTROL FASE -->
+    <div class="card-custom p-4 mb-4 border-success">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h5 class="fw-bold text-white mb-0"><i class="bi bi-diagram-3-fill text-success me-2"></i>KONTROL FASE</h5>
+        <span id="admin-phase-badge" class="badge bg-warning text-dark fs-6">Lobby</span>
+      </div>
+      <div id="admin-phase-buttons" class="row g-2"></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card-custom p-3 d-flex align-items-center">
+          <div class="bg-primary-subtle text-primary p-3 rounded-3 me-3 fs-3"><i class="bi bi-journal-text"></i></div>
+          <div>
+            <small class="text-slate-400 d-block">Total Soal</small>
+            <h4 class="fw-bold text-white mb-0" id="stat-total-soal">0</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-custom p-3 d-flex align-items-center">
+          <div class="bg-success-subtle text-success p-3 rounded-3 me-3 fs-3"><i class="bi bi-people-fill"></i></div>
+          <div>
+            <small class="text-slate-400 d-block">Pemain Aktif</small>
+            <h4 class="fw-bold text-white mb-0" id="stat-total-pemain">0</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-custom p-3 d-flex align-items-center">
+          <div class="bg-warning-subtle text-warning p-3 rounded-3 me-3 fs-3"><i class="bi bi-trophy-fill"></i></div>
+          <div>
+            <small class="text-slate-400 d-block">Pemimpin Klasemen</small>
+            <h5 class="fw-bold text-warning mb-0" id="stat-leader">-</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-custom p-4 mb-4 border-warning">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-warning mb-0"><i class="bi bi-flag-fill me-2"></i>MONITOR BALAPAN SKOR SISWA (LIVE RACE)</h5>
+        <span class="badge bg-success-subtle text-success border border-success">Live Sync</span>
+      </div>
+      <div class="race-track-container" id="admin-race-container">
+        <div class="text-center text-slate-500 py-3"><div class="spinner-border spinner-border-sm me-2"></div>Memuat balapan skor...</div>
+      </div>
+    </div>
+
+    <div class="card-custom p-3 mb-4 border-primary" id="admin-live-bar">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center">
+          <span class="badge bg-success me-2 pulse-live">● LIVE NOW</span>
+          <span class="fw-bold text-white" id="admin-current-live-text">-</span>
+        </div>
+        <div class="d-flex gap-2">
+          <button onclick="navLiveSoal(-1)" class="btn btn-sm btn-outline-light"><i class="bi bi-chevron-left me-1"></i> Soal Sblm</button>
+          <button onclick="navLiveSoal(1)" class="btn btn-sm btn-primary fw-bold">Soal Nanti <i class="bi bi-chevron-right ms-1"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-custom p-4 mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-info mb-0"><i class="bi bi-grid-fill me-2"></i>KATALOG SOAL <span id="admin-catalog-label" class="small text-slate-400"></span></h5>
+        <input type="text" id="admin-search-soal" class="form-control form-control-sm bg-dark text-white border-secondary" style="max-width: 250px;" placeholder="Cari soal...">
+      </div>
+      <div id="admin-soal-container" class="row g-3"></div>
+    </div>
+
+  </div>
+
+  <!-- FIREBASE MODULE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDeGAiaUfFbeDaAb4GZEu0cufVZDJADvms",
+      authDomain: "tebak-cepet.firebaseapp.com",
+      databaseURL: "https://tebak-cepet-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tebak-cepet",
+      storageBucket: "tebak-cepet.firebasestorage.app",
+      messagingSenderId: "856777161943",
+      appId: "1:856777161943:web:86c80a522a25d5ff994492"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const ADMIN_USERNAME = "admin";
+    const ADMIN_PASSWORD = "123";
+
+    // ===== KONFIGURASI FASE =====
+    // Urutan bankSoal: 7 soal pretest A, 8 soal pretest B, 35 soal kuis (total 50).
+    // start/end = index soal (mulai dari 0, inklusif).
+    const PHASES = {
+      lobby:     { label: 'Lobby',                      soal: false },
+      pretest_a: { label: 'Pretest A (7 soal, ketepatan)', short: 'Pretest A', soal: true, start: 0,  end: 6  },
+      pretest_b: { label: 'Pretest B (8 soal, klaim)',  short: 'Pretest B', soal: true, start: 7,  end: 14 },
+      jeda:      { label: 'Jeda (materi di luar web)',  soal: false },
+      kuis:      { label: 'Kuis (35 soal, klaim)',      short: 'Kuis',      soal: true, start: 15, end: 49 },
+      selesai:   { label: 'Selesai',                    soal: false }
+    };
+    const PHASE_ORDER = ['lobby', 'pretest_a', 'pretest_b', 'jeda', 'kuis', 'selesai'];
+
+    const WAITING_TEXT = {
+      lobby:   { icon: 'bi-hourglass-split', desc: 'Kamu sudah terhubung di <b>Ruang Tunggu Arena (Morfologi)</b>.', status: 'Kuis Belum Dimulai. Menunggu Admin...', spin: true },
+      jeda:    { icon: 'bi-journal-bookmark-fill', desc: 'Kuis sedang <b>dijeda</b>.', status: 'Simak materi dari guru dulu ya. Kuis lanjut sebentar lagi...', spin: true },
+      selesai: { icon: 'bi-flag-fill', desc: 'Kuis sudah <b>selesai</b>. Terima kasih sudah bermain!', status: 'Sampai jumpa di kuis berikutnya 🎉', spin: false }
+    };
+
+    let currentUser = "";
+    let userScore = 0;
+    let bankSoalData = [];
+    let currentSoalIndex = 0;
+    let claimsData = {};
+    let currentPhase = 'lobby';
+    let currentFontSize = 1.1;
+    let audioCtx = null;
+    let penaltyInterval = null;
+    let siswaInited = false;
+    let adminInited = false;
+    let adminLiveIndex = 0;
+
+    const isSoalPhase = (p) => !!(PHASES[p] && PHASES[p].soal);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('tebakcepet_user');
+      const savedRole = localStorage.getItem('tebakcepet_role');
+
+      if (savedRole === 'admin') {
+        showView('admin');
+        initAdminListeners();
+      } else if (savedUser) {
+        currentUser = savedUser;
+        document.getElementById('display-user').innerText = currentUser;
+        document.getElementById('lobby-user-name').innerText = currentUser;
+        loadOrCreateUser();
+        initSiswaListeners();
+      }
+    });
+
+    function loadOrCreateUser() {
+      const userRef = ref(db, 'users/' + currentUser);
+      get(userRef).then((snapshot) => {
+        if (!snapshot.exists()) {
+          set(userRef, { score: 0 });
+        } else {
+          userScore = snapshot.val().score || 0;
+          document.getElementById('display-score').innerText = userScore;
+        }
+      });
+    }
+
+    function showView(viewName) {
+      document.getElementById('view-login').style.display = viewName === 'login' ? 'block' : 'none';
+      document.getElementById('view-waiting').style.display = viewName === 'waiting' ? 'block' : 'none';
+      document.getElementById('view-game').style.display = viewName === 'game' ? 'block' : 'none';
+      document.getElementById('view-admin').style.display = viewName === 'admin' ? 'block' : 'none';
+    }
+
+    function playAudio(type) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 0.35);
+          gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+          osc.start(audioCtx.currentTime);
+          osc.stop(audioCtx.currentTime + 0.35);
+        } else if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+          osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+          osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+          osc.start(audioCtx.currentTime);
+          osc.stop(audioCtx.currentTime + 0.4);
+        }
+      } catch(e) {}
+    }
+
+    document.getElementById('inputName').addEventListener('input', function(e) {
+      const val = e.target.value.trim().toLowerCase();
+      document.getElementById('box-password').style.display = (val === ADMIN_USERNAME) ? 'block' : 'none';
+    });
+
+    window.changeFontSize = function(delta) {
+      currentFontSize = Math.max(0.85, Math.min(1.5, currentFontSize + delta));
+      document.documentElement.style.setProperty('--font-base', `${currentFontSize}rem`);
+    };
+
+    window.handleLogin = function() {
+      const nameInput = document.getElementById('inputName').value.trim();
+      const passInput = document.getElementById('inputPassword').value.trim();
+
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      } catch(e) {}
+
+      if(!nameInput) return alert("Isi nama kamu dulu!");
+
+      if(nameInput.toLowerCase() === ADMIN_USERNAME) {
+        if(passInput === ADMIN_PASSWORD) {
+          localStorage.setItem('tebakcepet_role', 'admin');
+          showView('admin');
+          initAdminListeners();
+        } else {
+          alert("Password Admin Salah!");
+        }
+        return;
+      }
+
+      currentUser = nameInput;
+      localStorage.setItem('tebakcepet_user', currentUser);
+      localStorage.removeItem('tebakcepet_role');
+
+      document.getElementById('display-user').innerText = currentUser;
+      document.getElementById('lobby-user-name').innerText = currentUser;
+
+      loadOrCreateUser();
+      initSiswaListeners();
+    };
+
+    window.userLogout = function() {
+      if(confirm("Apakah kamu yakin ingin keluar / ganti nama?")) {
+        localStorage.removeItem('tebakcepet_user');
+        location.reload();
+      }
+    };
+
+    window.adminLogout = function() {
+      localStorage.removeItem('tebakcepet_role');
+      location.reload();
+    };
+
+    // ===================== SISWA ENGINE =====================
+    function initSiswaListeners() {
+      if (siswaInited) return;
+      siswaInited = true;
+
+      // Fase: tampilan siswa sepenuhnya mengikuti nilai phase di Firebase
+      onValue(ref(db, 'phase'), (snapshot) => {
+        currentPhase = snapshot.val() || 'lobby';
+        resetAlertBoxes();
+        applyPhaseView();
+      });
+
+      onValue(ref(db, 'bankSoal'), (snapshot) => {
+        bankSoalData = snapshot.val() || [];
+        renderCurrentSoal();
+      });
+
+      onValue(ref(db, 'currentActiveIndex'), (snapshot) => {
+        currentSoalIndex = snapshot.val() || 0;
+        resetAlertBoxes();
+        renderCurrentSoal();
+      });
+
+      onValue(ref(db, 'claims'), (snapshot) => {
+        claimsData = snapshot.val() || {};
+        renderCurrentSoal();
+      });
+
+      onValue(ref(db, 'users'), (snapshot) => {
+        const users = snapshot.val() || {};
+        let sorted = [];
+        for(let u in users) sorted.push({ name: u, score: users[u].score || 0 });
+        sorted.sort((a,b) => b.score - a.score);
+
+        let html = '';
+        sorted.forEach((item, idx) => {
+          let rankClass = idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : 'bg-slate-700 text-white'));
+          let isMe = item.name === currentUser ? 'bg-slate-800 border border-primary' : '';
+          html += `
+            <div class="d-flex justify-content-between align-items-center p-2 rounded-3 mb-2 ${isMe}">
+              <div class="d-flex align-items-center">
+                <span class="badge-rank ${rankClass}">${idx+1}</span>
+                <span class="fw-bold ${item.name === currentUser ? 'text-info' : 'text-slate-200'}">${item.name}</span>
+              </div>
+              <div class="badge bg-warning text-dark fs-6 font-monospace">${item.score} Pts</div>
+            </div>`;
+        });
+        document.getElementById('leaderboard-list').innerHTML = html;
+      });
+    }
+
+    function applyPhaseView() {
+      if (isSoalPhase(currentPhase)) {
+        showView('game');
+        startPenaltyChecker();
+        renderCurrentSoal();
+      } else {
+        const t = WAITING_TEXT[currentPhase] || WAITING_TEXT.lobby;
+        document.getElementById('waiting-icon').className = `bi ${t.icon} display-1`;
+        document.getElementById('waiting-desc').innerHTML = t.desc;
+        document.getElementById('waiting-status').innerText = t.status;
+        document.getElementById('waiting-spinner').style.display = t.spin ? 'inline-block' : 'none';
+        showView('waiting');
+      }
+    }
+
+    function resetAlertBoxes() {
+      document.getElementById('wrong-notif-box').style.display = 'none';
+      document.getElementById('correct-notif-box').style.display = 'none';
+    }
+
+    // --- FITUR PENALTY (masih localStorage, dipindah ke Firebase di tahap 3) ---
+    function startPenaltyChecker() {
+      clearInterval(penaltyInterval);
+      penaltyInterval = setInterval(() => {
+        let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
+        let now = Date.now();
+        let penaltyBox = document.getElementById('penalty-notif-box');
+
+        if(penaltyUntil > now) {
+          let remaining = Math.ceil((penaltyUntil - now) / 1000);
+          document.getElementById('penalty-timer').innerText = remaining;
+          penaltyBox.style.display = 'block';
+
+          document.getElementById('wrong-notif-box').style.display = 'none';
+          document.getElementById('correct-notif-box').style.display = 'none';
+
+          document.querySelectorAll('.btn-jawaban').forEach(b => { b.disabled = true; });
+        } else {
+          if(penaltyBox.style.display === 'block') {
+             penaltyBox.style.display = 'none';
+             renderCurrentSoal();
+          }
+        }
+      }, 500);
+    }
+
+    function renderCurrentSoal() {
+      if(!isSoalPhase(currentPhase)) return;
+      const cfg = PHASES[currentPhase];
+      const soal = bankSoalData[currentSoalIndex];
+
+      // Soal yang tayang harus berada dalam rentang fase yang sedang berjalan
+      const inRange = currentSoalIndex >= cfg.start && currentSoalIndex <= cfg.end;
+      if(!soal || !inRange) {
+        document.getElementById('badge-fase').innerText = cfg.short;
+        document.getElementById('badge-soal-id').innerText = 'Soal -';
+        document.getElementById('soal-teks').innerText = 'Menunggu admin menayangkan soal...';
+        document.getElementById('opsi-container').innerHTML = '';
+        document.getElementById('claimed-box').style.display = 'none';
+        document.getElementById('status-klaim').innerHTML = '';
+        return;
+      }
+
+      const total = Math.min(cfg.end, bankSoalData.length - 1) - cfg.start + 1;
+      document.getElementById('badge-fase').innerText = cfg.short;
+      document.getElementById('badge-soal-id').innerText = `Soal ${currentSoalIndex - cfg.start + 1} / ${total}`;
+      document.getElementById('soal-teks').innerText = soal.teks;
+
+      const currentClaim = claimsData[currentSoalIndex];
+      const elemKlaim = document.getElementById('status-klaim');
+      const opsiContainer = document.getElementById('opsi-container');
+      const claimedBox = document.getElementById('claimed-box');
+
+      let isClaimed = !!currentClaim;
+      let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
+      let isPenalty = Date.now() < penaltyUntil;
+
+      if(isClaimed) {
+        elemKlaim.innerHTML = `<i class="bi bi-person-check-fill me-1"></i> Diklaim oleh: <b>${currentClaim}</b>`;
+        elemKlaim.className = "badge bg-warning text-dark px-2 py-1";
+        document.getElementById('wrong-notif-box').style.display = 'none';
+
+        claimedBox.style.display = 'block';
+        document.getElementById('claimed-text').innerText = `🏆 DIKLAIM OLEH ${currentClaim.toUpperCase()}`;
+      } else {
+        elemKlaim.innerHTML = `<i class="bi bi-clock me-1"></i> Belum diklaim siapapun`;
+        elemKlaim.className = "badge bg-dark border border-secondary text-slate-400 px-2 py-1";
+        claimedBox.style.display = 'none';
+      }
+
+      let opsiHtml = '';
+      const bgColors = { A: 'bg-opsi-A', B: 'bg-opsi-B', C: 'bg-opsi-C', D: 'bg-opsi-D', E: 'bg-opsi-E' };
+
+      for(let key in soal.opsi) {
+        if(soal.opsi[key] && soal.opsi[key].toString().trim() !== '') {
+          let extraClass = '';
+          let isDisabled = isClaimed || isPenalty ? 'disabled' : '';
+
+          if(isClaimed) {
+             extraClass = (key === soal.kunci) ? 'opsi-correct-highlight' : 'opacity-25';
+          }
+
+          opsiHtml += `
+            <button class="btn-jawaban ${bgColors[key] || 'bg-secondary'} ${extraClass}"
+                    id="btn-opsi-${key}"
+                    onclick="jawab('${key}', '${soal.kunci}')"
+                    ${isDisabled}>
+              <div class="ikon-opsi">${key}</div>
+              <div>${soal.opsi[key]}</div>
+            </button>`;
+        }
+      }
+      opsiContainer.innerHTML = opsiHtml;
+    }
+
+    // NOTE: logika jawab masih versi lama (klaim + penalti localStorage).
+    // Tahap 2 mengganti perilaku Pretest A, tahap 3 membuat klaim atomik.
+    window.jawab = function(pilihan, kunci) {
+      if(!isSoalPhase(currentPhase)) return;
+      if(claimsData[currentSoalIndex]) return;
+
+      let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
+      if(Date.now() < penaltyUntil) return;
+
+      const isCorrect = (pilihan === kunci);
+      const notifWrong = document.getElementById('wrong-notif-box');
+      const notifCorrect = document.getElementById('correct-notif-box');
+
+      if(isCorrect) {
+        localStorage.setItem('tebakcepet_mistakes', 0);
+
+        notifWrong.style.display = 'none';
+        notifCorrect.style.display = 'block';
+        playAudio('correct');
+        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+
+        userScore += 100;
+        document.getElementById('display-score').innerText = userScore;
+
+        update(ref(db, 'users/' + currentUser), { score: userScore });
+        update(ref(db, 'claims'), { [currentSoalIndex]: currentUser });
+        // Tidak ada auto-pindah soal: siswa menunggu admin menayangkan soal berikutnya.
+      } else {
+        userScore -= 50;
+        document.getElementById('display-score').innerText = userScore;
+        update(ref(db, 'users/' + currentUser), { score: userScore });
+
+        let mistakes = parseInt(localStorage.getItem('tebakcepet_mistakes') || '0');
+        mistakes++;
+
+        if(mistakes >= 3) {
+           let pUntil = Date.now() + 15000;
+           localStorage.setItem('tebakcepet_penalty_until', pUntil);
+           localStorage.setItem('tebakcepet_mistakes', 0);
+
+           notifCorrect.style.display = 'none';
+           notifWrong.style.display = 'none';
+           playAudio('wrong');
+           startPenaltyChecker();
+        } else {
+           localStorage.setItem('tebakcepet_mistakes', mistakes);
+
+           notifCorrect.style.display = 'none';
+           playAudio('wrong');
+
+           notifWrong.innerHTML = `😭 YAH JAWABAN SALAH! (-50 Pts).<br><small class="text-warning">Awas! Salah ${3 - mistakes}x lagi = Tombol Dibekukan!</small>`;
+           notifWrong.style.display = 'block';
+
+           notifWrong.classList.remove('shake-box');
+           void notifWrong.offsetWidth;
+           notifWrong.classList.add('shake-box');
+        }
+      }
+    };
+
+    // ===================== ADMIN ENGINE =====================
+    function initAdminListeners() {
+      if (adminInited) return;
+      adminInited = true;
+
+      onValue(ref(db, 'phase'), (snapshot) => {
+        currentPhase = snapshot.val() || 'lobby';
+        renderPhaseControls();
+        renderAdminLiveBar();
+        renderAdminCards();
+      });
+
+      onValue(ref(db, 'bankSoal'), (snapshot) => {
+        bankSoalData = snapshot.val() || [];
+        document.getElementById('stat-total-soal').innerText = bankSoalData.length;
+        renderAdminLiveBar();
+        renderAdminCards();
+      });
+
+      onValue(ref(db, 'currentActiveIndex'), (snapshot) => {
+        adminLiveIndex = snapshot.val() || 0;
+        renderAdminLiveBar();
+        renderAdminCards();
+      });
+
+      onValue(ref(db, 'users'), (snapshot) => {
+        const users = snapshot.val() || {};
+        const userList = Object.keys(users);
+        document.getElementById('stat-total-pemain').innerText = userList.length;
+
+        if(userList.length > 0) {
+          let sorted = [];
+          for(let u in users) sorted.push({ name: u, score: users[u].score || 0 });
+          sorted.sort((a,b) => b.score - a.score);
+          document.getElementById('stat-leader').innerText = `${sorted[0].name} (${sorted[0].score} pts)`;
+        } else {
+          document.getElementById('stat-leader').innerText = "-";
+        }
+
+        renderLiveRaceTrack(users, 'admin-race-container');
+      });
+
+      document.getElementById('admin-search-soal').addEventListener('input', function(e) {
+        renderAdminCards(e.target.value.toLowerCase());
+      });
+    }
+
+    function renderPhaseControls() {
+      document.getElementById('admin-phase-badge').innerText = PHASES[currentPhase].label;
+
+      let html = '';
+      PHASE_ORDER.forEach((key, i) => {
+        const isCurrent = key === currentPhase;
+        html += `
+          <div class="col-md-4 col-6">
+            <button onclick="setPhase('${key}')" class="btn btn-outline-light w-100 fw-bold py-2 phase-btn ${isCurrent ? 'is-current' : ''}">
+              <small class="d-block text-slate-400">Fase ${i + 1}</small>
+              ${isCurrent ? '● ' : ''}${PHASES[key].label}
+            </button>
+          </div>`;
+      });
+      document.getElementById('admin-phase-buttons').innerHTML = html;
+    }
+
+    window.setPhase = function(phaseKey) {
+      if(phaseKey === currentPhase) return;
+      if(!confirm(`Pindah ke fase: ${PHASES[phaseKey].label}?`)) return;
+
+      const updates = { phase: phaseKey };
+      // Masuk fase soal -> otomatis tayangkan soal pertama fase itu
+      if(PHASES[phaseKey].soal) updates.currentActiveIndex = PHASES[phaseKey].start;
+      update(ref(db), updates);
+    };
+
+    function renderAdminLiveBar() {
+      const bar = document.getElementById('admin-live-bar');
+      const txt = document.getElementById('admin-current-live-text');
+      if(!isSoalPhase(currentPhase)) {
+        bar.style.display = 'none';
+        return;
+      }
+      bar.style.display = 'block';
+      const cfg = PHASES[currentPhase];
+      const total = Math.min(cfg.end, bankSoalData.length - 1) - cfg.start + 1;
+      txt.innerText = `${cfg.short}: Soal ${adminLiveIndex - cfg.start + 1} / ${total} Sedang Ditayangkan`;
+    }
+
+    function renderLiveRaceTrack(usersData, targetElementId) {
+      let sorted = [];
+      for(let u in usersData) sorted.push({ name: u, score: usersData[u].score || 0 });
+      sorted.sort((a,b) => b.score - a.score);
+
+      const targetElem = document.getElementById(targetElementId);
+      if(!targetElem) return;
+
+      if(sorted.length === 0) {
+        targetElem.innerHTML = `<div class="text-center text-slate-500 py-2">Belum ada siswa yang masuk arena.</div>`;
+        return;
+      }
+
+      let maxScore = Math.max(...sorted.map(s => s.score), 100);
+
+      let html = '';
+      sorted.forEach((item, idx) => {
+        let percent = Math.max(6, (item.score / maxScore) * 100);
+        if(item.score < 0) percent = 4;
+        let isTop = idx === 0;
+
+        html += `
+          <div class="race-item">
+            <div class="d-flex justify-content-between align-items-center small mb-1">
+              <span class="fw-bold text-slate-300">
+                ${isTop ? '👑 ' : ''}${idx + 1}. ${item.name}
+              </span>
+              <span class="fw-bold text-warning font-monospace">${item.score} Pts</span>
+            </div>
+            <div class="race-bar-bg">
+              <div class="race-bar-fill ${isTop ? 'rank-1-bar' : ''}" style="width: ${percent}%; background: ${item.score < 0 ? '#dc2626' : ''};"></div>
+              <span class="race-avatar">🏎️</span>
+            </div>
+          </div>`;
+      });
+      targetElem.innerHTML = html;
+    }
+
+    function renderAdminCards(filterText = document.getElementById('admin-search-soal').value.toLowerCase()) {
+      const container = document.getElementById('admin-soal-container');
+      const label = document.getElementById('admin-catalog-label');
+
+      if(bankSoalData.length === 0) {
+        label.innerText = '';
+        container.innerHTML = `<div class="col-12 text-center text-slate-400 py-4"><i class="bi bi-inbox display-4 d-block mb-2"></i>Belum ada soal. Kirim soal dari Google Sheets!</div>`;
+        return;
+      }
+
+      // Di fase soal: hanya tampilkan soal milik fase itu. Di luar fase soal: tampilkan semua (tanpa tombol tayang).
+      const soalPhase = isSoalPhase(currentPhase);
+      const cfg = PHASES[currentPhase];
+      label.innerText = soalPhase ? `(${cfg.short}: soal ${cfg.start + 1}-${Math.min(cfg.end, bankSoalData.length - 1) + 1})` : '(semua soal)';
+
+      let html = '';
+      bankSoalData.forEach((item, idx) => {
+        if(soalPhase && (idx < cfg.start || idx > cfg.end)) return;
+        if(filterText && !item.teks.toLowerCase().includes(filterText)) return;
+
+        const isLive = soalPhase && idx === adminLiveIndex;
+        const btn = !soalPhase
+          ? ''
+          : `<button onclick="publishSoal(${idx})" class="btn ${isLive ? 'btn-success disabled' : 'btn-outline-primary'} w-100 fw-bold btn-sm">
+               ${isLive ? '<i class="bi bi-check-circle-fill me-1"></i> SEDANG TAYANG' : '<i class="bi bi-broadcast me-1"></i> TAYANGKAN KE SISWA'}
+             </button>`;
+
+        html += `
+          <div class="col-md-6">
+            <div class="admin-card-soal p-3 ${isLive ? 'is-live' : ''}">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge ${isLive ? 'bg-success' : 'bg-slate-700'}">Soal #${idx + 1}</span>
+                <span class="badge bg-warning text-dark"><i class="bi bi-key-fill me-1"></i> Kunci: ${item.kunci}</span>
+              </div>
+              <p class="fw-semibold text-white mb-3" style="min-height: 48px;">${item.teks}</p>
+
+              <div class="d-flex flex-wrap gap-1 mb-3">
+                ${Object.keys(item.opsi).map(k => `<span class="badge ${k === item.kunci ? 'bg-success border border-light' : 'bg-dark text-slate-400'}">${k}: ${item.opsi[k]}</span>`).join('')}
+              </div>
+              ${btn}
+            </div>
+          </div>`;
+      });
+      container.innerHTML = html;
+    }
+
+    window.publishSoal = function(index) {
+      if(!isSoalPhase(currentPhase)) return;
+      const cfg = PHASES[currentPhase];
+      if(index < cfg.start || index > cfg.end) return;
+      set(ref(db, 'currentActiveIndex'), index);
+    };
+
+    window.navLiveSoal = function(direction) {
+      if(!isSoalPhase(currentPhase)) return;
+      const cfg = PHASES[currentPhase];
+      const maxIdx = Math.min(cfg.end, bankSoalData.length - 1);
+      const newIndex = adminLiveIndex + direction;
+      if(newIndex >= cfg.start && newIndex <= maxIdx) publishSoal(newIndex);
+    };
+
+    window.resetLeaderboard = function() {
+      if(confirm("Yakin ingin mereset seluruh skor pemain?")) {
+        remove(ref(db, 'users'));
+        alert("Klasemen berhasil di-reset!");
+      }
+    };
+
+    window.resetClaims = function() {
+      if(confirm("Yakin ingin menghapus semua data klaim soal?")) {
+        remove(ref(db, 'claims'));
+        alert("Klaim soal berhasil di-reset!");
+      }
+    };
+  </script>
+</body>
+</html>
