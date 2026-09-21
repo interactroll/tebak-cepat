@@ -66,6 +66,12 @@
 
     .phase-btn { text-align: left; }
     .phase-btn.is-current { border-color: #22c55e !important; background: #064e3b !important; color: #fff !important; }
+
+    /* Custom scrollbar untuk kotak grid agar rapi di HP */
+    .grid-scroll { max-height: 200px; overflow-y: auto; padding-right: 5px; }
+    .grid-scroll::-webkit-scrollbar { width: 6px; }
+    .grid-scroll::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+    .grid-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -96,7 +102,7 @@
     </div>
   </div>
 
-  <!-- LAYAR 2A: RUANG TUNGGU (lobby / jeda / selesai) -->
+  <!-- LAYAR 2A: RUANG TUNGGU -->
   <div id="view-waiting" class="container my-5 text-center" style="display:none; max-width: 600px;">
     <div class="card-custom p-5">
       <div class="mb-4">
@@ -105,7 +111,7 @@
         </div>
       </div>
       <h3 class="fw-bold text-warning mb-2">HALO, <span id="lobby-user-name" class="text-info">-</span>! 👋</h3>
-      <p id="waiting-desc" class="text-slate-300 fs-5 mb-4">Kamu sudah terhubung di <b>Ruang Tunggu Arena (BAHASA PANDA)</b>.</p>
+      <p id="waiting-desc" class="text-slate-300 fs-5 mb-4">Kamu sudah terhubung di <b>Ruang Tunggu Arena</b>.</p>
 
       <div class="alert alert-dark border border-warning p-3 mb-4">
         <div class="spinner-grow spinner-grow-sm text-warning me-2" id="waiting-spinner"></div>
@@ -120,7 +126,6 @@
 
   <!-- LAYAR 2B: ARENA GAME SISWA -->
   <div id="view-game" class="container my-4" style="display:none; max-width: 850px;">
-
     <div class="card-custom p-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div class="d-flex align-items-center">
         <div class="bg-primary text-white rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -171,26 +176,27 @@
         😭 YAH JAWABAN SALAH! (-50 Pts).
       </div>
       <div id="correct-notif-box" class="alert alert-success text-center fw-bold py-3 mb-3" style="display:none; border-radius: 10px;">
-        🎉 BENAR! KLAIM BERHASIL (+100 Pts). Silakan lanjut ke soal berikutnya... 🚀
+        🎉 BENAR! KLAIM BERHASIL (+100 Pts).
       </div>
 
       <div id="claimed-box" class="alert alert-warning text-center p-3 border-warning mb-3" style="display:none; border-radius: 12px; background: rgba(217, 119, 6, 0.15);">
         <h6 class="fw-bold text-warning mb-1" id="claimed-text">SOAL INI SUDAH DIKLAIM OLEH X</h6>
-        <p class="small text-slate-300 mb-0">Kamu bisa pindah ke soal lain yang belum diklaim. Jawaban benar ditandai warna hijau.</p>
+        <p class="small text-slate-300 mb-0">Kamu bisa pindah ke soal lain yang belum diklaim dari kotak navigasi di bawah.</p>
       </div>
 
       <div id="opsi-container" class="opsi-grid mb-3"></div>
 
-      <!-- TOMBOL NAVIGASI KHUSUS FASE 5 (KUIS) -->
-      <div id="siswa-nav-container" class="d-flex justify-content-between align-items-center pt-3 border-top border-slate-700" style="display:none !important;">
-        <button id="btn-siswa-prev" onclick="siswaNavSoal(-1)" class="btn btn-outline-light fw-bold">
-          <i class="bi bi-chevron-left me-1"></i> Soal Sebelumnya
-        </button>
-        <span class="text-slate-400 small" id="siswa-soal-pos-text">1 dari 35</span>
-        <button id="btn-siswa-next" onclick="siswaNavSoal(1)" class="btn btn-warning fw-bold">
-          Soal Berikutnya <i class="bi bi-chevron-right ms-1"></i>
-        </button>
+      <!-- KOTAK NAVIGASI GRID KHUSUS FASE 5 (KUIS) -->
+      <div id="grid-nav-container" class="mt-4 pt-3 border-top border-slate-700" style="display:none;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="text-slate-300 small mb-0"><i class="bi bi-grid-3x3-gap-fill me-1"></i> Pilih Nomor Soal:</h6>
+          <span class="badge bg-secondary opacity-75 small">Abu-abu = Sudah Diklaim</span>
+        </div>
+        <div class="grid-scroll">
+          <div id="grid-nav-buttons" class="d-flex flex-wrap gap-2"></div>
+        </div>
       </div>
+
     </div>
 
     <div class="card-custom p-4">
@@ -200,15 +206,13 @@
       </div>
       <div id="leaderboard-list"></div>
     </div>
-
   </div>
 
   <!-- LAYAR 3: CONTROL ROOM ADMIN -->
   <div id="view-admin" class="container my-4" style="display:none; max-width: 950px;">
-
     <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
       <div>
-        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM (BAHASA PANDA)</h3>
+        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM</h3>
         <p class="text-slate-400 small mb-0">Pusat Kendali Live Quiz & Monitoring Real-Time</p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
@@ -224,7 +228,6 @@
       </div>
     </div>
 
-    <!-- KONTROL FASE -->
     <div class="card-custom p-4 mb-4 border-success">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <h5 class="fw-bold text-white mb-0"><i class="bi bi-diagram-3-fill text-success me-2"></i>KONTROL FASE</h5>
@@ -265,7 +268,7 @@
 
     <div class="card-custom p-4 mb-4 border-warning">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold text-warning mb-0"><i class="bi bi-flag-fill me-2"></i>MONITOR BALAPAN SKOR SISWA (LIVE RACE)</h5>
+        <h5 class="fw-bold text-warning mb-0"><i class="bi bi-flag-fill me-2"></i>MONITOR BALAPAN SKOR SISWA</h5>
         <span class="badge bg-success-subtle text-success border border-success">Live Sync</span>
       </div>
       <div class="race-track-container" id="admin-race-container">
@@ -293,7 +296,6 @@
       </div>
       <div id="admin-soal-container" class="row g-3"></div>
     </div>
-
   </div>
 
   <!-- FIREBASE MODULE -->
@@ -318,20 +320,22 @@
     const ADMIN_PASSWORD = "123";
 
     // ===== KONFIGURASI FASE =====
+    // isClaim: false berarti banyak siswa bisa menjawab benar di soal yang sama (seperti Pretest A)
+    // isClaim: true berarti soal dikunci setelah dijawab 1 orang (Pretest B & Kuis)
     const PHASES = {
-      lobby:      { label: 'Lobby',                     soal: false },
-      pretest_a: { label: 'Pretest A (7 soal, ketepatan)', short: 'Pretest A', soal: true, start: 0,  end: 6  },
-      pretest_b: { label: 'Pretest B (8 soal, klaim)',  short: 'Pretest B', soal: true, start: 7,  end: 14 },
-      jeda:      { label: 'Jeda (materi di luar web)',  soal: false },
-      kuis:      { label: 'Kuis (35 soal, klaim)',      short: 'Kuis',      soal: true, start: 15, end: 49 },
-      selesai:   { label: 'Selesai',                    soal: false }
+      lobby:     { label: 'Lobby',                     soal: false },
+      pretest_a: { label: 'Pretest A (7 soal, semua bisa jawab)', short: 'Pretest A', soal: true, start: 0,  end: 6,  isClaim: false },
+      pretest_b: { label: 'Pretest B (8 soal, klaim)', short: 'Pretest B', soal: true, start: 7,  end: 14, isClaim: true },
+      jeda:      { label: 'Jeda (materi di luar web)', soal: false },
+      kuis:      { label: 'Kuis Utama (35 soal, klaim)', short: 'Kuis', soal: true, start: 15, end: 49, isClaim: true },
+      selesai:   { label: 'Selesai',                   soal: false }
     };
     const PHASE_ORDER = ['lobby', 'pretest_a', 'pretest_b', 'jeda', 'kuis', 'selesai'];
 
     const WAITING_TEXT = {
-      lobby:   { icon: 'bi-hourglass-split', desc: 'Kamu sudah terhubung di <b>Ruang Tunggu Arena (BAHASA PANDA)</b>.', status: 'Kuis Belum Dimulai. Menunggu Admin...', spin: true },
-      jeda:    { icon: 'bi-journal-bookmark-fill', desc: 'Kuis sedang <b>dijeda</b>.', status: 'Simak materi dari guru dulu ya. Kuis lanjut sebentar lagi...', spin: true },
-      selesai: { icon: 'bi-flag-fill', desc: 'Kuis sudah <b>selesai</b>. Terima kasih sudah bermain!', status: 'Sampai jumpa di kuis berikutnya 🎉', spin: false }
+      lobby:   { icon: 'bi-hourglass-split', desc: 'Kamu sudah terhubung di <b>Ruang Tunggu Arena</b>.', status: 'Kuis Belum Dimulai. Menunggu Admin...', spin: true },
+      jeda:    { icon: 'bi-journal-bookmark-fill', desc: 'Kuis sedang <b>dijeda</b>.', status: 'Simak materi dulu ya. Kuis lanjut sebentar lagi...', spin: true },
+      selesai: { icon: 'bi-flag-fill', desc: 'Kuis sudah <b>selesai</b>. Terima kasih sudah bermain!', status: 'Sampai jumpa 🎉', spin: false }
     };
 
     let currentUser = "";
@@ -352,28 +356,15 @@
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('tebakcepet_user');
       const savedRole = localStorage.getItem('tebakcepet_role');
-
-      if (savedRole === 'admin') {
-        showView('admin');
-        initAdminListeners();
-      } else if (savedUser) {
-        currentUser = savedUser;
-        document.getElementById('display-user').innerText = currentUser;
-        document.getElementById('lobby-user-name').innerText = currentUser;
-        loadOrCreateUser();
-        initSiswaListeners();
-      }
+      if (savedRole === 'admin') { showView('admin'); initAdminListeners(); } 
+      else if (savedUser) { currentUser = savedUser; document.getElementById('display-user').innerText = currentUser; document.getElementById('lobby-user-name').innerText = currentUser; loadOrCreateUser(); initSiswaListeners(); }
     });
 
     function loadOrCreateUser() {
       const userRef = ref(db, 'users/' + currentUser);
       get(userRef).then((snapshot) => {
-        if (!snapshot.exists()) {
-          set(userRef, { score: 0 });
-        } else {
-          userScore = snapshot.val().score || 0;
-          document.getElementById('display-score').innerText = userScore;
-        }
+        if (!snapshot.exists()) { set(userRef, { score: 0 }); } 
+        else { userScore = snapshot.val().score || 0; document.getElementById('display-score').innerText = userScore; }
       });
     }
 
@@ -388,36 +379,25 @@
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
-
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
+        osc.connect(gain); gain.connect(audioCtx.destination);
         if (type === 'wrong') {
           osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(140, audioCtx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 0.35);
-          gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-          osc.start(audioCtx.currentTime);
-          osc.stop(audioCtx.currentTime + 0.35);
+          osc.frequency.setValueAtTime(140, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 0.35);
+          gain.gain.setValueAtTime(0.4, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+          osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.35);
         } else if (type === 'correct') {
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-          osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
-          osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
-          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-          osc.start(audioCtx.currentTime);
-          osc.stop(audioCtx.currentTime + 0.4);
+          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+          osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.4);
         }
       } catch(e) {}
     }
 
     document.getElementById('inputName').addEventListener('input', function(e) {
-      const val = e.target.value.trim().toLowerCase();
-      document.getElementById('box-password').style.display = (val === ADMIN_USERNAME) ? 'block' : 'none';
+      document.getElementById('box-password').style.display = (e.target.value.trim().toLowerCase() === ADMIN_USERNAME) ? 'block' : 'none';
     });
 
     window.changeFontSize = function(delta) {
@@ -428,47 +408,19 @@
     window.handleLogin = function() {
       const nameInput = document.getElementById('inputName').value.trim();
       const passInput = document.getElementById('inputPassword').value.trim();
-
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-      } catch(e) {}
-
+      try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
       if(!nameInput) return alert("Isi nama kamu dulu!");
-
       if(nameInput.toLowerCase() === ADMIN_USERNAME) {
-        if(passInput === ADMIN_PASSWORD) {
-          localStorage.setItem('tebakcepet_role', 'admin');
-          showView('admin');
-          initAdminListeners();
-        } else {
-          alert("Password Admin Salah!");
-        }
-        return;
+        if(passInput === ADMIN_PASSWORD) { localStorage.setItem('tebakcepet_role', 'admin'); showView('admin'); initAdminListeners(); } 
+        else { alert("Password Admin Salah!"); } return;
       }
-
-      currentUser = nameInput;
-      localStorage.setItem('tebakcepet_user', currentUser);
-      localStorage.removeItem('tebakcepet_role');
-
-      document.getElementById('display-user').innerText = currentUser;
-      document.getElementById('lobby-user-name').innerText = currentUser;
-
-      loadOrCreateUser();
-      initSiswaListeners();
+      currentUser = nameInput; localStorage.setItem('tebakcepet_user', currentUser); localStorage.removeItem('tebakcepet_role');
+      document.getElementById('display-user').innerText = currentUser; document.getElementById('lobby-user-name').innerText = currentUser;
+      loadOrCreateUser(); initSiswaListeners();
     };
 
-    window.userLogout = function() {
-      if(confirm("Apakah kamu yakin ingin keluar / ganti nama?")) {
-        localStorage.removeItem('tebakcepet_user');
-        location.reload();
-      }
-    };
-
-    window.adminLogout = function() {
-      localStorage.removeItem('tebakcepet_role');
-      location.reload();
-    };
+    window.userLogout = function() { if(confirm("Apakah kamu yakin ingin keluar / ganti nama?")) { localStorage.removeItem('tebakcepet_user'); location.reload(); } };
+    window.adminLogout = function() { localStorage.removeItem('tebakcepet_role'); location.reload(); };
 
     // ===================== SISWA ENGINE =====================
     function initSiswaListeners() {
@@ -477,48 +429,29 @@
 
       onValue(ref(db, 'phase'), (snapshot) => {
         currentPhase = snapshot.val() || 'lobby';
-        resetAlertBoxes();
-        applyPhaseView();
+        resetAlertBoxes(); applyPhaseView();
       });
 
-      onValue(ref(db, 'bankSoal'), (snapshot) => {
-        bankSoalData = snapshot.val() || [];
-        renderCurrentSoal();
-      });
+      onValue(ref(db, 'bankSoal'), (snapshot) => { bankSoalData = snapshot.val() || []; renderCurrentSoal(); });
 
       onValue(ref(db, 'currentActiveIndex'), (snapshot) => {
-        // Pada Fase Kuis (35 soal), navigasi bersifat mandiri oleh siswa.
-        // Di fase pretest, layar otomatis berpindah mengikuti Admin.
-        if (currentPhase !== 'kuis') {
-          currentSoalIndex = snapshot.val() || 0;
-          resetAlertBoxes();
-          renderCurrentSoal();
-        }
+        // Layar siswa mengikuti Admin kecuali jika di fase kuis (mandiri grid)
+        if (currentPhase !== 'kuis') { currentSoalIndex = snapshot.val() || 0; resetAlertBoxes(); renderCurrentSoal(); }
       });
 
-      onValue(ref(db, 'claims'), (snapshot) => {
-        claimsData = snapshot.val() || {};
-        renderCurrentSoal();
-      });
+      onValue(ref(db, 'claims'), (snapshot) => { claimsData = snapshot.val() || {}; renderCurrentSoal(); });
 
       onValue(ref(db, 'users'), (snapshot) => {
         const users = snapshot.val() || {};
-        let sorted = [];
-        for(let u in users) sorted.push({ name: u, score: users[u].score || 0 });
+        let sorted = []; for(let u in users) sorted.push({ name: u, score: users[u].score || 0 });
         sorted.sort((a,b) => b.score - a.score);
-
         let html = '';
         sorted.forEach((item, idx) => {
           let rankClass = idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : 'bg-slate-700 text-white'));
           let isMe = item.name === currentUser ? 'bg-slate-800 border border-primary' : '';
-          html += `
-            <div class="d-flex justify-content-between align-items-center p-2 rounded-3 mb-2 ${isMe}">
-              <div class="d-flex align-items-center">
-                <span class="badge-rank ${rankClass}">${idx+1}</span>
-                <span class="fw-bold ${item.name === currentUser ? 'text-info' : 'text-slate-200'}">${item.name}</span>
-              </div>
-              <div class="badge bg-warning text-dark fs-6 font-monospace">${item.score} Pts</div>
-            </div>`;
+          html += `<div class="d-flex justify-content-between align-items-center p-2 rounded-3 mb-2 ${isMe}">
+            <div class="d-flex align-items-center"><span class="badge-rank ${rankClass}">${idx+1}</span><span class="fw-bold ${item.name === currentUser ? 'text-info' : 'text-slate-200'}">${item.name}</span></div>
+            <div class="badge bg-warning text-dark fs-6 font-monospace">${item.score} Pts</div></div>`;
         });
         document.getElementById('leaderboard-list').innerHTML = html;
       });
@@ -526,26 +459,18 @@
 
     function applyPhaseView() {
       if (isSoalPhase(currentPhase)) {
-        showView('game');
-        startPenaltyChecker();
-        // Jika baru masuk Fase Kuis, arahkan awal ke soal pertama kuis (indeks 15)
-        if (currentPhase === 'kuis' && (currentSoalIndex < PHASES.kuis.start || currentSoalIndex > PHASES.kuis.end)) {
-          currentSoalIndex = PHASES.kuis.start;
-        }
+        showView('game'); startPenaltyChecker();
+        if (currentPhase === 'kuis' && (currentSoalIndex < PHASES.kuis.start || currentSoalIndex > PHASES.kuis.end)) { currentSoalIndex = PHASES.kuis.start; }
         renderCurrentSoal();
       } else {
         const t = WAITING_TEXT[currentPhase] || WAITING_TEXT.lobby;
-        document.getElementById('waiting-icon').className = `bi ${t.icon} display-1`;
-        document.getElementById('waiting-desc').innerHTML = t.desc;
-        document.getElementById('waiting-status').innerText = t.status;
-        document.getElementById('waiting-spinner').style.display = t.spin ? 'inline-block' : 'none';
+        document.getElementById('waiting-icon').className = `bi ${t.icon} display-1`; document.getElementById('waiting-desc').innerHTML = t.desc; document.getElementById('waiting-status').innerText = t.status; document.getElementById('waiting-spinner').style.display = t.spin ? 'inline-block' : 'none';
         showView('waiting');
       }
     }
 
     function resetAlertBoxes() {
-      document.getElementById('wrong-notif-box').style.display = 'none';
-      document.getElementById('correct-notif-box').style.display = 'none';
+      document.getElementById('wrong-notif-box').style.display = 'none'; document.getElementById('correct-notif-box').style.display = 'none';
     }
 
     function startPenaltyChecker() {
@@ -554,22 +479,11 @@
         let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
         let now = Date.now();
         let penaltyBox = document.getElementById('penalty-notif-box');
-
         if(penaltyUntil > now) {
-          let remaining = Math.ceil((penaltyUntil - now) / 1000);
-          document.getElementById('penalty-timer').innerText = remaining;
-          penaltyBox.style.display = 'block';
-
-          document.getElementById('wrong-notif-box').style.display = 'none';
-          document.getElementById('correct-notif-box').style.display = 'none';
-
+          document.getElementById('penalty-timer').innerText = Math.ceil((penaltyUntil - now) / 1000);
+          penaltyBox.style.display = 'block'; document.getElementById('wrong-notif-box').style.display = 'none'; document.getElementById('correct-notif-box').style.display = 'none';
           document.querySelectorAll('.btn-jawaban').forEach(b => { b.disabled = true; });
-        } else {
-          if(penaltyBox.style.display === 'block') {
-             penaltyBox.style.display = 'none';
-             renderCurrentSoal();
-          }
-        }
+        } else { if(penaltyBox.style.display === 'block') { penaltyBox.style.display = 'none'; renderCurrentSoal(); } }
       }, 500);
     }
 
@@ -578,34 +492,31 @@
       const cfg = PHASES[currentPhase];
       const soal = bankSoalData[currentSoalIndex];
 
-      const inRange = currentSoalIndex >= cfg.start && currentSoalIndex <= cfg.end;
-      if(!soal || !inRange) {
-        document.getElementById('badge-fase').innerText = cfg.short;
-        document.getElementById('badge-soal-id').innerText = 'Soal -';
-        document.getElementById('soal-teks').innerText = 'Menunggu admin menayangkan soal...';
-        document.getElementById('opsi-container').innerHTML = '';
-        document.getElementById('claimed-box').style.display = 'none';
-        document.getElementById('status-klaim').innerHTML = '';
-        document.getElementById('siswa-nav-container').style.setProperty('display', 'none', 'important');
+      if(!soal || currentSoalIndex < cfg.start || currentSoalIndex > cfg.end) {
+        document.getElementById('soal-teks').innerText = 'Menunggu admin...';
+        document.getElementById('opsi-container').innerHTML = ''; document.getElementById('claimed-box').style.display = 'none'; document.getElementById('status-klaim').innerHTML = ''; document.getElementById('grid-nav-container').style.display = 'none';
         return;
       }
 
-      const total = Math.min(cfg.end, bankSoalData.length - 1) - cfg.start + 1;
-      const currentPos = currentSoalIndex - cfg.start + 1;
-
       document.getElementById('badge-fase').innerText = cfg.short;
-      document.getElementById('badge-soal-id').innerText = `Soal ${currentPos} / ${total}`;
+      document.getElementById('badge-soal-id').innerText = `Soal ${currentSoalIndex + 1}`;
       document.getElementById('soal-teks').innerText = soal.teks;
 
-      // TOMBOL NAVIGASI HANYA TAMPIL DI FASE 5 ('kuis')
-      const navContainer = document.getElementById('siswa-nav-container');
+      // KENDALI GRID NAVIGASI (HANYA FASE 5)
+      const gridContainer = document.getElementById('grid-nav-container');
       if (currentPhase === 'kuis') {
-        navContainer.style.setProperty('display', 'flex', 'important');
-        document.getElementById('siswa-soal-pos-text').innerText = `${currentPos} dari ${total}`;
-        document.getElementById('btn-siswa-prev').disabled = currentSoalIndex <= cfg.start;
-        document.getElementById('btn-siswa-next').disabled = currentSoalIndex >= cfg.end || currentSoalIndex >= bankSoalData.length - 1;
+        gridContainer.style.display = 'block';
+        let gridHtml = '';
+        for (let i = cfg.start; i <= cfg.end; i++) {
+          let nomor = i + 1; // Menampilkan nomor aslinya (16 s.d 50)
+          let isSoalClaimed = !!claimsData[i];
+          let isActive = (i === currentSoalIndex) ? 'border border-2 border-warning shadow' : '';
+          let btnClass = isSoalClaimed ? 'btn-secondary opacity-50' : 'btn-outline-info';
+          gridHtml += `<button onclick="lompatSoal(${i})" class="btn ${btnClass} ${isActive} btn-sm fw-bold p-1" style="width: 42px; height: 42px;">${nomor}</button>`;
+        }
+        document.getElementById('grid-nav-buttons').innerHTML = gridHtml;
       } else {
-        navContainer.style.setProperty('display', 'none', 'important');
+        gridContainer.style.display = 'none';
       }
 
       const currentClaim = claimsData[currentSoalIndex];
@@ -613,7 +524,8 @@
       const opsiContainer = document.getElementById('opsi-container');
       const claimedBox = document.getElementById('claimed-box');
 
-      let isClaimed = !!currentClaim;
+      // Mengecek apakah fase ini mengizinkan klaim. Jika cfg.isClaim false (Fase 2), abaikan status klaim.
+      let isClaimed = cfg.isClaim ? !!currentClaim : false;
       let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
       let isPenalty = Date.now() < penaltyUntil;
 
@@ -621,11 +533,9 @@
         elemKlaim.innerHTML = `<i class="bi bi-person-check-fill me-1"></i> Diklaim oleh: <b>${currentClaim}</b>`;
         elemKlaim.className = "badge bg-warning text-dark px-2 py-1";
         document.getElementById('wrong-notif-box').style.display = 'none';
-
-        claimedBox.style.display = 'block';
-        document.getElementById('claimed-text').innerText = `🏆 DIKLAIM OLEH ${currentClaim.toUpperCase()}`;
+        claimedBox.style.display = 'block'; document.getElementById('claimed-text').innerText = `🏆 DIKLAIM OLEH ${currentClaim.toUpperCase()}`;
       } else {
-        elemKlaim.innerHTML = `<i class="bi bi-clock me-1"></i> Belum diklaim siapapun`;
+        elemKlaim.innerHTML = cfg.isClaim ? `<i class="bi bi-clock me-1"></i> Belum diklaim` : `<i class="bi bi-people-fill me-1"></i> Bebas Dijawab`;
         elemKlaim.className = "badge bg-dark border border-secondary text-slate-400 px-2 py-1";
         claimedBox.style.display = 'none';
       }
@@ -635,43 +545,26 @@
 
       for(let key in soal.opsi) {
         if(soal.opsi[key] && soal.opsi[key].toString().trim() !== '') {
-          let extraClass = '';
-          let isDisabled = isClaimed || isPenalty ? 'disabled' : '';
-
-          if(isClaimed) {
-             extraClass = (key === soal.kunci) ? 'opsi-correct-highlight' : 'opacity-25';
-          }
-
-          opsiHtml += `
-            <button class="btn-jawaban ${bgColors[key] || 'bg-secondary'} ${extraClass}"
-                    id="btn-opsi-${key}"
-                    onclick="jawab('${key}', '${soal.kunci}')"
-                    ${isDisabled}>
-              <div class="ikon-opsi">${key}</div>
-              <div>${soal.opsi[key]}</div>
-            </button>`;
+          let extraClass = ''; let isDisabled = isClaimed || isPenalty ? 'disabled' : '';
+          if(isClaimed) { extraClass = (key === soal.kunci) ? 'opsi-correct-highlight' : 'opacity-25'; }
+          opsiHtml += `<button class="btn-jawaban ${bgColors[key] || 'bg-secondary'} ${extraClass}" id="btn-opsi-${key}" onclick="jawab('${key}', '${soal.kunci}')" ${isDisabled}><div class="ikon-opsi">${key}</div><div>${soal.opsi[key]}</div></button>`;
         }
       }
       opsiContainer.innerHTML = opsiHtml;
     }
 
-    // Fungsi Navigasi Khusus Fase 5 untuk Siswa
-    window.siswaNavSoal = function(direction) {
+    window.lompatSoal = function(index) {
       if(currentPhase !== 'kuis') return;
-      const cfg = PHASES.kuis;
-      const maxIdx = Math.min(cfg.end, bankSoalData.length - 1);
-      const newIndex = currentSoalIndex + direction;
-
-      if(newIndex >= cfg.start && newIndex <= maxIdx) {
-        currentSoalIndex = newIndex;
-        resetAlertBoxes();
-        renderCurrentSoal();
-      }
+      currentSoalIndex = index;
+      resetAlertBoxes(); renderCurrentSoal();
     };
 
     window.jawab = function(pilihan, kunci) {
       if(!isSoalPhase(currentPhase)) return;
-      if(claimsData[currentSoalIndex]) return;
+      const cfg = PHASES[currentPhase];
+      
+      // Jika mode klaim aktif dan soal sudah dijawab orang, block jawaban.
+      if(cfg.isClaim && claimsData[currentSoalIndex]) return;
 
       let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
       if(Date.now() < penaltyUntil) return;
@@ -682,110 +575,53 @@
 
       if(isCorrect) {
         localStorage.setItem('tebakcepet_mistakes', 0);
+        notifWrong.style.display = 'none'; notifCorrect.style.display = 'block';
+        playAudio('correct'); confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
 
-        notifWrong.style.display = 'none';
-        notifCorrect.style.display = 'block';
-        playAudio('correct');
-        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-
-        userScore += 100;
-        document.getElementById('display-score').innerText = userScore;
-
+        userScore += 100; document.getElementById('display-score').innerText = userScore;
         update(ref(db, 'users/' + currentUser), { score: userScore });
-        update(ref(db, 'claims'), { [currentSoalIndex]: currentUser });
+        
+        // Catat klaim jika fase tersebut adalah fase klaim
+        if (cfg.isClaim) { update(ref(db, 'claims'), { [currentSoalIndex]: currentUser }); }
       } else {
-        userScore -= 50;
-        document.getElementById('display-score').innerText = userScore;
+        userScore -= 50; document.getElementById('display-score').innerText = userScore;
         update(ref(db, 'users/' + currentUser), { score: userScore });
 
-        let mistakes = parseInt(localStorage.getItem('tebakcepet_mistakes') || '0');
-        mistakes++;
-
+        let mistakes = parseInt(localStorage.getItem('tebakcepet_mistakes') || '0'); mistakes++;
         if(mistakes >= 3) {
-           let pUntil = Date.now() + 15000;
-           localStorage.setItem('tebakcepet_penalty_until', pUntil);
-           localStorage.setItem('tebakcepet_mistakes', 0);
-
-           notifCorrect.style.display = 'none';
-           notifWrong.style.display = 'none';
-           playAudio('wrong');
-           startPenaltyChecker();
+           localStorage.setItem('tebakcepet_penalty_until', Date.now() + 15000); localStorage.setItem('tebakcepet_mistakes', 0);
+           notifCorrect.style.display = 'none'; notifWrong.style.display = 'none'; playAudio('wrong'); startPenaltyChecker();
         } else {
            localStorage.setItem('tebakcepet_mistakes', mistakes);
-
-           notifCorrect.style.display = 'none';
-           playAudio('wrong');
-
+           notifCorrect.style.display = 'none'; playAudio('wrong');
            notifWrong.innerHTML = `😭 YAH JAWABAN SALAH! (-50 Pts).<br><small class="text-warning">Awas! Salah ${3 - mistakes}x lagi = Tombol Dibekukan!</small>`;
-           notifWrong.style.display = 'block';
-
-           notifWrong.classList.remove('shake-box');
-           void notifWrong.offsetWidth;
-           notifWrong.classList.add('shake-box');
+           notifWrong.style.display = 'block'; notifWrong.classList.remove('shake-box'); void notifWrong.offsetWidth; notifWrong.classList.add('shake-box');
         }
       }
     };
 
     // ===================== ADMIN ENGINE =====================
     function initAdminListeners() {
-      if (adminInited) return;
-      adminInited = true;
-
-      onValue(ref(db, 'phase'), (snapshot) => {
-        currentPhase = snapshot.val() || 'lobby';
-        renderPhaseControls();
-        renderAdminLiveBar();
-        renderAdminCards();
-      });
-
-      onValue(ref(db, 'bankSoal'), (snapshot) => {
-        bankSoalData = snapshot.val() || [];
-        document.getElementById('stat-total-soal').innerText = bankSoalData.length;
-        renderAdminLiveBar();
-        renderAdminCards();
-      });
-
-      onValue(ref(db, 'currentActiveIndex'), (snapshot) => {
-        adminLiveIndex = snapshot.val() || 0;
-        renderAdminLiveBar();
-        renderAdminCards();
-      });
-
+      if (adminInited) return; adminInited = true;
+      onValue(ref(db, 'phase'), (snapshot) => { currentPhase = snapshot.val() || 'lobby'; renderPhaseControls(); renderAdminLiveBar(); renderAdminCards(); });
+      onValue(ref(db, 'bankSoal'), (snapshot) => { bankSoalData = snapshot.val() || []; document.getElementById('stat-total-soal').innerText = bankSoalData.length; renderAdminLiveBar(); renderAdminCards(); });
+      onValue(ref(db, 'currentActiveIndex'), (snapshot) => { adminLiveIndex = snapshot.val() || 0; renderAdminLiveBar(); renderAdminCards(); });
       onValue(ref(db, 'users'), (snapshot) => {
-        const users = snapshot.val() || {};
-        const userList = Object.keys(users);
+        const users = snapshot.val() || {}; const userList = Object.keys(users);
         document.getElementById('stat-total-pemain').innerText = userList.length;
-
-        if(userList.length > 0) {
-          let sorted = [];
-          for(let u in users) sorted.push({ name: u, score: users[u].score || 0 });
-          sorted.sort((a,b) => b.score - a.score);
-          document.getElementById('stat-leader').innerText = `${sorted[0].name} (${sorted[0].score} pts)`;
-        } else {
-          document.getElementById('stat-leader').innerText = "-";
-        }
-
+        if(userList.length > 0) { let sorted = []; for(let u in users) sorted.push({ name: u, score: users[u].score || 0 }); sorted.sort((a,b) => b.score - a.score); document.getElementById('stat-leader').innerText = `${sorted[0].name} (${sorted[0].score} pts)`; } 
+        else { document.getElementById('stat-leader').innerText = "-"; }
         renderLiveRaceTrack(users, 'admin-race-container');
       });
-
-      document.getElementById('admin-search-soal').addEventListener('input', function(e) {
-        renderAdminCards(e.target.value.toLowerCase());
-      });
+      document.getElementById('admin-search-soal').addEventListener('input', function(e) { renderAdminCards(e.target.value.toLowerCase()); });
     }
 
     function renderPhaseControls() {
       document.getElementById('admin-phase-badge').innerText = PHASES[currentPhase].label;
-
       let html = '';
       PHASE_ORDER.forEach((key, i) => {
         const isCurrent = key === currentPhase;
-        html += `
-          <div class="col-md-4 col-6">
-            <button onclick="setPhase('${key}')" class="btn btn-outline-light w-100 fw-bold py-2 phase-btn ${isCurrent ? 'is-current' : ''}">
-              <small class="d-block text-slate-400">Fase ${i + 1}</small>
-              ${isCurrent ? '● ' : ''}${PHASES[key].label}
-            </button>
-          </div>`;
+        html += `<div class="col-md-4 col-6"><button onclick="setPhase('${key}')" class="btn btn-outline-light w-100 fw-bold py-2 phase-btn ${isCurrent ? 'is-current' : ''}"><small class="d-block text-slate-400">Fase ${i + 1}</small>${isCurrent ? '● ' : ''}${PHASES[key].label}</button></div>`;
       });
       document.getElementById('admin-phase-buttons').innerHTML = html;
     }
@@ -793,136 +629,62 @@
     window.setPhase = function(phaseKey) {
       if(phaseKey === currentPhase) return;
       if(!confirm(`Pindah ke fase: ${PHASES[phaseKey].label}?`)) return;
-
       const updates = { phase: phaseKey };
       if(PHASES[phaseKey].soal) updates.currentActiveIndex = PHASES[phaseKey].start;
       update(ref(db), updates);
     };
 
     function renderAdminLiveBar() {
-      const bar = document.getElementById('admin-live-bar');
-      const txt = document.getElementById('admin-current-live-text');
-      if(!isSoalPhase(currentPhase)) {
-        bar.style.display = 'none';
-        return;
-      }
+      const bar = document.getElementById('admin-live-bar'); const txt = document.getElementById('admin-current-live-text');
+      if(!isSoalPhase(currentPhase)) { bar.style.display = 'none'; return; }
       bar.style.display = 'block';
-      const cfg = PHASES[currentPhase];
-      const total = Math.min(cfg.end, bankSoalData.length - 1) - cfg.start + 1;
-      txt.innerText = `${cfg.short}: Soal ${adminLiveIndex - cfg.start + 1} / ${total} Sedang Ditayangkan`;
+      txt.innerText = `${PHASES[currentPhase].short}: Soal ${adminLiveIndex + 1} Sedang Ditayangkan`;
     }
 
     function renderLiveRaceTrack(usersData, targetElementId) {
-      let sorted = [];
-      for(let u in usersData) sorted.push({ name: u, score: usersData[u].score || 0 });
-      sorted.sort((a,b) => b.score - a.score);
-
-      const targetElem = document.getElementById(targetElementId);
-      if(!targetElem) return;
-
-      if(sorted.length === 0) {
-        targetElem.innerHTML = `<div class="text-center text-slate-500 py-2">Belum ada siswa yang masuk arena.</div>`;
-        return;
-      }
-
+      let sorted = []; for(let u in usersData) sorted.push({ name: u, score: usersData[u].score || 0 }); sorted.sort((a,b) => b.score - a.score);
+      const targetElem = document.getElementById(targetElementId); if(!targetElem) return;
+      if(sorted.length === 0) { targetElem.innerHTML = `<div class="text-center text-slate-500 py-2">Belum ada siswa yang masuk arena.</div>`; return; }
       let maxScore = Math.max(...sorted.map(s => s.score), 100);
-
       let html = '';
       sorted.forEach((item, idx) => {
-        let percent = Math.max(6, (item.score / maxScore) * 100);
-        if(item.score < 0) percent = 4;
+        let percent = Math.max(6, (item.score / maxScore) * 100); if(item.score < 0) percent = 4;
         let isTop = idx === 0;
-
-        html += `
-          <div class="race-item">
-            <div class="d-flex justify-content-between align-items-center small mb-1">
-              <span class="fw-bold text-slate-300">
-                ${isTop ? '👑 ' : ''}${idx + 1}. ${item.name}
-              </span>
-              <span class="fw-bold text-warning font-monospace">${item.score} Pts</span>
-            </div>
-            <div class="race-bar-bg">
-              <div class="race-bar-fill ${isTop ? 'rank-1-bar' : ''}" style="width: ${percent}%; background: ${item.score < 0 ? '#dc2626' : ''};"></div>
-              <span class="race-avatar">🏎️</span>
-            </div>
-          </div>`;
+        html += `<div class="race-item"><div class="d-flex justify-content-between align-items-center small mb-1"><span class="fw-bold text-slate-300">${isTop ? '👑 ' : ''}${idx + 1}. ${item.name}</span><span class="fw-bold text-warning font-monospace">${item.score} Pts</span></div><div class="race-bar-bg"><div class="race-bar-fill ${isTop ? 'rank-1-bar' : ''}" style="width: ${percent}%; background: ${item.score < 0 ? '#dc2626' : ''};"></div><span class="race-avatar">🏎️</span></div></div>`;
       });
       targetElem.innerHTML = html;
     }
 
     function renderAdminCards(filterText = document.getElementById('admin-search-soal').value.toLowerCase()) {
-      const container = document.getElementById('admin-soal-container');
-      const label = document.getElementById('admin-catalog-label');
-
-      if(bankSoalData.length === 0) {
-        label.innerText = '';
-        container.innerHTML = `<div class="col-12 text-center text-slate-400 py-4"><i class="bi bi-inbox display-4 d-block mb-2"></i>Belum ada soal. Kirim soal dari Google Sheets!</div>`;
-        return;
-      }
-
-      const soalPhase = isSoalPhase(currentPhase);
-      const cfg = PHASES[currentPhase];
-      label.innerText = soalPhase ? `(${cfg.short}: soal ${cfg.start + 1}-${Math.min(cfg.end, bankSoalData.length - 1) + 1})` : '(semua soal)';
-
+      const container = document.getElementById('admin-soal-container'); const label = document.getElementById('admin-catalog-label');
+      if(bankSoalData.length === 0) { label.innerText = ''; container.innerHTML = `<div class="col-12 text-center text-slate-400 py-4"><i class="bi bi-inbox display-4 d-block mb-2"></i>Belum ada soal. Kirim soal dari Google Sheets!</div>`; return; }
+      const soalPhase = isSoalPhase(currentPhase); const cfg = PHASES[currentPhase];
+      label.innerText = soalPhase ? `(${cfg.short})` : '(semua soal)';
       let html = '';
       bankSoalData.forEach((item, idx) => {
         if(soalPhase && (idx < cfg.start || idx > cfg.end)) return;
         if(filterText && !item.teks.toLowerCase().includes(filterText)) return;
-
         const isLive = soalPhase && idx === adminLiveIndex;
-        const btn = !soalPhase
-          ? ''
-          : `<button onclick="publishSoal(${idx})" class="btn ${isLive ? 'btn-success disabled' : 'btn-outline-primary'} w-100 fw-bold btn-sm">
-               ${isLive ? '<i class="bi bi-check-circle-fill me-1"></i> SEDANG TAYANG' : '<i class="bi bi-broadcast me-1"></i> TAYANGKAN KE SISWA'}
-             </button>`;
-
-        html += `
-          <div class="col-md-6">
-            <div class="admin-card-soal p-3 ${isLive ? 'is-live' : ''}">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="badge ${isLive ? 'bg-success' : 'bg-slate-700'}">Soal #${idx + 1}</span>
-                <span class="badge bg-warning text-dark"><i class="bi bi-key-fill me-1"></i> Kunci: ${item.kunci}</span>
-              </div>
-              <p class="fw-semibold text-white mb-3" style="min-height: 48px;">${item.teks}</p>
-
-              <div class="d-flex flex-wrap gap-1 mb-3">
-                ${Object.keys(item.opsi).map(k => `<span class="badge ${k === item.kunci ? 'bg-success border border-light' : 'bg-dark text-slate-400'}">${k}:${item.opsi[k]}</span>`).join('')}
-              </div>
-              ${btn}
-            </div>
-          </div>`;
+        const btn = !soalPhase ? '' : `<button onclick="publishSoal(${idx})" class="btn ${isLive ? 'btn-success disabled' : 'btn-outline-primary'} w-100 fw-bold btn-sm">${isLive ? '<i class="bi bi-check-circle-fill me-1"></i> SEDANG TAYANG' : '<i class="bi bi-broadcast me-1"></i> TAYANGKAN KE SISWA'}</button>`;
+        html += `<div class="col-md-6"><div class="admin-card-soal p-3 ${isLive ? 'is-live' : ''}"><div class="d-flex justify-content-between align-items-center mb-2"><span class="badge ${isLive ? 'bg-success' : 'bg-slate-700'}">Soal #${idx + 1}</span><span class="badge bg-warning text-dark"><i class="bi bi-key-fill me-1"></i> Kunci: ${item.kunci}</span></div><p class="fw-semibold text-white mb-3" style="min-height: 48px;">${item.teks}</p><div class="d-flex flex-wrap gap-1 mb-3">${Object.keys(item.opsi).map(k => `<span class="badge ${k === item.kunci ? 'bg-success border border-light' : 'bg-dark text-slate-400'}">${k}:${item.opsi[k]}</span>`).join('')}</div>${btn}</div></div>`;
       });
       container.innerHTML = html;
     }
 
     window.publishSoal = function(index) {
       if(!isSoalPhase(currentPhase)) return;
-      const cfg = PHASES[currentPhase];
-      if(index < cfg.start || index > cfg.end) return;
+      const cfg = PHASES[currentPhase]; if(index < cfg.start || index > cfg.end) return;
       set(ref(db, 'currentActiveIndex'), index);
     };
 
     window.navLiveSoal = function(direction) {
       if(!isSoalPhase(currentPhase)) return;
-      const cfg = PHASES[currentPhase];
-      const maxIdx = Math.min(cfg.end, bankSoalData.length - 1);
-      const newIndex = adminLiveIndex + direction;
-      if(newIndex >= cfg.start && newIndex <= maxIdx) publishSoal(newIndex);
+      const cfg = PHASES[currentPhase]; const maxIdx = Math.min(cfg.end, bankSoalData.length - 1);
+      const newIndex = adminLiveIndex + direction; if(newIndex >= cfg.start && newIndex <= maxIdx) publishSoal(newIndex);
     };
 
-    window.resetLeaderboard = function() {
-      if(confirm("Yakin ingin mereset seluruh skor pemain?")) {
-        remove(ref(db, 'users'));
-        alert("Klasemen berhasil di-reset!");
-      }
-    };
-
-    window.resetClaims = function() {
-      if(confirm("Yakin ingin menghapus semua data klaim soal?")) {
-        remove(ref(db, 'claims'));
-        alert("Klaim soal berhasil di-reset!");
-      }
-    };
+    window.resetLeaderboard = function() { if(confirm("Yakin ingin mereset seluruh skor pemain?")) { remove(ref(db, 'users')); alert("Klasemen berhasil di-reset!"); } };
+    window.resetClaims = function() { if(confirm("Yakin ingin menghapus semua data klaim soal?")) { remove(ref(db, 'claims')); alert("Klaim soal berhasil di-reset!"); } };
   </script>
 </body>
 </html>
