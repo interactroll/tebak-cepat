@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tebak Cepat - Kuis Morfologi</title>
+  <title>Tebak Cepat - Kuis Bahasa Panda</title>
 
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
@@ -77,7 +77,7 @@
         <img src="logo.png" alt="Logo Prastancy" style="height: 60px; width: auto;" onerror="this.style.display='none'; document.getElementById('rocket-icon').style.display='inline-block';">
         <i id="rocket-icon" class="bi bi-rocket-takeoff text-warning display-3" style="display:none;"></i>
       </div>
-      <h2 class="fw-bold text-warning mb-1">⚡ KUIS MORFOLOGI</h2>
+      <h2 class="fw-bold text-warning mb-1">⚡ KUIS BAHASA PANDA</h2>
       <p class="text-slate-400 small mb-4">Benar +100 | Salah -50 (3x Salah = Banned 15s) 🚀</p>
 
       <div class="mb-3 text-start">
@@ -105,7 +105,7 @@
         </div>
       </div>
       <h3 class="fw-bold text-warning mb-2">HALO, <span id="lobby-user-name" class="text-info">-</span>! 👋</h3>
-      <p id="waiting-desc" class="text-slate-300 fs-5 mb-4">Kamu sudah terhubung di <b>Ruang Tunggu Arena (Morfologi)</b>.</p>
+      <p id="waiting-desc" class="text-slate-300 fs-5 mb-4">Kamu sudah terhubung di <b>Ruang Tunggu Arena (BAHASA PANDA)</b>.</p>
 
       <div class="alert alert-dark border border-warning p-3 mb-4">
         <div class="spinner-grow spinner-grow-sm text-warning me-2" id="waiting-spinner"></div>
@@ -197,7 +197,7 @@
 
     <div class="card-custom p-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
       <div>
-        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM (MORFOLOGI)</h3>
+        <h3 class="fw-bold text-warning mb-1"><i class="bi bi-sliders me-2"></i>ADMIN CONTROL ROOM (BAHASA PANDA)</h3>
         <p class="text-slate-400 small mb-0">Pusat Kendali Live Quiz & Monitoring Real-Time</p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
@@ -320,7 +320,7 @@
     const PHASE_ORDER = ['lobby', 'pretest_a', 'pretest_b', 'jeda', 'kuis', 'selesai'];
 
     const WAITING_TEXT = {
-      lobby:   { icon: 'bi-hourglass-split', desc: 'Kamu sudah terhubung di <b>Ruang Tunggu Arena (Morfologi)</b>.', status: 'Kuis Belum Dimulai. Menunggu Admin...', spin: true },
+      lobby:   { icon: 'bi-hourglass-split', desc: 'Kamu sudah terhubung di <b>Ruang Tunggu Arena (BAHASA PANDA)</b>.', status: 'Kuis Belum Dimulai. Menunggu Admin...', spin: true },
       jeda:    { icon: 'bi-journal-bookmark-fill', desc: 'Kuis sedang <b>dijeda</b>.', status: 'Simak materi dari guru dulu ya. Kuis lanjut sebentar lagi...', spin: true },
       selesai: { icon: 'bi-flag-fill', desc: 'Kuis sudah <b>selesai</b>. Terima kasih sudah bermain!', status: 'Sampai jumpa di kuis berikutnya 🎉', spin: false }
     };
