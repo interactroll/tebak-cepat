@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Try Out System — CBT Online</title>
+
+<!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<!-- Google Font: Inter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text: #18181b;
+    --text-muted: #71717a;
+    --primary: #0f172a;
+    --accent: #2563eb;
+    --accent-soft: #eff6ff;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --warning-soft: #fffbeb;
+    --radius: 14px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,.06);
+    --shadow-md: 0 4px 16px rgba(15,23,42,.08);
+    --shadow-lg: 0 12px 32px rgba(15,23,42,.12);
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ============== SETUP VIEW ============== */
+  .setup-wrapper{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .setup-card{
+    width: 100%;
+    max-width: 460px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 40px 36px;
+  }
+  .setup-logo{
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  .setup-card h1{
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .setup-card p.subtitle{
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+  .form-label{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .form-control, .form-control:focus{
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    font-size: 14px;
+    box-shadow: none;
+  }
+  .form-control:focus{
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .btn-primary-custom{
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 11px;
+    width: 100%;
+    transition: opacity .15s ease;
+  }
+  .btn-primary-custom:hover{ opacity: .88; color:#fff; }
+  .btn-primary-custom:disabled{ opacity: .6; }
+
+  .setup-alert{
+    font-size: 13px;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* ============== EXAM VIEW ============== */
+  .exam-navbar{
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+  }
+  .exam-navbar .brand{
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    display:flex; align-items:center; gap:8px;
+  }
+  .exam-navbar .participant-name{
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .timer-badge{
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 15px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: 6px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background .2s, color .2s;
+  }
+  .timer-badge.timer-danger{
+    background: #fef2f2;
+    color: var(--danger);
+    animation: pulse-danger 1s infinite;
+  }
+  @keyframes pulse-danger{
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,.35); }
+    50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+  }
+  .btn-submit{
+    background: var(--danger);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 8px;
+    padding: 8px 16px;
+  }
+  .btn-submit:hover{ background:#b91c1c; color:#fff; }
+
+  .exam-body{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 24px 20px 100px;
+  }
+
+  .question-panel{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 28px;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+  }
+  .question-index-badge{
+    display:inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 6px;
+    padding: 4px 10px;
+    margin-bottom: 14px;
+  }
+  .question-text{
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 24px;
+    white-space: pre-wrap;
+  }
+
+  .option-item{
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+  .option-item:hover{
+    border-color: #c7cdd6;
+    background: #fafafa;
+  }
+  .option-item.selected{
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .option-letter{
+    flex: 0 0 26px;
+    height: 26px;
+    width: 26px;
+    border-radius: 7px;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    transition: all .15s;
+  }
+  .option-item.selected .option-letter{
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .option-text{ padding-top: 3px; }
+
+  .question-footer-actions{
+    margin-top: auto;
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-nav-question{
+    border-radius: 9px;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    color: var(--text);
+  }
+  .btn-nav-question:hover{ background:#f4f4f5; }
+  .btn-nav-question:disabled{ opacity:.4; }
+  .btn-mark-review{
+    border-radius: 9px;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border: 1.5px solid var(--warning);
+    background: #fff;
+    color: var(--warning);
+  }
+  .btn-mark-review.active{
+    background: var(--warning);
+    color: #fff;
+  }
+
+  /* Nav grid sidebar */
+  .nav-sidebar{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+  }
+  .nav-sidebar h6{
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .nav-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+    gap: 8px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .nav-grid-item{
+    aspect-ratio: 1/1;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    color: var(--text-muted);
+    font-size: 12.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .nav-grid-item:hover{ border-color: var(--accent); }
+  .nav-grid-item.answered{
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .nav-grid-item.marked{
+    background: var(--warning);
+    border-color: var(--warning);
+    color: #fff;
+  }
+  .nav-grid-item.current{
+    outline: 2.5px solid var(--primary);
+    outline-offset: 1.5px;
+  }
+  .nav-legend{
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .nav-legend .dot{
+    width: 12px; height: 12px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-right: 8px;
+    border: 1.5px solid var(--border);
+  }
+  .nav-summary{
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12.5px;
+  }
+  .nav-summary div{ display:flex; justify-content: space-between; margin-bottom:6px; color: var(--text-muted); }
+  .nav-summary strong{ color: var(--text); }
+
+  /* ============== RESULT VIEW ============== */
+  .result-wrapper{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .result-card{
+    width: 100%;
+    max-width: 560px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 44px 40px;
+    text-align: center;
+  }
+  .result-score{
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--primary);
+    line-height: 1;
+    margin: 10px 0 4px;
+  }
+  .result-stats{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 28px 0 8px;
+  }
+  .stat-box{
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 8px;
+  }
+  .stat-box .num{ font-size: 20px; font-weight: 700; }
+  .stat-box .label{ font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+  .stat-box.correct .num{ color: var(--success); }
+  .stat-box.wrong .num{ color: var(--danger); }
+  .stat-box.empty .num{ color: var(--text-muted); }
+
+  .spinner-wrap{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+
+  @media (max-width: 991px){
+    .exam-body{ padding-bottom: 30px; }
+    .nav-sidebar{ margin-top: 20px; }
+    .nav-grid{ max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<!-- Modal Konfirmasi Submit -->
+<div class="modal fade" id="submitModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:14px; border:none;">
+      <div class="modal-body p-4">
+        <h5 class="fw-bold mb-2">Kumpulkan Jawaban?</h5>
+        <p class="text-muted small mb-3" id="submitModalDesc">Pastikan Anda telah memeriksa seluruh jawaban sebelum mengumpulkan.</p>
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="btn btn-nav-question" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-submit" id="confirmSubmitBtn">Ya, Kumpulkan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* =========================================================================
+   TRY OUT SYSTEM — CBT ONLINE
+   Single-file Vanilla JS SPA. State persisted in localStorage for resilience
+   against reload / connection loss.
+   ========================================================================= */
+
+(function(){
+  "use strict";
+
+  // ---------------------------------------------------------------------
+  // 1. CONSTANTS & STATE
+  // ---------------------------------------------------------------------
+  const STORAGE_KEY = "cbt_exam_state_v1";
+  const OPTION_LETTERS = ["A", "B", "C", "D", "E"];
+
+  const appEl = document.getElementById("app");
+  let timerIntervalId = null;   // handle for countdown interval
+  let lastResult = null;        // holds computed result, not persisted
+
+  /**
+   * Shape of the persisted exam state object:
+   * {
+   *   userName: string,
+   *   apiLink: string,
+   *   durationMinutes: number,
+   *   endTime: number (epoch ms) - when the exam must auto-submit,
+   *   questions: [{ No, Teks_Soal, Opsi_A..E, Kunci_Jawaban }],
+   *   answers: { [questionIndex]: "A"|"B"|"C"|"D"|"E" },
+   *   marked: { [questionIndex]: true },
+   *   currentIndex: number
+   * }
+   */
+  let state = null;
+
+  // ---------------------------------------------------------------------
+  // 2. PERSISTENCE HELPERS
+  // ---------------------------------------------------------------------
+  function saveState(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(err){
+      console.error("Gagal menyimpan state ke localStorage:", err);
+    }
+  }
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(err){
+      console.error("Gagal membaca state dari localStorage:", err);
+      return null;
+    }
+  }
+
+  function clearState(){
+    localStorage.removeItem(STORAGE_KEY);
+    state = null;
+  }
+
+  // ---------------------------------------------------------------------
+  // 3. UTILITIES
+  // ---------------------------------------------------------------------
+  function formatTime(ms){
+    if(ms < 0) ms = 0;
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+  }
+
+  function escapeHtml(str){
+    if(str === undefined || str === null) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function getOptionText(question, letter){
+    return question["Opsi_" + letter];
+  }
+
+  function hasOption(question, letter){
+    const val = getOptionText(question, letter);
+    return val !== undefined && val !== null && String(val).trim() !== "";
+  }
+
+  // ---------------------------------------------------------------------
+  // 4. VIEW: SETUP (LOGIN)
+  // ---------------------------------------------------------------------
+  function renderSetup(errorMessage){
+    appEl.innerHTML = `
+      <div class="setup-wrapper">
+        <div class="setup-card">
+          <div class="setup-logo"><i class="bi bi-pencil-square"></i></div>
+          <h1>Try Out System</h1>
+          <p class="subtitle">Masukkan data untuk memulai sesi ujian Anda.</p>
+
+          <div id="setupAlert" class="setup-alert alert alert-danger" role="alert"></div>
+
+          <form id="setupForm" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="inputNama">Nama Peserta</label>
+              <input type="text" class="form-control" id="inputNama" placeholder="Contoh: Budi Santoso" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="inputApiLink">Link API Soal (Google Apps Script)</label>
+              <input type="url" class="form-control" id="inputApiLink" placeholder="https://script.google.com/macros/s/..." required>
+            </div>
+            <div class="mb-4">
+              <label class="form-label" for="inputDurasi">Durasi Ujian (menit)</label>
+              <input type="number" class="form-control" id="inputDurasi" value="90" min="1" max="600" required>
+            </div>
+            <button type="submit" class="btn-primary-custom" id="startBtn">
+              <span id="startBtnText">Mulai Ujian</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    `;
+
+    if(errorMessage){
+      const alertEl = document.getElementById("setupAlert");
+      alertEl.textContent = errorMessage;
+      alertEl.style.display = "block";
+    }
+
+    document.getElementById("setupForm").addEventListener("submit", handleSetupSubmit);
+  }
+
+  async function handleSetupSubmit(e){
+    e.preventDefault();
+
+    const userName = document.getElementById("inputNama").value.trim();
+    const apiLink = document.getElementById("inputApiLink").value.trim();
+    const durationMinutes = parseInt(document.getElementById("inputDurasi").value, 10);
+
+    if(!userName || !apiLink || !durationMinutes || durationMinutes <= 0){
+      renderSetup("Mohon lengkapi semua isian dengan benar.");
+      return;
+    }
+
+    const startBtn = document.getElementById("startBtn");
+    const startBtnText = document.getElementById("startBtnText");
+    startBtn.disabled = true;
+    startBtnText.innerHTML = `
+      <span class="spinner-wrap">
+        <span class="spinner-border spinner-border-sm" role="status"></span>
+        Memuat soal...
+      </span>
+    `;
+
+    try{
+      const response = await fetch(apiLink, { method: "GET" });
+      if(!response.ok){
+        throw new Error("Server API mengembalikan status " + response.status);
+      }
+      const data = await response.json();
+
+      if(!Array.isArray(data) || data.length === 0){
+        throw new Error("Format data soal tidak valid atau kosong.");
+      }
+
+      // Build fresh exam state
+      state = {
+        userName: userName,
+        apiLink: apiLink,
+        durationMinutes: durationMinutes,
+        endTime: Date.now() + durationMinutes * 60 * 1000,
+        questions: data,
+        answers: {},
+        marked: {},
+        currentIndex: 0
+      };
+
+      saveState();
+      renderExam();
+      startTimer();
+
+    }catch(err){
+      console.error("Gagal memuat soal:", err);
+      renderSetup("Gagal memuat soal. Periksa kembali link API Anda. (" + err.message + ")");
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // 5. VIEW: EXAM ARENA
+  // ---------------------------------------------------------------------
+  function renderExam(){
+    const total = state.questions.length;
+    const currentIndex = state.currentIndex;
+    const question = state.questions[currentIndex];
+    const selectedAnswer = state.answers[currentIndex];
+    const isMarked = !!state.marked[currentIndex];
+
+    const answeredCount = Object.keys(state.answers).length;
+    const markedCount = Object.keys(state.marked).filter(k => state.marked[k]).length;
+    const unansweredCount = total - answeredCount;
+
+    // Build option rows
+    let optionsHtml = "";
+    OPTION_LETTERS.forEach(letter => {
+      if(!hasOption(question, letter)) return;
+      const isSelected = selectedAnswer === letter;
+      optionsHtml += `
+        <div class="option-item ${isSelected ? 'selected' : ''}" data-letter="${letter}">
+          <div class="option-letter">${letter}</div>
+          <div class="option-text">${escapeHtml(getOptionText(question, letter))}</div>
+        </div>
+      `;
+    });
+
+    // Build navigation grid
+    let gridHtml = "";
+    for(let i = 0; i < total; i++){
+      const cls = [];
+      if(state.marked[i]) cls.push("marked");
+      else if(state.answers[i]) cls.push("answered");
+      if(i === currentIndex) cls.push("current");
+      gridHtml += `<div class="nav-grid-item ${cls.join(' ')}" data-index="${i}">${i + 1}</div>`;
+    }
+
+    appEl.innerHTML = `
+      <nav class="exam-navbar">
+        <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="brand"><i class="bi bi-pencil-square"></i> Try Out System</div>
+            <span class="participant-name"><i class="bi bi-person-circle"></i> ${escapeHtml(state.userName)}</span>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <div class="timer-badge" id="timerBadge">
+              <i class="bi bi-clock-history"></i>
+              <span id="timerDisplay">--:--</span>
+            </div>
+            <button class="btn-submit" id="submitExamBtn">
+              <i class="bi bi-check2-circle"></i> Kumpulkan
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="exam-body">
+        <div class="row g-3">
+          <div class="col-lg-8">
+            <div class="question-panel">
+              <div>
+                <span class="question-index-badge">Soal ${currentIndex + 1} dari ${total}</span>
+                <div class="question-text">${escapeHtml(question.Teks_Soal)}</div>
+                <div id="optionsContainer">${optionsHtml}</div>
+              </div>
+              <div class="question-footer-actions">
+                <button class="btn-nav-question" id="prevBtn" ${currentIndex === 0 ? 'disabled' : ''}>
+                  <i class="bi bi-arrow-left"></i> Soal Sebelumnya
+                </button>
+                <button class="btn-mark-review ${isMarked ? 'active' : ''}" id="markBtn">
+                  <i class="bi bi-flag${isMarked ? '-fill' : ''}"></i> Ragu-ragu
+                </button>
+                <button class="btn-nav-question" id="nextBtn" ${currentIndex === total - 1 ? 'disabled' : ''}>
+                  Soal Berikutnya <i class="bi bi-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="nav-sidebar">
+              <h6>Navigasi Soal</h6>
+              <div class="nav-grid" id="navGrid">${gridHtml}</div>
+              <div class="nav-legend">
+                <div><span class="dot" style="background:#fff;"></span> Belum dijawab</div>
+                <div><span class="dot" style="background:var(--accent); border-color:var(--accent);"></span> Sudah dijawab</div>
+                <div><span class="dot" style="background:var(--warning); border-color:var(--warning);"></span> Ragu-ragu</div>
+              </div>
+              <div class="nav-summary">
+                <div>Terjawab <strong>${answeredCount} / ${total}</strong></div>
+                <div>Ragu-ragu <strong>${markedCount}</strong></div>
+                <div>Belum dijawab <strong>${unansweredCount}</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    attachExamListeners();
+    updateTimerDisplay(); // immediate paint, interval will keep updating
+  }
+
+  function attachExamListeners(){
+    // Option selection
+    document.querySelectorAll("#optionsContainer .option-item").forEach(el => {
+      el.addEventListener("click", () => {
+        const letter = el.getAttribute("data-letter");
+        state.answers[state.currentIndex] = letter;
+        saveState();
+        renderExam();
+      });
+    });
+
+    // Prev / Next
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    if(prevBtn) prevBtn.addEventListener("click", () => navigateTo(state.currentIndex - 1));
+    if(nextBtn) nextBtn.addEventListener("click", () => navigateTo(state.currentIndex + 1));
+
+    // Mark for review toggle
+    document.getElementById("markBtn").addEventListener("click", () => {
+      if(state.marked[state.currentIndex]){
+        delete state.marked[state.currentIndex];
+      }else{
+        state.marked[state.currentIndex] = true;
+      }
+      saveState();
+      renderExam();
+    });
+
+    // Nav grid item click
+    document.querySelectorAll(".nav-grid-item").forEach(el => {
+      el.addEventListener("click", () => {
+        const idx = parseInt(el.getAttribute("data-index"), 10);
+        navigateTo(idx);
+      });
+    });
+
+    // Submit button -> open confirmation modal
+    document.getElementById("submitExamBtn").addEventListener("click", () => {
+      const total = state.questions.length;
+      const answeredCount = Object.keys(state.answers).length;
+      const unanswered = total - answeredCount;
+      document.getElementById("submitModalDesc").textContent =
+        `Anda telah menjawab ${answeredCount} dari ${total} soal` +
+        (unanswered > 0 ? ` (${unanswered} soal belum dijawab).` : ".") +
+        " Jawaban tidak dapat diubah setelah dikumpulkan.";
+      const modal = new bootstrap.Modal(document.getElementById("submitModal"));
+      modal.show();
+    });
+  }
+
+  function navigateTo(index){
+    if(index < 0 || index >= state.questions.length) return;
+    state.currentIndex = index;
+    saveState();
+    renderExam();
+  }
+
+  // ---------------------------------------------------------------------
+  // 6. TIMER
+  // ---------------------------------------------------------------------
+  function startTimer(){
+    if(timerIntervalId) clearInterval(timerIntervalId);
+    timerIntervalId = setInterval(() => {
+      updateTimerDisplay();
+      const remaining = state.endTime - Date.now();
+      if(remaining <= 0){
+        clearInterval(timerIntervalId);
+        timerIntervalId = null;
+        submitExam(true); // auto-submit, no confirmation
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay(){
+    if(!state) return;
+    const remaining = state.endTime - Date.now();
+    const display = document.getElementById("timerDisplay");
+    const badge = document.getElementById("timerBadge");
+    if(!display || !badge) return;
+
+    display.textContent = formatTime(remaining);
+
+    if(remaining <= 5 * 60 * 1000){
+      badge.classList.add("timer-danger");
+    }else{
+      badge.classList.remove("timer-danger");
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // 7. SUBMIT & SCORING
+  // ---------------------------------------------------------------------
+  function calculateResult(){
+    const total = state.questions.length;
+    let correct = 0, wrong = 0, unanswered = 0;
+
+    state.questions.forEach((q, idx) => {
+      const userAnswer = state.answers[idx];
+      if(!userAnswer){
+        unanswered++;
+        return;
+      }
+      const key = (q.Kunci_Jawaban || "").toString().trim().toUpperCase();
+      if(userAnswer === key){
+        correct++;
+      }else{
+        wrong++;
+      }
+    });
+
+    const score = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+    return { total, correct, wrong, unanswered, score, userName: state.userName };
+  }
+
+  function submitExam(isAuto){
+    if(timerIntervalId){
+      clearInterval(timerIntervalId);
+      timerIntervalId = null;
+    }
+    lastResult = calculateResult();
+    lastResult.isAuto = !!isAuto;
+    clearState();
+    renderResult(lastResult);
+  }
+
+  // ---------------------------------------------------------------------
+  // 8. VIEW: RESULT
+  // ---------------------------------------------------------------------
+  function renderResult(result){
+    appEl.innerHTML = `
+      <div class="result-wrapper">
+        <div class="result-card">
+          <div class="setup-logo mx-auto"><i class="bi bi-clipboard2-check"></i></div>
+          <p class="text-muted small mb-0">${result.isAuto ? "Waktu habis — jawaban otomatis dikumpulkan" : "Ujian selesai"}</p>
+          <div class="fw-bold" style="font-size:18px; margin-top:4px;">${escapeHtml(result.userName)}</div>
+          <div class="text-muted small">Skor Akhir</div>
+          <div class="result-score">${result.score}</div>
+
+          <div class="result-stats">
+            <div class="stat-box correct">
+              <div class="num">${result.correct}</div>
+              <div class="label">Benar</div>
+            </div>
+            <div class="stat-box wrong">
+              <div class="num">${result.wrong}</div>
+              <div class="label">Salah</div>
+            </div>
+            <div class="stat-box empty">
+              <div class="num">${result.unanswered}</div>
+              <div class="label">Kosong</div>
+            </div>
+          </div>
+
+          <div class="text-muted small mt-3 mb-4">Total ${result.total} soal</div>
+
+          <button class="btn-primary-custom" id="newExamBtn">
+            <i class="bi bi-arrow-repeat"></i> Mulai Ujian Baru
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("newExamBtn").addEventListener("click", () => {
+      renderSetup();
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // 9. INIT — RESUME OR FRESH START
+  // ---------------------------------------------------------------------
+  function init(){
+    // Bind global submit-confirmation button once
+    document.getElementById("confirmSubmitBtn").addEventListener("click", () => {
+      const modalEl = document.getElementById("submitModal");
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if(modal) modal.hide();
+      submitExam(false);
+    });
+
+    const saved = loadState();
+
+    if(saved && saved.questions && saved.endTime){
+      state = saved;
+      const remaining = state.endTime - Date.now();
+
+      if(remaining <= 0){
+        // Time already expired while away — auto-submit immediately
+        lastResult = calculateResult();
+        lastResult.isAuto = true;
+        clearState();
+        renderResult(lastResult);
+      }else{
+        // Resume exam exactly where the user left off
+        renderExam();
+        startTimer();
+      }
+    }else{
+      renderSetup();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+
+})();
+</script>
+</body>
+</html>
