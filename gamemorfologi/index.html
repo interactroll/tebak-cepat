@@ -339,8 +339,8 @@
     let penaltyInterval = null;
 
     window.addEventListener('DOMContentLoaded', () => {
-      const savedUser = localStorage.getItem('tebakcepet_user');
-      const savedRole = localStorage.getItem('tebakcepet_role');
+      const savedUser = localStorage.getItem('morfologi_user');
+      const savedRole = localStorage.getItem('morfologi_role');
 
       if (savedRole === 'admin') {
         showView('admin');
@@ -350,7 +350,7 @@
         document.getElementById('display-user').innerText = currentUser;
         document.getElementById('lobby-user-name').innerText = currentUser;
 
-        const userRef = ref(db, 'users/' + currentUser);
+        const userRef = ref(db, 'morfologi_users/' + currentUser);
         get(userRef).then((snapshot) => {
           if (!snapshot.exists()) {
             set(userRef, { score: 0 });
@@ -425,7 +425,7 @@
 
       if(nameInput.toLowerCase() === ADMIN_USERNAME) {
         if(passInput === ADMIN_PASSWORD) {
-          localStorage.setItem('tebakcepet_role', 'admin');
+          localStorage.setItem('morfologi_role', 'admin');
           showView('admin');
           initAdminListeners();
         } else {
@@ -435,13 +435,13 @@
       }
 
       currentUser = nameInput;
-      localStorage.setItem('tebakcepet_user', currentUser);
-      localStorage.removeItem('tebakcepet_role');
+      localStorage.setItem('morfologi_user', currentUser);
+      localStorage.removeItem('morfologi_role');
 
       document.getElementById('display-user').innerText = currentUser;
       document.getElementById('lobby-user-name').innerText = currentUser;
 
-      const userRef = ref(db, 'users/' + currentUser);
+      const userRef = ref(db, 'morfologi_users/' + currentUser);
       get(userRef).then((snapshot) => {
         if (!snapshot.exists()) {
           set(userRef, { score: 0 });
@@ -456,19 +456,19 @@
 
     window.userLogout = function() {
       if(confirm("Apakah kamu yakin ingin keluar / ganti nama?")) {
-        localStorage.removeItem('tebakcepet_user');
+        localStorage.removeItem('morfologi_user');
         location.reload();
       }
     };
 
     window.adminLogout = function() {
-      localStorage.removeItem('tebakcepet_role');
+      localStorage.removeItem('morfologi_role');
       location.reload();
     };
 
     // --- SISWA ENGINE ---
     function initSiswaListeners() {
-      onValue(ref(db, 'isGameStarted'), (snapshot) => {
+      onValue(ref(db, 'morfologi_isGameStarted'), (snapshot) => {
         isGameStarted = snapshot.val() || false;
         if (isGameStarted) {
           showView('game');
@@ -478,11 +478,11 @@
         }
       });
 
-      onValue(ref(db, 'bankSoal'), (snapshot) => {
+      onValue(ref(db, 'morfologi_bankSoal'), (snapshot) => {
         bankSoalData = snapshot.val() || [];
         renderPetaSoal();
 
-        onValue(ref(db, 'currentActiveIndex'), (snapIndex) => {
+        onValue(ref(db, 'morfologi_currentActiveIndex'), (snapIndex) => {
           currentSoalIndex = snapIndex.val() || 0;
           resetAlertBoxes();
           renderCurrentSoal();
@@ -490,13 +490,13 @@
         });
       });
 
-      onValue(ref(db, 'claims'), (snapshot) => {
+      onValue(ref(db, 'morfologi_claims'), (snapshot) => {
         claimsData = snapshot.val() || {};
         renderCurrentSoal();
         renderPetaSoal();
       });
 
-      onValue(ref(db, 'users'), (snapshot) => {
+      onValue(ref(db, 'morfologi_users'), (snapshot) => {
         const users = snapshot.val() || {};
         let sorted = [];
         for(let u in users) sorted.push({ name: u, score: users[u].score || 0 });
@@ -528,7 +528,7 @@
     function startPenaltyChecker() {
       clearInterval(penaltyInterval);
       penaltyInterval = setInterval(() => {
-        let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
+        let penaltyUntil = parseInt(localStorage.getItem('morfologi_penalty_until') || '0');
         let now = Date.now();
         let penaltyBox = document.getElementById('penalty-notif-box');
         
@@ -584,7 +584,7 @@
       const claimedBox = document.getElementById('claimed-box');
       
       let isClaimed = !!currentClaim;
-      let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
+      let penaltyUntil = parseInt(localStorage.getItem('morfologi_penalty_until') || '0');
       let isPenalty = Date.now() < penaltyUntil;
 
       if(isClaimed) {
@@ -632,7 +632,7 @@
     window.jawab = function(pilihan, kunci) {
       if(claimsData[currentSoalIndex]) return;
       
-      let penaltyUntil = parseInt(localStorage.getItem('tebakcepet_penalty_until') || '0');
+      let penaltyUntil = parseInt(localStorage.getItem('morfologi_penalty_until') || '0');
       if(Date.now() < penaltyUntil) return; // Mencegah klik saat kena penalty
       
       const isCorrect = (pilihan === kunci);
@@ -640,7 +640,7 @@
       const notifCorrect = document.getElementById('correct-notif-box');
 
       if(isCorrect) {
-        localStorage.setItem('tebakcepet_mistakes', 0); // Reset salah
+        localStorage.setItem('morfologi_mistakes', 0); // Reset salah
 
         notifWrong.style.display = 'none';
         notifCorrect.style.display = 'block';
@@ -650,8 +650,8 @@
         userScore += 100;
         document.getElementById('display-score').innerText = userScore;
         
-        update(ref(db, 'users/' + currentUser), { score: userScore });
-        update(ref(db, 'claims'), { [currentSoalIndex]: currentUser });
+        update(ref(db, 'morfologi_users/' + currentUser), { score: userScore });
+        update(ref(db, 'morfologi_claims'), { [currentSoalIndex]: currentUser });
 
         setTimeout(() => {
           let nextIndex = (currentSoalIndex + 1) % bankSoalData.length;
@@ -662,23 +662,23 @@
         // Hukuman Poin Minus & Banned
         userScore -= 50;
         document.getElementById('display-score').innerText = userScore;
-        update(ref(db, 'users/' + currentUser), { score: userScore });
+        update(ref(db, 'morfologi_users/' + currentUser), { score: userScore });
 
-        let mistakes = parseInt(localStorage.getItem('tebakcepet_mistakes') || '0');
+        let mistakes = parseInt(localStorage.getItem('morfologi_mistakes') || '0');
         mistakes++;
 
         if(mistakes >= 3) {
            // Banned 15 detik
            let pUntil = Date.now() + 15000;
-           localStorage.setItem('tebakcepet_penalty_until', pUntil);
-           localStorage.setItem('tebakcepet_mistakes', 0); // Reset hitungan usai dibanned
+           localStorage.setItem('morfologi_penalty_until', pUntil);
+           localStorage.setItem('morfologi_mistakes', 0); // Reset hitungan usai dibanned
            
            notifCorrect.style.display = 'none';
            notifWrong.style.display = 'none';
            playAudio('wrong');
            startPenaltyChecker(); 
         } else {
-           localStorage.setItem('tebakcepet_mistakes', mistakes);
+           localStorage.setItem('morfologi_mistakes', mistakes);
 
            notifCorrect.style.display = 'none';
            playAudio('wrong');
@@ -697,7 +697,7 @@
     let adminLiveIndex = 0;
 
     function initAdminListeners() {
-      onValue(ref(db, 'isGameStarted'), (snapshot) => {
+      onValue(ref(db, 'morfologi_isGameStarted'), (snapshot) => {
         const started = snapshot.val() || false;
         const badgeElem = document.getElementById('admin-status-state-badge');
         const btnStart = document.getElementById('btn-start-quiz');
@@ -716,18 +716,18 @@
         }
       });
 
-      onValue(ref(db, 'bankSoal'), (snapshot) => {
+      onValue(ref(db, 'morfologi_bankSoal'), (snapshot) => {
         bankSoalData = snapshot.val() || [];
         document.getElementById('stat-total-soal').innerText = bankSoalData.length;
 
-        onValue(ref(db, 'currentActiveIndex'), (snapIndex) => {
+        onValue(ref(db, 'morfologi_currentActiveIndex'), (snapIndex) => {
           adminLiveIndex = snapIndex.val() || 0;
           document.getElementById('admin-current-live-text').innerText = `Soal #${adminLiveIndex + 1} Sedang Ditayangkan`;
           renderAdminCards();
         });
       });
 
-      onValue(ref(db, 'users'), (snapshot) => {
+      onValue(ref(db, 'morfologi_users'), (snapshot) => {
         const users = snapshot.val() || {};
         const userList = Object.keys(users);
         document.getElementById('stat-total-pemain').innerText = userList.length;
@@ -750,7 +750,7 @@
     }
 
     window.setGameState = function(status) {
-      set(ref(db, 'isGameStarted'), status);
+      set(ref(db, 'morfologi_isGameStarted'), status);
     };
 
     function renderLiveRaceTrack(usersData, targetElementId) {
@@ -814,7 +814,7 @@
               <p class="fw-semibold text-white mb-3" style="min-height: 48px;">${item.teks}</p>
               
               <div class="d-flex flex-wrap gap-1 mb-3">
-                ${Object.keys(item.opsi).map(k => `<span class="badge ${k === item.kunci ? 'bg-success border border-light' : 'bg-dark text-slate-400'}">${k}: ${item.opsi[k]}</span>`).join('')}
+                ${Object.keys(item.opsi).map(k => `<span class="badge ${k === item.kunci ? 'bg-success border border-light' : 'bg-dark text-slate-400'}">${k}:${item.opsi[k]}</span>`).join('')}
               </div>
 
               <button onclick="publishSoal(${idx})" class="btn ${isLive ? 'btn-success disabled' : 'btn-outline-primary'} w-100 fw-bold btn-sm">
@@ -827,7 +827,7 @@
     }
 
     window.publishSoal = function(index) {
-      set(ref(db, 'currentActiveIndex'), index);
+      set(ref(db, 'morfologi_currentActiveIndex'), index);
     };
 
     window.navLiveSoal = function(direction) {
@@ -839,14 +839,14 @@
 
     window.resetLeaderboard = function() {
       if(confirm("Yakin ingin mereset seluruh skor pemain?")) {
-        remove(ref(db, 'users'));
+        remove(ref(db, 'morfologi_users'));
         alert("Klasemen berhasil di-reset!");
       }
     };
 
     window.resetClaims = function() {
       if(confirm("Yakin ingin menghapus semua data klaim soal?")) {
-        remove(ref(db, 'claims'));
+        remove(ref(db, 'morfologi_claims'));
         alert("Klaim soal berhasil di-reset!");
       }
     };
