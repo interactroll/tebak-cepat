@@ -255,8 +255,8 @@
 
         const data = docSnap.data();
         
-        // Jika menggunakan sistem link CSV, tarik data terbaru dari link tersebut saat peserta mulai
-        let questionsToUse = data.soal;
+        // Tarik data soal langsung dari link CSV Google Sheets saat peserta mulai ujian
+        let questionsToUse = data.soal || [];
         if(data.csvLink){
           const res = await fetch(data.csvLink);
           if(res.ok){
@@ -280,9 +280,15 @@
                 });
               }
             }
-            if(freshSoal.length > 0) freshSoal.sort((a, b) => Number(a.No) - Number(b.No));
-            if(freshSoal.length > 0) questionsToUse = freshSoal;
+            if(freshSoal.length > 0) {
+              freshSoal.sort((a, b) => Number(a.No) - Number(b.No));
+              questionsToUse = freshSoal;
+            }
           }
+        }
+
+        if(questionsToUse.length === 0){
+          throw new Error("Soal untuk kode ujian ini kosong atau link CSV gagal dibaca.");
         }
 
         state = {
@@ -300,6 +306,8 @@
         renderExam();
         startTimer();
       } catch(err){
+        btn.disabled = false;
+        btn.textContent = "Mulai Ujian";
         renderSetup(err.message);
       }
     });
@@ -400,49 +408,18 @@
       const msgBox = document.getElementById("adminMsg");
 
       saveBtn.disabled = true;
-      saveBtn.textContent = "Memverifikasi Link CSV...";
+      saveBtn.textContent = "Menyimpan...";
 
       try {
-        const response = await fetch(csvLink);
-        if(!response.ok) throw new Error("Gagal mengakses link CSV Google Sheets.");
-        const csvText = await response.text();
-
-        const lines = csvText.split("\n");
-        const parsedSoal = [];
-
-        for(let i = 1; i < lines.length; i++){
-          const line = lines[i].trim();
-          if(!line) continue;
-
-          const cols = line.split(",").map(c => c.trim().replace(/^"|"$/g, ''));
-          if(cols.length >= 8){
-            parsedSoal.push({
-              No: cols[0] || (parsedSoal.length + 1),
-              Teks_Soal: cols[1],
-              Opsi_A: cols[2],
-              Opsi_B: cols[3],
-              Opsi_C: cols[4],
-              Opsi_D: cols[5],
-              Opsi_E: cols[6],
-              Kunci_Jawaban: cols[7].toUpperCase()
-            });
-          }
-        }
-
-        if(parsedSoal.length === 0){
-          throw new Error("Format CSV tidak terbaca atau kosong. Pastikan kolom sesuai (No, Teks_Soal, Opsi_A-E, Kunci_Jawaban).");
-        }
-
-        parsedSoal.sort((a, b) => Number(a.No) - Number(b.No));
-
+        // Simpan langsung secara instan tanpa proses fetch yang bikin lama/nyangkut di admin
         await db.collection("morfologi_tryouts").doc(code).set({
           durasi: durasi,
           csvLink: csvLink,
-          soal: parsedSoal,
+          soal: [],
           updated_at: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        msgBox.textContent = `Sukses! Try Out ${code} berhasil dihubungkan (${parsedSoal.length} soal dimuat dari Sheet).`;
+        msgBox.textContent = `Sukses! Try Out ${code} berhasil disimpan secara instan.`;
         msgBox.style.display = "block";
         document.getElementById("createForm").reset();
       } catch(err){
