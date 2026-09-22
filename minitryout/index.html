@@ -160,7 +160,7 @@
   "use strict";
 
   // ==========================================
-  // KONFIGURASI FIREBASE KAMU (SUDAH DIISI)
+  // KONFIGURASI FIREBASE KAMU (SUDAH TERPASANG)
   // ==========================================
   const firebaseConfig = {
     apiKey: "AIzaSyCfcLnl5HyOZImzZIGqIygcZ2UOZW0W8ww",
@@ -182,7 +182,6 @@
   let state = null;
   let timerIntervalId = null;
 
-  // Router sederhana berdasarkan Hash URL (#admin atau default peserta)
   function router(){
     const hash = window.location.hash;
     if(hash === "#admin"){
@@ -247,7 +246,6 @@
       btn.textContent = "Memuat Soal...";
 
       try {
-        // Ambil data dari Firestore koleksi 'morfologi_tryouts'
         const docRef = db.collection("morfologi_tryouts").doc(code);
         const docSnap = await docRef.get();
 
@@ -256,12 +254,43 @@
         }
 
         const data = docSnap.data();
+        
+        // Jika menggunakan sistem link CSV, tarik data terbaru dari link tersebut saat peserta mulai
+        let questionsToUse = data.soal;
+        if(data.csvLink){
+          const res = await fetch(data.csvLink);
+          if(res.ok){
+            const csvText = await res.text();
+            const lines = csvText.split("\n");
+            const freshSoal = [];
+            for(let i = 1; i < lines.length; i++){
+              const line = lines[i].trim();
+              if(!line) continue;
+              const cols = line.split(",").map(c => c.trim().replace(/^"|"$/g, ''));
+              if(cols.length >= 8){
+                freshSoal.push({
+                  No: cols[0] || (freshSoal.length + 1),
+                  Teks_Soal: cols[1],
+                  Opsi_A: cols[2],
+                  Opsi_B: cols[3],
+                  Opsi_C: cols[4],
+                  Opsi_D: cols[5],
+                  Opsi_E: cols[6],
+                  Kunci_Jawaban: cols[7].toUpperCase()
+                });
+              }
+            }
+            if(freshSoal.length > 0) freshSoal.sort((a, b) => Number(a.No) - Number(b.No));
+            if(freshSoal.length > 0) questionsToUse = freshSoal;
+          }
+        }
+
         state = {
           userName: name,
           code: code,
           durationMinutes: data.durasi,
           endTime: Date.now() + (data.durasi * 60 * 1000),
-          questions: data.soal,
+          questions: questionsToUse,
           answers: {},
           marked: {},
           currentIndex: 0
@@ -336,13 +365,13 @@
         </div>
 
         <div class="custom-card" style="max-width: 100%;">
-          <h5 class="fw-bold mb-3">Buat / Update Try Out Baru</h5>
+          <h5 class="fw-bold mb-3">Hubungkan Try Out via Link CSV Google Sheets</h5>
           <div id="adminMsg" class="alert-box alert alert-success"></div>
           <form id="createForm">
             <div class="row mb-3">
               <div class="col-md-8">
                 <label class="form-label">Kode Try Out (Unik)</label>
-                <input type="text" class="form-control" id="newCode" placeholder="Contoh: UTBK-01" style="text-transform:uppercase" required>
+                <input type="text" class="form-control" id="newCode" placeholder="Contoh: KE1" style="text-transform:uppercase" required>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Durasi (Menit)</label>
@@ -350,11 +379,11 @@
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label">Paste Data Excel (CSV format)</label>
-              <textarea class="form-control" id="csvData" rows="8" placeholder="Format kolom per baris:&#10;Teks Soal, Opsi A, Opsi B, Opsi C, Opsi D, Opsi E, Kunci (A/B/C/D/E)" required></textarea>
-              <small class="text-muted">Pisahkan antar kolom menggunakan koma (,).</small>
+              <label class="form-label">Link CSV Google Sheets</label>
+              <input type="url" class="form-control" id="csvLink" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" required>
+              <small class="text-muted">Cukup masukkan link pub?output=csv dari Google Sheets kamu.</small>
             </div>
-            <button type="submit" class="btn-custom" id="saveBtn">Simpan ke Firebase</button>
+            <button type="submit" class="btn-custom" id="saveBtn">Simpan Link ke Firebase</button>
           </form>
         </div>
       </div>
@@ -366,51 +395,61 @@
       e.preventDefault();
       const code = document.getElementById("newCode").value.trim().toUpperCase();
       const durasi = parseInt(document.getElementById("newDurasi").value, 10);
-      const csvText = document.getElementById("csvData").value.trim();
+      const csvLink = document.getElementById("csvLink").value.trim();
       const saveBtn = document.getElementById("saveBtn");
       const msgBox = document.getElementById("adminMsg");
 
       saveBtn.disabled = true;
-      saveBtn.textContent = "Memproses...";
+      saveBtn.textContent = "Memverifikasi Link CSV...";
 
       try {
+        const response = await fetch(csvLink);
+        if(!response.ok) throw new Error("Gagal mengakses link CSV Google Sheets.");
+        const csvText = await response.text();
+
         const lines = csvText.split("\n");
         const parsedSoal = [];
 
-        lines.forEach((line, index) => {
-          const cols = line.split(",").map(c => c.trim());
-          if(cols.length >= 7){
+        for(let i = 1; i < lines.length; i++){
+          const line = lines[i].trim();
+          if(!line) continue;
+
+          const cols = line.split(",").map(c => c.trim().replace(/^"|"$/g, ''));
+          if(cols.length >= 8){
             parsedSoal.push({
-              No: index + 1,
-              Teks_Soal: cols[0],
-              Opsi_A: cols[1],
-              Opsi_B: cols[2],
-              Opsi_C: cols[3],
-              Opsi_D: cols[4],
-              Opsi_E: cols[5],
-              Kunci_Jawaban: cols[6].toUpperCase()
+              No: cols[0] || (parsedSoal.length + 1),
+              Teks_Soal: cols[1],
+              Opsi_A: cols[2],
+              Opsi_B: cols[3],
+              Opsi_C: cols[4],
+              Opsi_D: cols[5],
+              Opsi_E: cols[6],
+              Kunci_Jawaban: cols[7].toUpperCase()
             });
           }
-        });
+        }
 
         if(parsedSoal.length === 0){
-          throw new Error("Format CSV tidak valid atau kosong. Pastikan ada minimal 7 kolom per baris.");
+          throw new Error("Format CSV tidak terbaca atau kosong. Pastikan kolom sesuai (No, Teks_Soal, Opsi_A-E, Kunci_Jawaban).");
         }
+
+        parsedSoal.sort((a, b) => Number(a.No) - Number(b.No));
 
         await db.collection("morfologi_tryouts").doc(code).set({
           durasi: durasi,
+          csvLink: csvLink,
           soal: parsedSoal,
           updated_at: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        msgBox.textContent = `Sukses! Try Out dengan kode ${code} berhasil disimpan (${parsedSoal.length} soal).`;
+        msgBox.textContent = `Sukses! Try Out ${code} berhasil dihubungkan (${parsedSoal.length} soal dimuat dari Sheet).`;
         msgBox.style.display = "block";
         document.getElementById("createForm").reset();
       } catch(err){
         alert("Gagal: " + err.message);
       } finally {
         saveBtn.disabled = false;
-        saveBtn.textContent = "Simpan ke Firebase";
+        saveBtn.textContent = "Simpan Link ke Firebase";
       }
     });
   }
