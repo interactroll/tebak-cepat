@@ -450,23 +450,13 @@
   const STORAGE_KEY = "cbt_exam_state_v1";
   const OPTION_LETTERS = ["A", "B", "C", "D", "E"];
 
+  // 👇 MASUKKAN LINK API MASTER DARI FILE "ADMIN MINI TO" DI SINI
+  const URL_API_MASTER = "https://script.google.com/macros/s/AKfycbwR3P3gKJALroDK9t-EH81jWwrWVLqLgX4gUdywM2REGfYbkWk7GvPmi-ccow1LHkE8fg/exec"; 
+
   const appEl = document.getElementById("app");
   let timerIntervalId = null;   // handle for countdown interval
   let lastResult = null;        // holds computed result, not persisted
 
-  /**
-   * Shape of the persisted exam state object:
-   * {
-   *   userName: string,
-   *   apiLink: string,
-   *   durationMinutes: number,
-   *   endTime: number (epoch ms) - when the exam must auto-submit,
-   *   questions: [{ No, Teks_Soal, Opsi_A..E, Kunci_Jawaban }],
-   *   answers: { [questionIndex]: "A"|"B"|"C"|"D"|"E" },
-   *   marked: { [questionIndex]: true },
-   *   currentIndex: number
-   * }
-   */
   let state = null;
 
   // ---------------------------------------------------------------------
@@ -526,7 +516,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // 4. VIEW: SETUP (LOGIN)
+  // 4. VIEW: SETUP (LOGIN DENGAN KODE)
   // ---------------------------------------------------------------------
   function renderSetup(errorMessage){
     appEl.innerHTML = `
@@ -534,22 +524,18 @@
         <div class="setup-card">
           <div class="setup-logo"><i class="bi bi-pencil-square"></i></div>
           <h1>Try Out System</h1>
-          <p class="subtitle">Masukkan data untuk memulai sesi ujian Anda.</p>
+          <p class="subtitle">Masukkan nama dan kode ujian untuk mulai.</p>
 
           <div id="setupAlert" class="setup-alert alert alert-danger" role="alert"></div>
 
           <form id="setupForm" novalidate>
             <div class="mb-3">
               <label class="form-label" for="inputNama">Nama Peserta</label>
-              <input type="text" class="form-control" id="inputNama" placeholder="Contoh: Budi Santoso" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="inputApiLink">Link API Soal (Google Apps Script)</label>
-              <input type="url" class="form-control" id="inputApiLink" placeholder="https://script.google.com/macros/s/..." required>
+              <input type="text" class="form-control" id="inputNama" placeholder="Contoh: Budi Santoso" autocomplete="off" required>
             </div>
             <div class="mb-4">
-              <label class="form-label" for="inputDurasi">Durasi Ujian (menit)</label>
-              <input type="number" class="form-control" id="inputDurasi" value="90" min="1" max="600" required>
+              <label class="form-label" for="inputKode">Kode Try Out</label>
+              <input type="text" class="form-control" id="inputKode" placeholder="Contoh: KE1" autocomplete="off" style="text-transform: uppercase;" required>
             </div>
             <button type="submit" class="btn-primary-custom" id="startBtn">
               <span id="startBtnText">Mulai Ujian</span>
@@ -572,11 +558,10 @@
     e.preventDefault();
 
     const userName = document.getElementById("inputNama").value.trim();
-    const apiLink = document.getElementById("inputApiLink").value.trim();
-    const durationMinutes = parseInt(document.getElementById("inputDurasi").value, 10);
+    const kodeTO = document.getElementById("inputKode").value.trim().toUpperCase();
 
-    if(!userName || !apiLink || !durationMinutes || durationMinutes <= 0){
-      renderSetup("Mohon lengkapi semua isian dengan benar.");
+    if(!userName || !kodeTO){
+      renderSetup("Mohon isi Nama dan Kode Try Out.");
       return;
     }
 
@@ -586,27 +571,43 @@
     startBtnText.innerHTML = `
       <span class="spinner-wrap">
         <span class="spinner-border spinner-border-sm" role="status"></span>
-        Memuat soal...
+        Memverifikasi Kode...
       </span>
     `;
 
     try{
-      const response = await fetch(apiLink, { method: "GET" });
-      if(!response.ok){
-        throw new Error("Server API mengembalikan status " + response.status);
+      // 1. Cek kode ke Sheet Master Admin
+      const resMaster = await fetch(URL_API_MASTER, { method: "GET" });
+      if(!resMaster.ok) throw new Error("Gagal terhubung ke server validasi kode.");
+      const dbKode = await resMaster.json();
+
+      const toData = dbKode[kodeTO];
+      if(!toData || !toData.url){
+        throw new Error("Kode Try Out tidak ditemukan atau tidak valid.");
       }
+
+      startBtnText.innerHTML = `
+        <span class="spinner-wrap">
+          <span class="spinner-border spinner-border-sm" role="status"></span>
+          Mengunduh Soal...
+        </span>
+      `;
+
+      // 2. Tarik soal berdasarkan link dari Sheet Master
+      const response = await fetch(toData.url, { method: "GET" });
+      if(!response.ok) throw new Error("Server API soal mengembalikan status " + response.status);
       const data = await response.json();
 
       if(!Array.isArray(data) || data.length === 0){
         throw new Error("Format data soal tidak valid atau kosong.");
       }
 
-      // Build fresh exam state
+      // 3. Build fresh exam state
       state = {
         userName: userName,
-        apiLink: apiLink,
-        durationMinutes: durationMinutes,
-        endTime: Date.now() + durationMinutes * 60 * 1000,
+        apiLink: toData.url,
+        durationMinutes: toData.durasi,
+        endTime: Date.now() + toData.durasi * 60 * 1000,
         questions: data,
         answers: {},
         marked: {},
@@ -619,7 +620,7 @@
 
     }catch(err){
       console.error("Gagal memuat soal:", err);
-      renderSetup("Gagal memuat soal. Periksa kembali link API Anda. (" + err.message + ")");
+      renderSetup("Gagal memuat soal. (" + err.message + ")");
     }
   }
 
@@ -723,11 +724,10 @@
     `;
 
     attachExamListeners();
-    updateTimerDisplay(); // immediate paint, interval will keep updating
+    updateTimerDisplay();
   }
 
   function attachExamListeners(){
-    // Option selection
     document.querySelectorAll("#optionsContainer .option-item").forEach(el => {
       el.addEventListener("click", () => {
         const letter = el.getAttribute("data-letter");
@@ -737,13 +737,11 @@
       });
     });
 
-    // Prev / Next
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
     if(prevBtn) prevBtn.addEventListener("click", () => navigateTo(state.currentIndex - 1));
     if(nextBtn) nextBtn.addEventListener("click", () => navigateTo(state.currentIndex + 1));
 
-    // Mark for review toggle
     document.getElementById("markBtn").addEventListener("click", () => {
       if(state.marked[state.currentIndex]){
         delete state.marked[state.currentIndex];
@@ -754,7 +752,6 @@
       renderExam();
     });
 
-    // Nav grid item click
     document.querySelectorAll(".nav-grid-item").forEach(el => {
       el.addEventListener("click", () => {
         const idx = parseInt(el.getAttribute("data-index"), 10);
@@ -762,7 +759,6 @@
       });
     });
 
-    // Submit button -> open confirmation modal
     document.getElementById("submitExamBtn").addEventListener("click", () => {
       const total = state.questions.length;
       const answeredCount = Object.keys(state.answers).length;
@@ -794,7 +790,7 @@
       if(remaining <= 0){
         clearInterval(timerIntervalId);
         timerIntervalId = null;
-        submitExam(true); // auto-submit, no confirmation
+        submitExam(true);
       }
     }, 1000);
   }
@@ -895,10 +891,9 @@
   }
 
   // ---------------------------------------------------------------------
-  // 9. INIT — RESUME OR FRESH START
+  // 9. INIT
   // ---------------------------------------------------------------------
   function init(){
-    // Bind global submit-confirmation button once
     document.getElementById("confirmSubmitBtn").addEventListener("click", () => {
       const modalEl = document.getElementById("submitModal");
       const modal = bootstrap.Modal.getInstance(modalEl);
@@ -913,13 +908,11 @@
       const remaining = state.endTime - Date.now();
 
       if(remaining <= 0){
-        // Time already expired while away — auto-submit immediately
         lastResult = calculateResult();
         lastResult.isAuto = true;
         clearState();
         renderResult(lastResult);
       }else{
-        // Resume exam exactly where the user left off
         renderExam();
         startTimer();
       }
