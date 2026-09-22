@@ -160,15 +160,17 @@
   "use strict";
 
   // ==========================================
-  // KONFIGURASI FIREBASE KAMU DI SINI
+  // KONFIGURASI FIREBASE KAMU (SUDAH DIISI)
   // ==========================================
   const firebaseConfig = {
-    apiKey: "GANTI_DENGAN_API_KEY_KAMU",
-    authDomain: "ganti-dengan-project.firebaseapp.com",
-    projectId: "ganti-dengan-project-id",
-    storageBucket: "ganti-dengan.appspot.com",
-    messagingSenderId: "xxxx",
-    appId: "xxxx"
+    apiKey: "AIzaSyCfcLnl5HyOZImzZIGqIygcZ2UOZW0W8ww",
+    authDomain: "minitryout-92efd.firebaseapp.com",
+    databaseURL: "https://minitryout-92efd-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "minitryout-92efd",
+    storageBucket: "minitryout-92efd.firebasestorage.app",
+    messagingSenderId: "624696081103",
+    appId: "1:624696081103:web:960a65a4c4335c61ab15ba",
+    measurementId: "G-BMCNX53L3Z"
   };
 
   firebase.initializeApp(firebaseConfig);
@@ -372,12 +374,10 @@
       saveBtn.textContent = "Memproses...";
 
       try {
-        // Parser CSV sederhana baris demi baris
         const lines = csvText.split("\n");
         const parsedSoal = [];
 
         lines.forEach((line, index) => {
-          // Pisahkan berdasarkan koma (mengabaikan spasi tepi)
           const cols = line.split(",").map(c => c.trim());
           if(cols.length >= 7){
             parsedSoal.push({
@@ -397,7 +397,6 @@
           throw new Error("Format CSV tidak valid atau kosong. Pastikan ada minimal 7 kolom per baris.");
         }
 
-        // Kirim ke Firestore
         await db.collection("morfologi_tryouts").doc(code).set({
           durasi: durasi,
           soal: parsedSoal,
@@ -483,7 +482,6 @@
       </div>
     `;
 
-    // Event Listeners Ujian
     document.querySelectorAll(".option-item").forEach(el => {
       el.addEventListener("click", () => {
         state.answers[idx] = el.getAttribute("data-letter");
@@ -583,7 +581,6 @@
     `;
   }
 
-  // Helpers
   function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
   function loadState(){ 
     const r = localStorage.getItem(STORAGE_KEY); 
