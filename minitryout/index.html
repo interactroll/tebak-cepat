@@ -26,7 +26,6 @@
     --success: #16a34a;
     --danger: #dc2626;
     --warning: #f59e0b;
-    --warning-soft: #fffbeb;
     --radius: 14px;
     --shadow-sm: 0 1px 2px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,.06);
     --shadow-md: 0 4px 16px rgba(15,23,42,.08);
@@ -34,7 +33,6 @@
   }
 
   *{ box-sizing: border-box; }
-
   body{
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg);
@@ -42,24 +40,23 @@
     min-height: 100vh;
   }
 
-  /* ============== SETUP VIEW ============== */
-  .setup-wrapper{
+  .auth-wrapper, .setup-wrapper, .result-wrapper{
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 24px;
   }
-  .setup-card{
+  .custom-card{
     width: 100%;
-    max-width: 460px;
+    max-width: 500px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow-md);
     padding: 40px 36px;
   }
-  .setup-logo{
+  .system-logo{
     width: 44px; height: 44px;
     border-radius: 10px;
     background: var(--primary);
@@ -68,23 +65,7 @@
     font-size: 20px;
     margin-bottom: 20px;
   }
-  .setup-card h1{
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 4px;
-  }
-  .setup-card p.subtitle{
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 28px;
-  }
-  .form-label{
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
+  .form-label{ font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
   .form-control, .form-control:focus{
     border-radius: 10px;
     border: 1px solid var(--border);
@@ -92,11 +73,8 @@
     font-size: 14px;
     box-shadow: none;
   }
-  .form-control:focus{
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
-  .btn-primary-custom{
+  .form-control:focus{ border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .btn-custom{
     background: var(--primary);
     color: #fff;
     border: none;
@@ -107,309 +85,53 @@
     width: 100%;
     transition: opacity .15s ease;
   }
-  .btn-primary-custom:hover{ opacity: .88; color:#fff; }
-  .btn-primary-custom:disabled{ opacity: .6; }
+  .btn-custom:hover{ opacity: .88; color:#fff; }
+  .alert-box{ font-size: 13px; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; display: none; }
 
-  .setup-alert{
-    font-size: 13px;
-    border-radius: 10px;
-    padding: 10px 14px;
-    margin-bottom: 16px;
-    display: none;
-  }
-
-  /* ============== EXAM VIEW ============== */
-  .exam-navbar{
-    position: sticky;
-    top: 0;
-    z-index: 1030;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 20px;
-  }
-  .exam-navbar .brand{
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: -0.01em;
-    display:flex; align-items:center; gap:8px;
-  }
-  .exam-navbar .participant-name{
-    font-size: 13px;
-    color: var(--text-muted);
-  }
+  /* Exam Arena Styles */
+  .exam-navbar{ position: sticky; top: 0; z-index: 1030; background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 20px; }
   .timer-badge{
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
-    font-size: 15px;
-    background: var(--accent-soft);
-    color: var(--accent);
-    border-radius: 8px;
-    padding: 6px 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: background .2s, color .2s;
+    font-variant-numeric: tabular-nums; font-weight: 700; font-size: 15px;
+    background: var(--accent-soft); color: var(--accent); border-radius: 8px; padding: 6px 14px;
+    display: inline-flex; align-items: center; gap: 6px;
   }
-  .timer-badge.timer-danger{
-    background: #fef2f2;
-    color: var(--danger);
-    animation: pulse-danger 1s infinite;
-  }
-  @keyframes pulse-danger{
-    0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,.35); }
-    50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
-  }
-  .btn-submit{
-    background: var(--danger);
-    border: none;
-    color: #fff;
-    font-weight: 600;
-    font-size: 13px;
-    border-radius: 8px;
-    padding: 8px 16px;
-  }
-  .btn-submit:hover{ background:#b91c1c; color:#fff; }
-
-  .exam-body{
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 24px 20px 100px;
-  }
-
-  .question-panel{
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    padding: 28px;
-    min-height: 420px;
-    display: flex;
-    flex-direction: column;
-  }
-  .question-index-badge{
-    display:inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent);
-    background: var(--accent-soft);
-    border-radius: 6px;
-    padding: 4px 10px;
-    margin-bottom: 14px;
-  }
-  .question-text{
-    font-size: 17px;
-    font-weight: 500;
-    line-height: 1.6;
-    color: var(--text);
-    margin-bottom: 24px;
-    white-space: pre-wrap;
-  }
+  .timer-badge.timer-danger{ background: #fef2f2; color: var(--danger); animation: pulse-danger 1s infinite; }
+  @keyframes pulse-danger{ 0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,.35); } 50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); } }
+  
+  .exam-body{ max-width: 1180px; margin: 0 auto; padding: 24px 20px 100px; }
+  .question-panel{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 28px; min-height: 420px; display: flex; flex-direction: column; }
+  .question-index-badge{ display:inline-block; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 4px 10px; margin-bottom: 14px; }
+  .question-text{ font-size: 17px; font-weight: 500; line-height: 1.6; color: var(--text); margin-bottom: 24px; white-space: pre-wrap; }
 
   .option-item{
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 13px 16px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: border-color .15s, background .15s;
-    font-size: 14.5px;
-    line-height: 1.5;
+    display: flex; align-items: flex-start; gap: 12px;
+    border: 1.5px solid var(--border); border-radius: 10px; padding: 13px 16px; margin-bottom: 10px; cursor: pointer; transition: all .15s;
   }
-  .option-item:hover{
-    border-color: #c7cdd6;
-    background: #fafafa;
-  }
-  .option-item.selected{
-    border-color: var(--accent);
-    background: var(--accent-soft);
-  }
-  .option-letter{
-    flex: 0 0 26px;
-    height: 26px;
-    width: 26px;
-    border-radius: 7px;
-    border: 1.5px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 12.5px;
-    color: var(--text-muted);
-    transition: all .15s;
-  }
-  .option-item.selected .option-letter{
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .option-text{ padding-top: 3px; }
-
-  .question-footer-actions{
-    margin-top: auto;
-    padding-top: 20px;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .btn-nav-question{
-    border-radius: 9px;
-    font-size: 13.5px;
-    font-weight: 600;
-    padding: 9px 16px;
-    border: 1.5px solid var(--border);
-    background: #fff;
-    color: var(--text);
-  }
-  .btn-nav-question:hover{ background:#f4f4f5; }
-  .btn-nav-question:disabled{ opacity:.4; }
-  .btn-mark-review{
-    border-radius: 9px;
-    font-size: 13.5px;
-    font-weight: 600;
-    padding: 9px 16px;
-    border: 1.5px solid var(--warning);
-    background: #fff;
-    color: var(--warning);
-  }
-  .btn-mark-review.active{
-    background: var(--warning);
-    color: #fff;
-  }
-
-  /* Nav grid sidebar */
-  .nav-sidebar{
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    padding: 20px;
-  }
-  .nav-sidebar h6{
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: var(--text-muted);
-    margin-bottom: 14px;
-  }
-  .nav-grid{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
-    gap: 8px;
-    max-height: 360px;
-    overflow-y: auto;
-    padding-right: 4px;
-  }
-  .nav-grid-item{
-    aspect-ratio: 1/1;
-    border-radius: 8px;
-    border: 1.5px solid var(--border);
-    background: #fff;
-    color: var(--text-muted);
-    font-size: 12.5px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all .12s;
-  }
-  .nav-grid-item:hover{ border-color: var(--accent); }
-  .nav-grid-item.answered{
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .nav-grid-item.marked{
-    background: var(--warning);
-    border-color: var(--warning);
-    color: #fff;
-  }
-  .nav-grid-item.current{
-    outline: 2.5px solid var(--primary);
-    outline-offset: 1.5px;
-  }
-  .nav-legend{
-    margin-top: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 12.5px;
-    color: var(--text-muted);
-  }
-  .nav-legend .dot{
-    width: 12px; height: 12px;
-    border-radius: 4px;
-    display: inline-block;
-    margin-right: 8px;
-    border: 1.5px solid var(--border);
-  }
-  .nav-summary{
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-    font-size: 12.5px;
-  }
-  .nav-summary div{ display:flex; justify-content: space-between; margin-bottom:6px; color: var(--text-muted); }
-  .nav-summary strong{ color: var(--text); }
-
-  /* ============== RESULT VIEW ============== */
-  .result-wrapper{
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .result-card{
-    width: 100%;
-    max-width: 560px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
-    padding: 44px 40px;
-    text-align: center;
-  }
-  .result-score{
-    font-size: 56px;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: var(--primary);
-    line-height: 1;
-    margin: 10px 0 4px;
-  }
-  .result-stats{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin: 28px 0 8px;
-  }
-  .stat-box{
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 8px;
-  }
+  .option-item:hover{ border-color: #c7cdd6; background: #fafafa; }
+  .option-item.selected{ border-color: var(--accent); background: var(--accent-soft); }
+  .option-letter{ flex: 0 0 26px; height: 26px; width: 26px; border-radius: 7px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12.5px; color: var(--text-muted); }
+  .option-item.selected .option-letter{ background: var(--accent); border-color: var(--accent); color: #fff; }
+  
+  .nav-sidebar{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 20px; }
+  .nav-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 8px; max-height: 360px; overflow-y: auto; }
+  .nav-grid-item{ aspect-ratio: 1/1; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; color: var(--text-muted); font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .nav-grid-item.answered{ background: var(--accent); border-color: var(--accent); color: #fff; }
+  .nav-grid-item.marked{ background: var(--warning); border-color: var(--warning); color: #fff; }
+  .nav-grid-item.current{ outline: 2.5px solid var(--primary); outline-offset: 1.5px; }
+  
+  .result-score{ font-size: 56px; font-weight: 800; color: var(--primary); line-height: 1; margin: 10px 0 4px; }
+  .result-stats{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 28px 0 8px; }
+  .stat-box{ border: 1px solid var(--border); border-radius: 10px; padding: 14px 8px; text-align: center; }
   .stat-box .num{ font-size: 20px; font-weight: 700; }
-  .stat-box .label{ font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
   .stat-box.correct .num{ color: var(--success); }
   .stat-box.wrong .num{ color: var(--danger); }
   .stat-box.empty .num{ color: var(--text-muted); }
-
-  .spinner-wrap{
-    display:flex; align-items:center; justify-content:center; gap:10px;
-  }
-
-  @media (max-width: 991px){
-    .exam-body{ padding-bottom: 30px; }
-    .nav-sidebar{ margin-top: 20px; }
-    .nav-grid{ max-height: none; }
-  }
 </style>
+
+<!-- Firebase SDKs (Compat v9) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -421,508 +143,456 @@
     <div class="modal-content" style="border-radius:14px; border:none;">
       <div class="modal-body p-4">
         <h5 class="fw-bold mb-2">Kumpulkan Jawaban?</h5>
-        <p class="text-muted small mb-3" id="submitModalDesc">Pastikan Anda telah memeriksa seluruh jawaban sebelum mengumpulkan.</p>
+        <p class="text-muted small mb-3" id="submitModalDesc">Pastikan jawaban sudah dicek.</p>
         <div class="d-flex gap-2 justify-content-end">
-          <button type="button" class="btn btn-nav-question" data-bs-dismiss="modal">Batal</button>
-          <button type="button" class="btn btn-submit" id="confirmSubmitBtn">Ya, Kumpulkan</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-danger btn-sm px-3" id="confirmSubmitBtn">Ya, Kumpulkan</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Bootstrap JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-/* =========================================================================
-   TRY OUT SYSTEM — CBT ONLINE
-   Single-file Vanilla JS SPA. State persisted in localStorage for resilience
-   against reload / connection loss.
-   ========================================================================= */
-
 (function(){
   "use strict";
 
-  // ---------------------------------------------------------------------
-  // 1. CONSTANTS & STATE
-  // ---------------------------------------------------------------------
-  const STORAGE_KEY = "cbt_exam_state_v1";
-  const OPTION_LETTERS = ["A", "B", "C", "D", "E"];
+  // ==========================================
+  // KONFIGURASI FIREBASE KAMU DI SINI
+  // ==========================================
+  const firebaseConfig = {
+    apiKey: "GANTI_DENGAN_API_KEY_KAMU",
+    authDomain: "ganti-dengan-project.firebaseapp.com",
+    projectId: "ganti-dengan-project-id",
+    storageBucket: "ganti-dengan.appspot.com",
+    messagingSenderId: "xxxx",
+    appId: "xxxx"
+  };
 
-  // 👇 MASUKKAN LINK API MASTER DARI FILE "ADMIN MINI TO" DI SINI
-  const URL_API_MASTER = "https://script.google.com/macros/s/AKfycbwR3P3gKJALroDK9t-EH81jWwrWVLqLgX4gUdywM2REGfYbkWk7GvPmi-ccow1LHkE8fg/exec"; 
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
+  const STORAGE_KEY = "cbt_exam_state_morfologi";
   const appEl = document.getElementById("app");
-  let timerIntervalId = null;   // handle for countdown interval
-  let lastResult = null;        // holds computed result, not persisted
-
   let state = null;
+  let timerIntervalId = null;
 
-  // ---------------------------------------------------------------------
-  // 2. PERSISTENCE HELPERS
-  // ---------------------------------------------------------------------
-  function saveState(){
-    try{
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }catch(err){
-      console.error("Gagal menyimpan state ke localStorage:", err);
+  // Router sederhana berdasarkan Hash URL (#admin atau default peserta)
+  function router(){
+    const hash = window.location.hash;
+    if(hash === "#admin"){
+      renderAdminAuthOrDashboard();
+    } else {
+      initParticipantApp();
     }
   }
 
-  function loadState(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return null;
-      return JSON.parse(raw);
-    }catch(err){
-      console.error("Gagal membaca state dari localStorage:", err);
-      return null;
+  window.addEventListener("hashchange", router);
+
+  // ==========================================
+  // 1. HALAMAN PESERTA (DEFAULT)
+  // ==========================================
+  function initParticipantApp(){
+    const saved = loadState();
+    if(saved && saved.questions && saved.endTime){
+      state = saved;
+      if(state.endTime - Date.now() <= 0){
+        clearState();
+        renderSetup("Waktu ujian telah habis.");
+      } else {
+        renderExam();
+        startTimer();
+      }
+    } else {
+      renderSetup();
     }
   }
 
-  function clearState(){
-    localStorage.removeItem(STORAGE_KEY);
-    state = null;
-  }
-
-  // ---------------------------------------------------------------------
-  // 3. UTILITIES
-  // ---------------------------------------------------------------------
-  function formatTime(ms){
-    if(ms < 0) ms = 0;
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
-  }
-
-  function escapeHtml(str){
-    if(str === undefined || str === null) return "";
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
-  function getOptionText(question, letter){
-    return question["Opsi_" + letter];
-  }
-
-  function hasOption(question, letter){
-    const val = getOptionText(question, letter);
-    return val !== undefined && val !== null && String(val).trim() !== "";
-  }
-
-  // ---------------------------------------------------------------------
-  // 4. VIEW: SETUP (LOGIN DENGAN KODE)
-  // ---------------------------------------------------------------------
-  function renderSetup(errorMessage){
+  function renderSetup(errText){
     appEl.innerHTML = `
       <div class="setup-wrapper">
-        <div class="setup-card">
-          <div class="setup-logo"><i class="bi bi-pencil-square"></i></div>
-          <h1>Try Out System</h1>
-          <p class="subtitle">Masukkan nama dan kode ujian untuk mulai.</p>
-
-          <div id="setupAlert" class="setup-alert alert alert-danger" role="alert"></div>
-
-          <form id="setupForm" novalidate>
+        <div class="custom-card">
+          <div class="system-logo"><i class="bi bi-mortarboard-fill"></i></div>
+          <h1 class="fw-bold fs-4 mb-1">Try Out Peserta</h1>
+          <p class="text-muted small mb-4">Masukkan data diri dan kode ujian dari admin.</p>
+          <div id="alertBox" class="alert-box alert alert-danger" style="display:${errText?'block':'none'}">${errText||''}</div>
+          <form id="participantForm">
             <div class="mb-3">
-              <label class="form-label" for="inputNama">Nama Peserta</label>
-              <input type="text" class="form-control" id="inputNama" placeholder="Contoh: Budi Santoso" autocomplete="off" required>
+              <label class="form-label">Nama Lengkap</label>
+              <input type="text" class="form-control" id="pName" placeholder="Contoh: Siti Rahma" required>
             </div>
             <div class="mb-4">
-              <label class="form-label" for="inputKode">Kode Try Out</label>
-              <input type="text" class="form-control" id="inputKode" placeholder="Contoh: KE1" autocomplete="off" style="text-transform: uppercase;" required>
+              <label class="form-label">Kode Try Out</label>
+              <input type="text" class="form-control" id="pCode" placeholder="Contoh: UTBK-01" style="text-transform:uppercase" required>
             </div>
-            <button type="submit" class="btn-primary-custom" id="startBtn">
-              <span id="startBtnText">Mulai Ujian</span>
-            </button>
+            <button type="submit" class="btn-custom" id="startBtn">Mulai Ujian</button>
+          </form>
+          <div class="text-center mt-3"><a href="#admin" class="text-muted small text-decoration-none">Login Admin</a></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("participantForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("pName").value.trim();
+      const code = document.getElementById("pCode").value.trim().toUpperCase();
+      const btn = document.getElementById("startBtn");
+
+      btn.disabled = true;
+      btn.textContent = "Memuat Soal...";
+
+      try {
+        // Ambil data dari Firestore koleksi 'morfologi_tryouts'
+        const docRef = db.collection("morfologi_tryouts").doc(code);
+        const docSnap = await docRef.get();
+
+        if(!docSnap.exists){
+          throw new Error("Kode Try Out tidak ditemukan.");
+        }
+
+        const data = docSnap.data();
+        state = {
+          userName: name,
+          code: code,
+          durationMinutes: data.durasi,
+          endTime: Date.now() + (data.durasi * 60 * 1000),
+          questions: data.soal,
+          answers: {},
+          marked: {},
+          currentIndex: 0
+        };
+
+        saveState();
+        renderExam();
+        startTimer();
+      } catch(err){
+        renderSetup(err.message);
+      }
+    });
+  }
+
+  // ==========================================
+  // 2. HALAMAN ADMIN (TERSEMBUNYI DI #admin)
+  // ==========================================
+  function renderAdminAuthOrDashboard(){
+    auth.onAuthStateChanged(user => {
+      if(user){
+        renderAdminDashboard(user);
+      } else {
+        renderAdminLogin();
+      }
+    });
+  }
+
+  function renderAdminLogin(){
+    appEl.innerHTML = `
+      <div class="auth-wrapper">
+        <div class="custom-card">
+          <div class="system-logo bg-danger"><i class="bi bi-shield-lock-fill"></i></div>
+          <h1 class="fw-bold fs-4 mb-1">Admin Control</h1>
+          <p class="text-muted small mb-4">Masuk untuk mengelola bank soal.</p>
+          <div id="adminAlert" class="alert-box alert alert-danger"></div>
+          <form id="loginForm">
+            <div class="mb-3">
+              <label class="form-label">Email Admin</label>
+              <input type="email" class="form-control" id="adminEmail" required>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-control" id="adminPass" required>
+            </div>
+            <button type="submit" class="btn-custom bg-danger" id="loginBtn">Login Admin</button>
+          </form>
+          <div class="text-center mt-3"><a href="#" class="text-muted small text-decoration-none">Kembali ke Peserta</a></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("adminEmail").value;
+      const pass = document.getElementById("adminPass").value;
+      try {
+        await auth.signInWithEmailAndPassword(email, pass);
+      } catch(err){
+        const box = document.getElementById("adminAlert");
+        box.textContent = err.message;
+        box.style.display = "block";
+      }
+    });
+  }
+
+  function renderAdminDashboard(user){
+    appEl.innerHTML = `
+      <div class="container py-5" style="max-width: 800px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="fw-bold m-0">Admin Dashboard</h3>
+          <button class="btn btn-outline-danger btn-sm" id="logoutBtn">Logout</button>
+        </div>
+
+        <div class="custom-card" style="max-width: 100%;">
+          <h5 class="fw-bold mb-3">Buat / Update Try Out Baru</h5>
+          <div id="adminMsg" class="alert-box alert alert-success"></div>
+          <form id="createForm">
+            <div class="row mb-3">
+              <div class="col-md-8">
+                <label class="form-label">Kode Try Out (Unik)</label>
+                <input type="text" class="form-control" id="newCode" placeholder="Contoh: UTBK-01" style="text-transform:uppercase" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Durasi (Menit)</label>
+                <input type="number" class="form-control" id="newDurasi" value="90" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Paste Data Excel (CSV format)</label>
+              <textarea class="form-control" id="csvData" rows="8" placeholder="Format kolom per baris:&#10;Teks Soal, Opsi A, Opsi B, Opsi C, Opsi D, Opsi E, Kunci (A/B/C/D/E)" required></textarea>
+              <small class="text-muted">Pisahkan antar kolom menggunakan koma (,).</small>
+            </div>
+            <button type="submit" class="btn-custom" id="saveBtn">Simpan ke Firebase</button>
           </form>
         </div>
       </div>
     `;
 
-    if(errorMessage){
-      const alertEl = document.getElementById("setupAlert");
-      alertEl.textContent = errorMessage;
-      alertEl.style.display = "block";
-    }
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.signOut());
 
-    document.getElementById("setupForm").addEventListener("submit", handleSetupSubmit);
+    document.getElementById("createForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const code = document.getElementById("newCode").value.trim().toUpperCase();
+      const durasi = parseInt(document.getElementById("newDurasi").value, 10);
+      const csvText = document.getElementById("csvData").value.trim();
+      const saveBtn = document.getElementById("saveBtn");
+      const msgBox = document.getElementById("adminMsg");
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Memproses...";
+
+      try {
+        // Parser CSV sederhana baris demi baris
+        const lines = csvText.split("\n");
+        const parsedSoal = [];
+
+        lines.forEach((line, index) => {
+          // Pisahkan berdasarkan koma (mengabaikan spasi tepi)
+          const cols = line.split(",").map(c => c.trim());
+          if(cols.length >= 7){
+            parsedSoal.push({
+              No: index + 1,
+              Teks_Soal: cols[0],
+              Opsi_A: cols[1],
+              Opsi_B: cols[2],
+              Opsi_C: cols[3],
+              Opsi_D: cols[4],
+              Opsi_E: cols[5],
+              Kunci_Jawaban: cols[6].toUpperCase()
+            });
+          }
+        });
+
+        if(parsedSoal.length === 0){
+          throw new Error("Format CSV tidak valid atau kosong. Pastikan ada minimal 7 kolom per baris.");
+        }
+
+        // Kirim ke Firestore
+        await db.collection("morfologi_tryouts").doc(code).set({
+          durasi: durasi,
+          soal: parsedSoal,
+          updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        msgBox.textContent = `Sukses! Try Out dengan kode ${code} berhasil disimpan (${parsedSoal.length} soal).`;
+        msgBox.style.display = "block";
+        document.getElementById("createForm").reset();
+      } catch(err){
+        alert("Gagal: " + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Simpan ke Firebase";
+      }
+    });
   }
 
-  async function handleSetupSubmit(e){
-    e.preventDefault();
-
-    const userName = document.getElementById("inputNama").value.trim();
-    const kodeTO = document.getElementById("inputKode").value.trim().toUpperCase();
-
-    if(!userName || !kodeTO){
-      renderSetup("Mohon isi Nama dan Kode Try Out.");
-      return;
-    }
-
-    const startBtn = document.getElementById("startBtn");
-    const startBtnText = document.getElementById("startBtnText");
-    startBtn.disabled = true;
-    startBtnText.innerHTML = `
-      <span class="spinner-wrap">
-        <span class="spinner-border spinner-border-sm" role="status"></span>
-        Memverifikasi Kode...
-      </span>
-    `;
-
-    try{
-      // 1. Cek kode ke Sheet Master Admin
-      const resMaster = await fetch(URL_API_MASTER, { method: "GET" });
-      if(!resMaster.ok) throw new Error("Gagal terhubung ke server validasi kode.");
-      const dbKode = await resMaster.json();
-
-      const toData = dbKode[kodeTO];
-      if(!toData || !toData.url){
-        throw new Error("Kode Try Out tidak ditemukan atau tidak valid.");
-      }
-
-      startBtnText.innerHTML = `
-        <span class="spinner-wrap">
-          <span class="spinner-border spinner-border-sm" role="status"></span>
-          Mengunduh Soal...
-        </span>
-      `;
-
-      // 2. Tarik soal berdasarkan link dari Sheet Master
-      const response = await fetch(toData.url, { method: "GET" });
-      if(!response.ok) throw new Error("Server API soal mengembalikan status " + response.status);
-      const data = await response.json();
-
-      if(!Array.isArray(data) || data.length === 0){
-        throw new Error("Format data soal tidak valid atau kosong.");
-      }
-
-      // 3. Build fresh exam state
-      state = {
-        userName: userName,
-        apiLink: toData.url,
-        durationMinutes: toData.durasi,
-        endTime: Date.now() + toData.durasi * 60 * 1000,
-        questions: data,
-        answers: {},
-        marked: {},
-        currentIndex: 0
-      };
-
-      saveState();
-      renderExam();
-      startTimer();
-
-    }catch(err){
-      console.error("Gagal memuat soal:", err);
-      renderSetup("Gagal memuat soal. (" + err.message + ")");
-    }
-  }
-
-  // ---------------------------------------------------------------------
-  // 5. VIEW: EXAM ARENA
-  // ---------------------------------------------------------------------
+  // ==========================================
+  // 3. ARENA UJIAN & HASIL (SISWA)
+  // ==========================================
   function renderExam(){
     const total = state.questions.length;
-    const currentIndex = state.currentIndex;
-    const question = state.questions[currentIndex];
-    const selectedAnswer = state.answers[currentIndex];
-    const isMarked = !!state.marked[currentIndex];
+    const idx = state.currentIndex;
+    const q = state.questions[idx];
+    const currentAns = state.answers[idx];
+    const isMarked = !!state.marked[idx];
 
-    const answeredCount = Object.keys(state.answers).length;
-    const markedCount = Object.keys(state.marked).filter(k => state.marked[k]).length;
-    const unansweredCount = total - answeredCount;
-
-    // Build option rows
-    let optionsHtml = "";
-    OPTION_LETTERS.forEach(letter => {
-      if(!hasOption(question, letter)) return;
-      const isSelected = selectedAnswer === letter;
-      optionsHtml += `
-        <div class="option-item ${isSelected ? 'selected' : ''}" data-letter="${letter}">
+    let optHtml = "";
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      if(!q["Opsi_" + letter]) return;
+      const isSel = currentAns === letter;
+      optHtml += `
+        <div class="option-item ${isSel?'selected':''}" data-letter="${letter}">
           <div class="option-letter">${letter}</div>
-          <div class="option-text">${escapeHtml(getOptionText(question, letter))}</div>
+          <div class="flex-grow-1">${escapeHtml(q["Opsi_" + letter])}</div>
         </div>
       `;
     });
 
-    // Build navigation grid
     let gridHtml = "";
-    for(let i = 0; i < total; i++){
-      const cls = [];
+    for(let i=0; i<total; i++){
+      let cls = [];
       if(state.marked[i]) cls.push("marked");
       else if(state.answers[i]) cls.push("answered");
-      if(i === currentIndex) cls.push("current");
-      gridHtml += `<div class="nav-grid-item ${cls.join(' ')}" data-index="${i}">${i + 1}</div>`;
+      if(i === idx) cls.push("current");
+      gridHtml += `<div class="nav-grid-item ${cls.join(' ')}" data-idx="${i}">${i+1}</div>`;
     }
 
     appEl.innerHTML = `
       <nav class="exam-navbar">
-        <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <div class="d-flex align-items-center gap-3 flex-wrap">
-            <div class="brand"><i class="bi bi-pencil-square"></i> Try Out System</div>
-            <span class="participant-name"><i class="bi bi-person-circle"></i> ${escapeHtml(state.userName)}</span>
-          </div>
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+          <div class="fw-bold"><i class="bi bi-pencil-square"></i> Try Out Online</div>
           <div class="d-flex align-items-center gap-3">
-            <div class="timer-badge" id="timerBadge">
-              <i class="bi bi-clock-history"></i>
-              <span id="timerDisplay">--:--</span>
-            </div>
-            <button class="btn-submit" id="submitExamBtn">
-              <i class="bi bi-check2-circle"></i> Kumpulkan
-            </button>
+            <div class="timer-badge" id="timerBadge"><i class="bi bi-clock"></i> <span id="timerDisplay">--:--</span></div>
+            <button class="btn btn-danger btn-sm fw-bold px-3" id="openSubmitModal">Kumpulkan</button>
           </div>
         </div>
       </nav>
-
       <div class="exam-body">
         <div class="row g-3">
           <div class="col-lg-8">
             <div class="question-panel">
               <div>
-                <span class="question-index-badge">Soal ${currentIndex + 1} dari ${total}</span>
-                <div class="question-text">${escapeHtml(question.Teks_Soal)}</div>
-                <div id="optionsContainer">${optionsHtml}</div>
+                <span class="question-index-badge">Soal ${idx+1} dari ${total}</span>
+                <div class="question-text">${escapeHtml(q.Teks_Soal)}</div>
+                <div id="optionsContainer">${optHtml}</div>
               </div>
-              <div class="question-footer-actions">
-                <button class="btn-nav-question" id="prevBtn" ${currentIndex === 0 ? 'disabled' : ''}>
-                  <i class="bi bi-arrow-left"></i> Soal Sebelumnya
-                </button>
-                <button class="btn-mark-review ${isMarked ? 'active' : ''}" id="markBtn">
-                  <i class="bi bi-flag${isMarked ? '-fill' : ''}"></i> Ragu-ragu
-                </button>
-                <button class="btn-nav-question" id="nextBtn" ${currentIndex === total - 1 ? 'disabled' : ''}>
-                  Soal Berikutnya <i class="bi bi-arrow-right"></i>
-                </button>
+              <div class="d-flex justify-content-between mt-auto pt-4 flex-wrap gap-2">
+                <button class="btn btn-outline-secondary btn-sm px-3" id="prevBtn" ${idx===0?'disabled':''}>Sebelumnya</button>
+                <button class="btn btn-outline-warning btn-sm px-3 ${isMarked?'active':''}" id="markBtn">Ragu-ragu</button>
+                <button class="btn btn-outline-primary btn-sm px-3" id="nextBtn" ${idx===total-1?'disabled':''}>Berikutnya</button>
               </div>
             </div>
           </div>
-
           <div class="col-lg-4">
             <div class="nav-sidebar">
-              <h6>Navigasi Soal</h6>
-              <div class="nav-grid" id="navGrid">${gridHtml}</div>
-              <div class="nav-legend">
-                <div><span class="dot" style="background:#fff;"></span> Belum dijawab</div>
-                <div><span class="dot" style="background:var(--accent); border-color:var(--accent);"></span> Sudah dijawab</div>
-                <div><span class="dot" style="background:var(--warning); border-color:var(--warning);"></span> Ragu-ragu</div>
-              </div>
-              <div class="nav-summary">
-                <div>Terjawab <strong>${answeredCount} / ${total}</strong></div>
-                <div>Ragu-ragu <strong>${markedCount}</strong></div>
-                <div>Belum dijawab <strong>${unansweredCount}</strong></div>
-              </div>
+              <h6 class="fw-bold text-uppercase small text-muted mb-3">Navigasi Soal</h6>
+              <div class="nav-grid">${gridHtml}</div>
             </div>
           </div>
         </div>
       </div>
     `;
 
-    attachExamListeners();
-    updateTimerDisplay();
-  }
-
-  function attachExamListeners(){
-    document.querySelectorAll("#optionsContainer .option-item").forEach(el => {
+    // Event Listeners Ujian
+    document.querySelectorAll(".option-item").forEach(el => {
       el.addEventListener("click", () => {
-        const letter = el.getAttribute("data-letter");
-        state.answers[state.currentIndex] = letter;
+        state.answers[idx] = el.getAttribute("data-letter");
         saveState();
         renderExam();
       });
     });
 
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    if(prevBtn) prevBtn.addEventListener("click", () => navigateTo(state.currentIndex - 1));
-    if(nextBtn) nextBtn.addEventListener("click", () => navigateTo(state.currentIndex + 1));
-
+    document.getElementById("prevBtn").addEventListener("click", () => navigate(idx - 1));
+    document.getElementById("nextBtn").addEventListener("click", () => navigate(idx + 1));
     document.getElementById("markBtn").addEventListener("click", () => {
-      if(state.marked[state.currentIndex]){
-        delete state.marked[state.currentIndex];
-      }else{
-        state.marked[state.currentIndex] = true;
-      }
+      if(state.marked[idx]) delete state.marked[idx]; else state.marked[idx] = true;
       saveState();
       renderExam();
     });
 
     document.querySelectorAll(".nav-grid-item").forEach(el => {
-      el.addEventListener("click", () => {
-        const idx = parseInt(el.getAttribute("data-index"), 10);
-        navigateTo(idx);
-      });
+      el.addEventListener("click", () => navigate(parseInt(el.getAttribute("data-idx"))));
     });
 
-    document.getElementById("submitExamBtn").addEventListener("click", () => {
-      const total = state.questions.length;
-      const answeredCount = Object.keys(state.answers).length;
-      const unanswered = total - answeredCount;
-      document.getElementById("submitModalDesc").textContent =
-        `Anda telah menjawab ${answeredCount} dari ${total} soal` +
-        (unanswered > 0 ? ` (${unanswered} soal belum dijawab).` : ".") +
-        " Jawaban tidak dapat diubah setelah dikumpulkan.";
-      const modal = new bootstrap.Modal(document.getElementById("submitModal"));
-      modal.show();
+    document.getElementById("openSubmitModal").addEventListener("click", () => {
+      new bootstrap.Modal(document.getElementById("submitModal")).show();
     });
+
+    document.getElementById("confirmSubmitBtn").onclick = () => {
+      bootstrap.Modal.getInstance(document.getElementById("submitModal")).hide();
+      submitExam();
+    };
+
+    updateTimerDisplay();
   }
 
-  function navigateTo(index){
-    if(index < 0 || index >= state.questions.length) return;
-    state.currentIndex = index;
+  function navigate(i){
+    if(i < 0 || i >= state.questions.length) return;
+    state.currentIndex = i;
     saveState();
     renderExam();
   }
 
-  // ---------------------------------------------------------------------
-  // 6. TIMER
-  // ---------------------------------------------------------------------
   function startTimer(){
     if(timerIntervalId) clearInterval(timerIntervalId);
     timerIntervalId = setInterval(() => {
       updateTimerDisplay();
-      const remaining = state.endTime - Date.now();
-      if(remaining <= 0){
+      if(state.endTime - Date.now() <= 0){
         clearInterval(timerIntervalId);
-        timerIntervalId = null;
-        submitExam(true);
+        submitExam();
       }
     }, 1000);
   }
 
   function updateTimerDisplay(){
     if(!state) return;
-    const remaining = state.endTime - Date.now();
-    const display = document.getElementById("timerDisplay");
+    const rem = state.endTime - Date.now();
+    const disp = document.getElementById("timerDisplay");
     const badge = document.getElementById("timerBadge");
-    if(!display || !badge) return;
+    if(!disp) return;
 
-    display.textContent = formatTime(remaining);
+    const totalSec = Math.max(0, Math.floor(rem / 1000));
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    disp.textContent = String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
 
-    if(remaining <= 5 * 60 * 1000){
-      badge.classList.add("timer-danger");
-    }else{
-      badge.classList.remove("timer-danger");
-    }
+    if(rem <= 300000 && badge) badge.classList.add("timer-danger");
   }
 
-  // ---------------------------------------------------------------------
-  // 7. SUBMIT & SCORING
-  // ---------------------------------------------------------------------
-  function calculateResult(){
-    const total = state.questions.length;
-    let correct = 0, wrong = 0, unanswered = 0;
-
-    state.questions.forEach((q, idx) => {
-      const userAnswer = state.answers[idx];
-      if(!userAnswer){
-        unanswered++;
-        return;
-      }
-      const key = (q.Kunci_Jawaban || "").toString().trim().toUpperCase();
-      if(userAnswer === key){
-        correct++;
-      }else{
-        wrong++;
-      }
+  function submitExam(){
+    if(timerIntervalId) clearInterval(timerIntervalId);
+    
+    let correct = 0, wrong = 0, empty = 0;
+    state.questions.forEach((q, i) => {
+      const userAns = state.answers[i];
+      if(!userAns) empty++;
+      else if(userAns === (q.Kunci_Jawaban || "").trim().toUpperCase()) correct++;
+      else wrong++;
     });
 
-    const score = total > 0 ? Math.round((correct / total) * 100) : 0;
-
-    return { total, correct, wrong, unanswered, score, userName: state.userName };
-  }
-
-  function submitExam(isAuto){
-    if(timerIntervalId){
-      clearInterval(timerIntervalId);
-      timerIntervalId = null;
-    }
-    lastResult = calculateResult();
-    lastResult.isAuto = !!isAuto;
+    const score = Math.round((correct / state.questions.length) * 100);
+    const resName = state.userName;
     clearState();
-    renderResult(lastResult);
-  }
 
-  // ---------------------------------------------------------------------
-  // 8. VIEW: RESULT
-  // ---------------------------------------------------------------------
-  function renderResult(result){
     appEl.innerHTML = `
       <div class="result-wrapper">
-        <div class="result-card">
-          <div class="setup-logo mx-auto"><i class="bi bi-clipboard2-check"></i></div>
-          <p class="text-muted small mb-0">${result.isAuto ? "Waktu habis — jawaban otomatis dikumpulkan" : "Ujian selesai"}</p>
-          <div class="fw-bold" style="font-size:18px; margin-top:4px;">${escapeHtml(result.userName)}</div>
+        <div class="custom-card text-center">
+          <div class="system-logo mx-auto"><i class="bi bi-award-fill"></i></div>
+          <h5 class="fw-bold">${escapeHtml(resName)}</h5>
+          <p class="text-muted small">Ujian Telah Selesai</p>
           <div class="text-muted small">Skor Akhir</div>
-          <div class="result-score">${result.score}</div>
-
+          <div class="result-score">${score}</div>
           <div class="result-stats">
-            <div class="stat-box correct">
-              <div class="num">${result.correct}</div>
-              <div class="label">Benar</div>
-            </div>
-            <div class="stat-box wrong">
-              <div class="num">${result.wrong}</div>
-              <div class="label">Salah</div>
-            </div>
-            <div class="stat-box empty">
-              <div class="num">${result.unanswered}</div>
-              <div class="label">Kosong</div>
-            </div>
+            <div class="stat-box correct"><div class="num">${correct}</div><div class="text-muted small">Benar</div></div>
+            <div class="stat-box wrong"><div class="num">${wrong}</div><div class="text-muted small">Salah</div></div>
+            <div class="stat-box empty"><div class="num">${empty}</div><div class="text-muted small">Kosong</div></div>
           </div>
-
-          <div class="text-muted small mt-3 mb-4">Total ${result.total} soal</div>
-
-          <button class="btn-primary-custom" id="newExamBtn">
-            <i class="bi bi-arrow-repeat"></i> Mulai Ujian Baru
-          </button>
+          <button class="btn-custom mt-4" onclick="window.location.hash=''; window.location.reload();">Keluar / Ujian Baru</button>
         </div>
       </div>
     `;
-
-    document.getElementById("newExamBtn").addEventListener("click", () => {
-      renderSetup();
-    });
   }
 
-  // ---------------------------------------------------------------------
-  // 9. INIT
-  // ---------------------------------------------------------------------
-  function init(){
-    document.getElementById("confirmSubmitBtn").addEventListener("click", () => {
-      const modalEl = document.getElementById("submitModal");
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if(modal) modal.hide();
-      submitExam(false);
-    });
-
-    const saved = loadState();
-
-    if(saved && saved.questions && saved.endTime){
-      state = saved;
-      const remaining = state.endTime - Date.now();
-
-      if(remaining <= 0){
-        lastResult = calculateResult();
-        lastResult.isAuto = true;
-        clearState();
-        renderResult(lastResult);
-      }else{
-        renderExam();
-        startTimer();
-      }
-    }else{
-      renderSetup();
-    }
+  // Helpers
+  function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  function loadState(){ 
+    const r = localStorage.getItem(STORAGE_KEY); 
+    return r ? JSON.parse(r) : null; 
   }
+  function clearState(){ localStorage.removeItem(STORAGE_KEY); state = null; }
+  function escapeHtml(str){ return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-  document.addEventListener("DOMContentLoaded", init);
-
+  window.addEventListener("DOMContentLoaded", router);
 })();
 </script>
 </body>
